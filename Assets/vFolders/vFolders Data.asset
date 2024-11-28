@@ -24,6 +24,9 @@ MonoBehaviour:
     - 8bd8fa44eeb414966bbba16fd4efb869
     - 329086a42c50a4d3c98d6f8b91dfd3e7
     - e1a67ca67b7d08142a125b6b33bd46c6
+    - e5594e1e7ea598d409319855db3fd1f5
+    - bea343b9900271546b0205334acdc3bb
+    - 812952c0e5186734baf620ffc747cde2
     values:
     - guid: 00000000000000001000000000000000
       iColor: 0
@@ -72,6 +75,21 @@ MonoBehaviour:
       autoIconDirty: 0
     - guid: e1a67ca67b7d08142a125b6b33bd46c6
       iColor: 3
+      autoIcon: 
+      customIcon: 
+      autoIconDirty: 0
+    - guid: e5594e1e7ea598d409319855db3fd1f5
+      iColor: 6
+      autoIcon: 
+      customIcon: 
+      autoIconDirty: 0
+    - guid: bea343b9900271546b0205334acdc3bb
+      iColor: 6
+      autoIcon: 
+      customIcon: 
+      autoIconDirty: 0
+    - guid: 812952c0e5186734baf620ffc747cde2
+      iColor: 6
       autoIcon: 
       customIcon: 
       autoIconDirty: 0

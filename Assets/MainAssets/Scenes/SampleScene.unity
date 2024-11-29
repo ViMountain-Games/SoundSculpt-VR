@@ -137,7 +137,7 @@ MonoBehaviour:
   middleJoint: {fileID: 500868989}
   distalJoint: {fileID: 500868986}
   tip: {fileID: 500868987}
-  tipRadius: 0.01
+  tipRadius: 0.005
   bendOffset: 0
   fingerSmoothSpeed: 1
   secondaryOffset: 0
@@ -543,7 +543,7 @@ MonoBehaviour:
   middleJoint: {fileID: 1262012633}
   distalJoint: {fileID: 1262012630}
   tip: {fileID: 1262012631}
-  tipRadius: 0.01
+  tipRadius: 0.005
   bendOffset: 0
   fingerSmoothSpeed: 1
   secondaryOffset: 0
@@ -781,7 +781,7 @@ MonoBehaviour:
   middleJoint: {fileID: 1262012645}
   distalJoint: {fileID: 1262012642}
   tip: {fileID: 1262012643}
-  tipRadius: 0.01
+  tipRadius: 0.005
   bendOffset: 0
   fingerSmoothSpeed: 1
   secondaryOffset: 0
@@ -1599,7 +1599,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1941142993972176033, guid: 7c363f47ffc30e249922c6edc608f9ea, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.0009
+      value: -0.0046
       objectReference: {fileID: 0}
     - target: {fileID: 1941142993972176033, guid: 7c363f47ffc30e249922c6edc608f9ea, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1611,7 +1611,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2113104693022785806, guid: 7c363f47ffc30e249922c6edc608f9ea, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.0012
+      value: -0.0022
       objectReference: {fileID: 0}
     - target: {fileID: 2113104693022785806, guid: 7c363f47ffc30e249922c6edc608f9ea, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1807,7 +1807,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4234346875341646113, guid: 7c363f47ffc30e249922c6edc608f9ea, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.0007
+      value: -0.0024
       objectReference: {fileID: 0}
     - target: {fileID: 4234346875341646113, guid: 7c363f47ffc30e249922c6edc608f9ea, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1987,7 +1987,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8087322387372460680, guid: 7c363f47ffc30e249922c6edc608f9ea, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.0008
+      value: -0.0046
       objectReference: {fileID: 0}
     - target: {fileID: 8087322387372460680, guid: 7c363f47ffc30e249922c6edc608f9ea, type: 3}
       propertyPath: m_LocalPosition.z
@@ -1999,7 +1999,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8648969594324907557, guid: 7c363f47ffc30e249922c6edc608f9ea, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.003
+      value: -0.0061
       objectReference: {fileID: 0}
     - target: {fileID: 8648969594324907557, guid: 7c363f47ffc30e249922c6edc608f9ea, type: 3}
       propertyPath: m_LocalPosition.z
@@ -2747,7 +2747,7 @@ MonoBehaviour:
   middleJoint: {fileID: 500868984}
   distalJoint: {fileID: 500868981}
   tip: {fileID: 500868982}
-  tipRadius: 0.01
+  tipRadius: 0.005
   bendOffset: 0
   fingerSmoothSpeed: 1
   secondaryOffset: 0
@@ -3128,7 +3128,7 @@ MonoBehaviour:
   middleJoint: {fileID: 1262012640}
   distalJoint: {fileID: 1262012637}
   tip: {fileID: 1262012638}
-  tipRadius: 0.01
+  tipRadius: 0.005
   bendOffset: 0
   fingerSmoothSpeed: 1
   secondaryOffset: 0
@@ -4355,7 +4355,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1941142993972176033, guid: 7c363f47ffc30e249922c6edc608f9ea, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.0009
+      value: -0.0046
       objectReference: {fileID: 0}
     - target: {fileID: 1941142993972176033, guid: 7c363f47ffc30e249922c6edc608f9ea, type: 3}
       propertyPath: m_LocalPosition.z
@@ -4367,7 +4367,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2113104693022785806, guid: 7c363f47ffc30e249922c6edc608f9ea, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.0012
+      value: -0.0022
       objectReference: {fileID: 0}
     - target: {fileID: 2113104693022785806, guid: 7c363f47ffc30e249922c6edc608f9ea, type: 3}
       propertyPath: m_LocalPosition.z
@@ -4559,7 +4559,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4234346875341646113, guid: 7c363f47ffc30e249922c6edc608f9ea, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.0007
+      value: -0.0024
       objectReference: {fileID: 0}
     - target: {fileID: 4234346875341646113, guid: 7c363f47ffc30e249922c6edc608f9ea, type: 3}
       propertyPath: m_LocalPosition.z
@@ -4739,7 +4739,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8087322387372460680, guid: 7c363f47ffc30e249922c6edc608f9ea, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.0008
+      value: -0.0046
       objectReference: {fileID: 0}
     - target: {fileID: 8087322387372460680, guid: 7c363f47ffc30e249922c6edc608f9ea, type: 3}
       propertyPath: m_LocalPosition.z
@@ -4751,7 +4751,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8648969594324907557, guid: 7c363f47ffc30e249922c6edc608f9ea, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.003
+      value: -0.0061
       objectReference: {fileID: 0}
     - target: {fileID: 8648969594324907557, guid: 7c363f47ffc30e249922c6edc608f9ea, type: 3}
       propertyPath: m_LocalPosition.z
@@ -5508,7 +5508,7 @@ MonoBehaviour:
   middleJoint: {fileID: 1262012650}
   distalJoint: {fileID: 1262012647}
   tip: {fileID: 1262012648}
-  tipRadius: 0.01
+  tipRadius: 0.005
   bendOffset: 0
   fingerSmoothSpeed: 1
   secondaryOffset: 0
@@ -5993,7 +5993,7 @@ MonoBehaviour:
   middleJoint: {fileID: 500868974}
   distalJoint: {fileID: 500868971}
   tip: {fileID: 500868972}
-  tipRadius: 0.01
+  tipRadius: 0.005
   bendOffset: 0
   fingerSmoothSpeed: 1
   secondaryOffset: 0
@@ -6504,7 +6504,7 @@ MonoBehaviour:
   middleJoint: {fileID: 500868979}
   distalJoint: {fileID: 500868976}
   tip: {fileID: 500868977}
-  tipRadius: 0.01
+  tipRadius: 0.005
   bendOffset: 0
   fingerSmoothSpeed: 1
   secondaryOffset: 0
@@ -6707,7 +6707,7 @@ MonoBehaviour:
   middleJoint: {fileID: 500868967}
   distalJoint: {fileID: 500868964}
   tip: {fileID: 500868965}
-  tipRadius: 0.01
+  tipRadius: 0.005
   bendOffset: 0
   fingerSmoothSpeed: 1
   secondaryOffset: 0
@@ -6987,7 +6987,7 @@ MonoBehaviour:
   middleJoint: {fileID: 1262012655}
   distalJoint: {fileID: 1262012652}
   tip: {fileID: 1262012653}
-  tipRadius: 0.01
+  tipRadius: 0.005
   bendOffset: 0
   fingerSmoothSpeed: 1
   secondaryOffset: 0

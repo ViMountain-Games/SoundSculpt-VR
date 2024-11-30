@@ -1,3 +1,4 @@
+// Grid3DGenerator.cs
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,7 +21,6 @@ public class Grid3DGenerator : MonoBehaviour
 
     [HorizontalLine("Visual Settings", 2)]
     [ColorPalette] public Color emptyCellColor = Color.gray;
-    [ColorPalette] public Color filledCellColor = Color.blue;
     [ColorPalette] public Color lineColor = Color.white;
     [Range(0.001f, 0.5f)] public float lineWidth = 0.05f;
 
@@ -35,7 +35,7 @@ public class Grid3DGenerator : MonoBehaviour
         }
         else
         {
-            Debug.LogError("Un'altra istanza di Grid3DGenerator esiste già!");
+            Debug.LogError("Another instance of Grid3DGenerator already exists!");
         }
     }
 
@@ -73,7 +73,7 @@ public class Grid3DGenerator : MonoBehaviour
             }
         }
 
-        // Disegna le linee della griglia
+        // Draw grid lines
         DrawGridLines(origin, gridParent);
 
         EditorUtility.SetDirty(this);
@@ -92,9 +92,43 @@ public class Grid3DGenerator : MonoBehaviour
 
     public void UpdateGridMatrix(int x, int y, int z, GameObject newObject)
     {
+        if (gridMatrix == null)
+        {
+            Debug.LogError("GridMatrix is not initialized. Ensure you call GenerateGrid before updating the matrix.");
+            return;
+        }
+
+        if (x < 0 || x >= gridSizeX || y < 0 || y >= gridSizeY || z < 0 || z >= gridSizeZ)
+        {
+            Debug.LogError($"Invalid indices: ({x}, {y}, {z}). Ensure they are within the grid bounds.");
+            return;
+        }
+
+        // Assign the new object to the grid matrix
         gridMatrix[x, y, z] = newObject;
+
+        // If the new object is not null, try to apply the NoteData color
+        if (newObject != null)
+        {
+            Note noteComponent = newObject.GetComponent<Note>();
+            if (noteComponent != null && noteComponent.noteData != null)
+            {
+                //Debug.Log($"Assigned object with color {noteComponent.noteData.color} to grid at ({x}, {y}, {z}).");
+            }
+            else
+            {
+                //Debug.LogWarning($"The object at ({x}, {y}, {z}) does not have a valid Note or NoteData. No color applied.");
+            }
+        }
+        else
+        {
+            Debug.Log($"Grid cell at ({x}, {y}, {z}) set to empty.");
+        }
+
         EditorUtility.SetDirty(this);
     }
+
+
 
     private void DrawGridLines(Vector3 origin, GameObject parent)
     {

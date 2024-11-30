@@ -6267,7 +6267,6 @@ MonoBehaviour:
   cellPrefab: {fileID: 9207010278840529839, guid: 8afecae0636a3cf4d9e15f87b15ec761, type: 3}
   lineMaterial: {fileID: 2100000, guid: 2ed5da7ffe0c1f1439cb06a962cb647d, type: 2}
   emptyCellColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  filledCellColor: {r: 0, g: 0, b: 1, a: 1}
   lineColor: {r: 0.7, g: 0.8, b: 0.88, a: 1}
   lineWidth: 0.001
 --- !u!4 &1576117718

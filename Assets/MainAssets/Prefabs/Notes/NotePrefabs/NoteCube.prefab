@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 2958456752219626552}
   - component: {fileID: 4354422905351916128}
   - component: {fileID: 1649826901989723115}
+  - component: {fileID: 2495819421462424260}
   m_Layer: 0
   m_Name: NoteCube
   m_TagString: Note
@@ -456,3 +457,16 @@ MonoBehaviour:
     - {x: 0.57735026, y: 0.57735026, z: -0.57735026}
     - {x: 0.57735026, y: 0.57735026, z: 0.57735026}
     - {x: 0.57735026, y: -0.57735026, z: 0.57735026}
+--- !u!114 &2495819421462424260
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1335621963648836805}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0e0bfcdadef3cce48af1263ee57f1245, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  noteData: {fileID: 11400000, guid: 029f972909e6b5e42b3cede0e3818c8f, type: 2}

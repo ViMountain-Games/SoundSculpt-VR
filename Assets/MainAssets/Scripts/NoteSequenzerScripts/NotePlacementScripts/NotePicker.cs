@@ -46,30 +46,32 @@ public class NotePicker : MonoBehaviour
             }
         }
 
-        // Verifica se l'oggetto selezionato è valido e aggiorna la matrice della griglia
         if (selectedObject != null && gridGenerator != null)
         {
             int x = Mathf.FloorToInt((transform.position.x - gridGenerator.transform.position.x) / gridGenerator.cellSize);
             int y = Mathf.FloorToInt((transform.position.y - gridGenerator.transform.position.y) / gridGenerator.cellSize);
             int z = Mathf.FloorToInt((transform.position.z - gridGenerator.transform.position.z) / gridGenerator.cellSize);
 
-            // Verifica che gli indici siano validi prima di aggiornare la matrice
             if (x >= 0 && x < gridGenerator.gridSizeX && y >= 0 && y < gridGenerator.gridSizeY && z >= 0 && z < gridGenerator.gridSizeZ)
             {
                 gridGenerator.UpdateGridMatrix(x, y, z, selectedObject);
+
+                // Debug: Stampa conferma di assegnazione
+                //Debug.Log($"Object {selectedObject.name} assigned to grid at ({x}, {y}, {z}).");
             }
             else
             {
-                Debug.LogError($"Indici fuori dai limiti: ({x}, {y}, {z})");
+                Debug.LogError($"Indices out of bounds: ({x}, {y}, {z}). Object not assigned.");
             }
         }
         else
         {
-            Debug.LogError("SelectedObject non valido o Grid3DGenerator non assegnato!");
+            Debug.LogError("SelectedObject is invalid or Grid3DGenerator is not assigned.");
         }
 
-        EditorUtility.SetDirty(this); // Forza l'aggiornamento dell'Inspector
+        EditorUtility.SetDirty(this);
     }
+
 
     public void RemoveAssignedObject()
     {

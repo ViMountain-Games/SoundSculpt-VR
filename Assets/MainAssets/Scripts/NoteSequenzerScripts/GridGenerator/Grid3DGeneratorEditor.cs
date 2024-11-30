@@ -40,7 +40,8 @@ public class Grid3DGeneratorEditor : Editor
                 {
                     EditorGUILayout.BeginVertical();
 
-                    for (int y = 0; y < gridGenerator.gridMatrix.GetLength(1); y++)
+                    // Invert the y-loop to display rows in reverse order
+                    for (int y = gridGenerator.gridMatrix.GetLength(1) - 1; y >= 0; y--)
                     {
                         GameObject cell = gridGenerator.gridMatrix[x, y, z];
                         Color cellColor = gridGenerator.emptyCellColor;
@@ -62,9 +63,8 @@ public class Grid3DGeneratorEditor : Editor
                         else
                         {
                             cellColor = gridGenerator.emptyCellColor;
-                            Debug.Log($"Cell ({x}, {y}, {z}) is empty. Using emptyCellColor.");
+                            //Debug.Log($"Cell ({x}, {y}, {z}) is empty. Using emptyCellColor.");
                         }
-
 
                         GUIStyle cellStyle = new GUIStyle(GUI.skin.box)
                         {

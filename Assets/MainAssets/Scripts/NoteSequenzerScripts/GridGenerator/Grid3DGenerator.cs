@@ -1,25 +1,52 @@
+using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEditor;  // Aggiungi questo namespace per EditorUtility
 using VInspector;
 
 public class Grid3DGenerator : MonoBehaviour
 {
+    public static Grid3DGenerator Instance { get; private set; } // Variabile statica per accedere all'istanza
+
     [Header("Grid Settings")]
-    [Min(1)] public int gridSizeX = 5; // Numero di celle lungo l'asse X
-    [Min(1)] public int gridSizeY = 5; // Numero di celle lungo l'asse Y
-    [Min(1)] public int gridSizeZ = 5; // Numero di celle lungo l'asse Z
-    [Range(0.01f, 10f)] public float cellSize = 1f; // Dimensione di ciascuna cella
+    [Min(1)] public int gridSizeX = 5;
+    [Min(1)] public int gridSizeY = 5;
+    [Min(1)] public int gridSizeZ = 5;
+    [Range(0.01f, 10f)] public float cellSize = 1f;
 
     [Header("Prefab Settings")]
-    [SerializeField] private GameObject cellPrefab; // Prefab da posizionare al centro di ogni cella
+    [SerializeField] private GameObject cellPrefab;
 
     [Header("Line Renderer Settings")]
-    [SerializeField] private Material lineMaterial; // Materiale per il LineRenderer
-    [ColorUsage(false, true)] public Color lineColor = Color.white; // Colore delle linee
-    [Range(0.001f, 0.5f)] public float lineWidth = 0.05f; // Spessore delle linee
+    [SerializeField] private Material lineMaterial;
+    [ColorUsage(false, true)] public Color lineColor = Color.white;
+    [Range(0.001f, 0.5f)] public float lineWidth = 0.05f;
 
     [Header("Grid Matrix")]
     [Tooltip("Visualizza gli oggetti posizionati nella griglia")]
-    public GameObject[,,] gridMatrix; // Matrice 3D per gli oggetti
+    public GameObject[,,] gridMatrix;
+
+    private void Awake()
+    {
+        // Assegna l'istanza
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Debug.LogError("Un'altra istanza di Grid3DGenerator esiste già!");
+        }
+    }
+
+    private void OnDestroy()
+    {
+        // Rimuovi l'istanza quando l'oggetto viene distrutto
+        if (Instance == this)
+        {
+            Instance = null;
+        }
+    }
 
     [Button("Generate Grid")]
     public void GenerateGrid()
@@ -33,6 +60,18 @@ public class Grid3DGenerator : MonoBehaviour
         Vector3 origin = transform.position;
 
         // Disegna le linee della griglia
+        DrawGridLines(origin, gridParent);
+
+        // Posiziona il prefab e assegna il selectedObject alla matrice
+        InstantiateAndAssignObjects(origin, gridParent);
+
+        // Forza l'aggiornamento dell'Inspector
+        EditorUtility.SetDirty(this);
+    }
+
+    private void DrawGridLines(Vector3 origin, GameObject gridParent)
+    {
+        // Disegna le linee della griglia lungo gli assi X, Y e Z
         for (int x = 0; x <= gridSizeX; x++)
         {
             for (int y = 0; y <= gridSizeY; y++)
@@ -68,8 +107,11 @@ public class Grid3DGenerator : MonoBehaviour
                 );
             }
         }
+    }
 
-        // Posiziona il prefab al centro di ogni cella
+    private void InstantiateAndAssignObjects(Vector3 origin, GameObject gridParent)
+    {
+        // Posiziona i prefab e assegna gli oggetti selezionati alla matrice
         for (int x = 0; x < gridSizeX; x++)
         {
             for (int y = 0; y < gridSizeY; y++)
@@ -82,11 +124,22 @@ public class Grid3DGenerator : MonoBehaviour
                         z * cellSize + cellSize / 2
                     );
 
-                    if (cellPrefab != null)
+                    // Instanzia il prefab
+                    GameObject instance = Instantiate(cellPrefab, cellCenter, Quaternion.identity, gridParent.transform);
+
+                    // Ottieni il NotePicker e assegna il selectedObject alla matrice
+                    NotePicker picker = instance.GetComponent<NotePicker>();
+                    if (picker != null && picker.selectedObject != null)
                     {
-                        GameObject instance = Instantiate(cellPrefab, cellCenter, Quaternion.identity, gridParent.transform);
-                        gridMatrix[x, y, z] = instance; // Salva l'istanza nella matrice
+                        gridMatrix[x, y, z] = picker.selectedObject;
                     }
+                    else
+                    {
+                        gridMatrix[x, y, z] = null;
+                    }
+
+                    // Forza l'aggiornamento dell'Inspector per ogni cella
+                    EditorUtility.SetDirty(instance);
                 }
             }
         }
@@ -95,13 +148,15 @@ public class Grid3DGenerator : MonoBehaviour
     [Button("Clear Grid")]
     public void ClearGrid()
     {
-        // Elimina tutti i figli e resetta la matrice
         foreach (Transform child in transform)
         {
             DestroyImmediate(child.gameObject);
         }
 
         gridMatrix = null;
+
+        // Forza l'aggiornamento dell'Inspector
+        EditorUtility.SetDirty(this);
     }
 
     private void DrawLine(Vector3 start, Vector3 end, GameObject parent)
@@ -118,5 +173,15 @@ public class Grid3DGenerator : MonoBehaviour
         lineRenderer.positionCount = 2;
         lineRenderer.SetPosition(0, start);
         lineRenderer.SetPosition(1, end);
+    }
+
+    // Metodo per aggiornare la matrice manualmente, chiamato dal NotePicker o altro
+    public void UpdateGridMatrix(int x, int y, int z, GameObject newObject)
+    {
+        // Modifica il valore nella griglia e aggiorna l'Inspector
+        gridMatrix[x, y, z] = newObject;
+
+        // Forza l'aggiornamento
+        EditorUtility.SetDirty(this);
     }
 }

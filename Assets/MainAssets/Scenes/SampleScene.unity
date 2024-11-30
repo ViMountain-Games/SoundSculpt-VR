@@ -1052,6 +1052,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 1576117718}
   - {fileID: 964235613}
   - {fileID: 1920053586}
   - {fileID: 1917797790}
@@ -6259,9 +6260,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b84d5910ab2da246bee930f096f7a16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridSizeX: 10
-  gridSizeY: 5
-  gridSizeZ: 5
+  gridSizeX: 1
+  gridSizeY: 2
+  gridSizeZ: 2
   cellSize: 0.075
   cellPrefab: {fileID: 9207010278840529839, guid: 8afecae0636a3cf4d9e15f87b15ec761, type: 3}
   lineMaterial: {fileID: 2100000, guid: 2ed5da7ffe0c1f1439cb06a962cb647d, type: 2}
@@ -6275,12 +6276,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1576117716}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.536, y: 1.042, z: 0.875}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.42564362, y: -0.6309948, z: 1.6516688}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 226882359}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!136 &1599298977
 CapsuleCollider:
@@ -7440,7 +7441,6 @@ SceneRoots:
   - {fileID: 832575519}
   - {fileID: 315524420}
   - {fileID: 280368383}
-  - {fileID: 1576117718}
   - {fileID: 1385687761}
   - {fileID: 69864589}
   - {fileID: 1123770824}

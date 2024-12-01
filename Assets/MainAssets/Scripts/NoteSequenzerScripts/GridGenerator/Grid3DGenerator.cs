@@ -13,7 +13,9 @@ public class Grid3DGenerator : MonoBehaviour
     [Min(1)] public int gridSizeX = 5;
     [Min(1)] public int gridSizeY = 5;
     [Min(1)] public int gridSizeZ = 5;
-    [DynamicSlider] public float cellSize = 1f;
+    [DynamicSlider]
+    public DynamicSlider cellSize = new DynamicSlider(1f, 0.1f, 5f); // Default value, min, max
+
 
     [HorizontalLine("Prefabs and Materials", 2)]
     [ForceFill] public GameObject cellPrefab;

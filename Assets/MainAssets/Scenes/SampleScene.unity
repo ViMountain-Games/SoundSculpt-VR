@@ -6261,9 +6261,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridSizeX: 5
-  gridSizeY: 5
-  gridSizeZ: 5
-  cellSize: 0.075
+  gridSizeY: 7
+  gridSizeZ: 1
+  cellSize:
+    value: 0.1
+    min: 0.1
+    max: 5
   cellPrefab: {fileID: 9207010278840529839, guid: 8afecae0636a3cf4d9e15f87b15ec761, type: 3}
   lineMaterial: {fileID: 2100000, guid: 2ed5da7ffe0c1f1439cb06a962cb647d, type: 2}
   emptyCellColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}

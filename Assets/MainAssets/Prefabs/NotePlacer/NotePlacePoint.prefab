@@ -1183,9 +1183,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4913046769499813163}
+  - component: {fileID: 8523954103209873029}
   - component: {fileID: 8468680384923396964}
   - component: {fileID: 6485964935593485112}
-  - component: {fileID: 8523954103209873029}
   - component: {fileID: 7542092270810191055}
   m_Layer: 0
   m_Name: NotePlacePoint
@@ -1211,6 +1211,22 @@ Transform:
   - {fileID: 6907595635955391587}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8523954103209873029
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9207010278840529839}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b596fb8ba8ec42468b388d3fc435616, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  validTags:
+  - Note
+  selectedObject: {fileID: 0}
+  delay: 0
 --- !u!114 &8468680384923396964
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1345,22 +1361,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &8523954103209873029
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9207010278840529839}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1b596fb8ba8ec42468b388d3fc435616, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  validTags:
-  - Note
-  selectedObject: {fileID: 0}
-  delay: 0
 --- !u!114 &7542092270810191055
 MonoBehaviour:
   m_ObjectHideFlags: 0

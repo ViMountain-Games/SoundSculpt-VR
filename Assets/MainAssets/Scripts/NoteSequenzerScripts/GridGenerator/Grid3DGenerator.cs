@@ -9,13 +9,27 @@ public class Grid3DGenerator : MonoBehaviour
 {
     public static Grid3DGenerator Instance { get; private set; }
 
+    [System.Serializable]
+    public class GridEntry
+    {
+        public GameObject gameObject;
+        public int x, y, z;
+
+        public GridEntry(GameObject gameObject, int x, int y, int z)
+        {
+            this.gameObject = gameObject;
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+    }
+
     [Title("Grid Settings", fontSize = 14, alignment = TextAlignment.Center)]
     [Min(1)] public int gridSizeX = 5;
     [Min(1)] public int gridSizeY = 5;
     [Min(1)] public int gridSizeZ = 5;
     [DynamicSlider]
     public DynamicSlider cellSize = new DynamicSlider(1f, 0.1f, 5f); // Default value, min, max
-
 
     [HorizontalLine("Prefabs and Materials", 2)]
     [ForceFill] public GameObject cellPrefab;
@@ -28,6 +42,9 @@ public class Grid3DGenerator : MonoBehaviour
 
     [HorizontalLine("Grid Matrix", 2)]
     [ReadOnly] public GameObject[,,] gridMatrix;
+
+    [HorizontalLine("Object List", 2)]
+    [ReadOnly] public List<GridEntry> objectList = new List<GridEntry>();
 
     private void Awake()
     {
@@ -89,6 +106,7 @@ public class Grid3DGenerator : MonoBehaviour
         }
 
         gridMatrix = null;
+        objectList.Clear();
         EditorUtility.SetDirty(this);
     }
 
@@ -109,28 +127,31 @@ public class Grid3DGenerator : MonoBehaviour
         // Assign the new object to the grid matrix
         gridMatrix[x, y, z] = newObject;
 
-        // If the new object is not null, try to apply the NoteData color
+        // Update the objectList
+        // First, remove any existing entries at the same coordinates
+        objectList.RemoveAll(entry => entry.x == x && entry.y == y && entry.z == z);
+
         if (newObject != null)
         {
-            Note noteComponent = newObject.GetComponent<Note>();
-            if (noteComponent != null && noteComponent.noteData != null)
-            {
-                //Debug.Log($"Assigned object with color {noteComponent.noteData.color} to grid at ({x}, {y}, {z}).");
-            }
-            else
-            {
-                //Debug.LogWarning($"The object at ({x}, {y}, {z}) does not have a valid Note or NoteData. No color applied.");
-            }
+            // Add new entry
+            GridEntry newEntry = new GridEntry(newObject, x, y, z);
+            objectList.Add(newEntry);
         }
-        else
+
+        // Sort the list based on x, then z, then y
+        objectList.Sort((a, b) =>
         {
-            Debug.Log($"Grid cell at ({x}, {y}, {z}) set to empty.");
-        }
+            int xComparison = a.x.CompareTo(b.x);
+            if (xComparison != 0) return xComparison;
+
+            int zComparison = a.z.CompareTo(b.z);
+            if (zComparison != 0) return zComparison;
+
+            return a.y.CompareTo(b.y);
+        });
 
         EditorUtility.SetDirty(this);
     }
-
-
 
     private void DrawGridLines(Vector3 origin, GameObject parent)
     {

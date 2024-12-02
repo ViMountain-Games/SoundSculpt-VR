@@ -3078,34 +3078,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ignoreHandCollider: []
---- !u!83 &536365346
-AudioClip:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_Name: Note
-  m_LoadType: 0
-  m_Channels: 1
-  m_Frequency: 44100
-  m_BitsPerSample: 32
-  m_Length: 0
-  m_IsTrackerFormat: 0
-  m_Ambisonic: 0
-  m_SubsoundIndex: 0
-  m_PreloadAudioData: 1
-  m_LoadInBackground: 0
-  m_Legacy3D: 0
-  m_Resource:
-    m_Source: 
-    m_Offset: 0
-    m_Size: 0
-  m_CompressionFormat: 0
-  m_EditorResource:
-    m_Source: 
-    m_Offset: 0
-    m_Size: 0
-  m_EditorCompressionFormat: 0
 --- !u!4 &628968135 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2358261902754467598, guid: 432014264484f7b44afb25b027e8edb1, type: 3}
@@ -5862,8 +5834,8 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 536365346}
-  m_Resource: {fileID: 536365346}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -5961,22 +5933,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d76bc7ba41dd512459085eb3a54053f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseNote: {fileID: 8300000, guid: 7336cd5e6e4f74693ac6c4b607b671ef, type: 3}
+  baseNote: {fileID: 0}
   audioSource: {fileID: 1350039902}
-  showSharpFlatButtons: 1
-  playDo: 0
-  playRe: 0
-  playMi: 0
-  playFa: 0
-  playSol: 0
-  playLa: 0
-  playSi: 0
-  playDoSharp: 0
-  playReSharp: 0
-  playFaSharp: 0
-  playSolSharp: 0
-  playLaSharp: 0
-  playAllNotesButton: 0
+  minOctave: 2
+  maxOctave: 4
 --- !u!4 &1350039904
 Transform:
   m_ObjectHideFlags: 0
@@ -6637,8 +6597,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridSizeX: 5
-  gridSizeY: 7
-  gridSizeZ: 1
+  gridSizeY: 11
+  gridSizeZ: 3
   cellSize:
     value: 0.07
     min: 0.07

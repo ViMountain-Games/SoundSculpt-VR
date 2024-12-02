@@ -18,6 +18,7 @@ public class Grid3DGeneratorEditor : Editor
         EditorGUILayout.BeginHorizontal();
         if (GUILayout.Button("Generate Grid")) gridGenerator.GenerateGrid();
         if (GUILayout.Button("Clear Grid")) gridGenerator.ClearGrid();
+        if (GUILayout.Button("Play Assigned Notes")) gridGenerator.PlayAssignedNotes();
         EditorGUILayout.EndHorizontal();
 
         if (gridGenerator.gridMatrix != null)
@@ -26,11 +27,11 @@ public class Grid3DGeneratorEditor : Editor
 
             for (int x = 0; x < gridGenerator.gridMatrix.GetLength(0); x++)
             {
-                // Add separator line to separate layers
+                // Aggiungi una linea di separazione per separare i layer
                 if (x > 0)
                 {
                     EditorGUILayout.Space();
-                    GUILayout.Box("", GUILayout.ExpandWidth(true), GUILayout.Height(2)); // Separator line
+                    GUILayout.Box("", GUILayout.ExpandWidth(true), GUILayout.Height(2)); // Linea di separazione
                     EditorGUILayout.Space();
                 }
 
@@ -40,7 +41,7 @@ public class Grid3DGeneratorEditor : Editor
                 {
                     EditorGUILayout.BeginVertical();
 
-                    // Invert the y-loop to display rows in reverse order
+                    // Inverti il loop su y per visualizzare le righe in ordine inverso
                     for (int y = gridGenerator.gridMatrix.GetLength(1) - 1; y >= 0; y--)
                     {
                         GameObject cell = gridGenerator.gridMatrix[x, y, z];
@@ -52,18 +53,15 @@ public class Grid3DGeneratorEditor : Editor
                             if (noteComponent != null && noteComponent.noteData != null)
                             {
                                 cellColor = noteComponent.noteData.color;
-                                //Debug.Log($"Cell ({x}, {y}, {z}) color set to {cellColor} based on NoteData.");
                             }
                             else
                             {
-                                //Debug.LogWarning($"Cell at ({x}, {y}, {z}) does not have a valid Note or NoteData. Using default color.");
                                 cellColor = Color.white;
                             }
                         }
                         else
                         {
                             cellColor = gridGenerator.emptyCellColor;
-                            //Debug.Log($"Cell ({x}, {y}, {z}) is empty. Using emptyCellColor.");
                         }
 
                         GUIStyle cellStyle = new GUIStyle(GUI.skin.box)

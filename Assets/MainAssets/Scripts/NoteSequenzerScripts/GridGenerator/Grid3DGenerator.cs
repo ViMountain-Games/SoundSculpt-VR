@@ -26,10 +26,10 @@ public class Grid3DGenerator : MonoBehaviour
 
     [Title("Grid Settings", fontSize = 14, alignment = TextAlignment.Center)]
     [Min(1)] public int gridSizeX = 5;
-    [Min(1)] public int gridSizeY = 5;
-    [Min(1)] public int gridSizeZ = 5;
+    [Min(1)] public int gridSizeY = 12; // 12 note
+    [Min(1)] public int gridSizeZ = 3; // Tre ottave
     [DynamicSlider]
-    public DynamicSlider cellSize = new DynamicSlider(1f, 0.1f, 5f); // Default value, min, max
+    public DynamicSlider cellSize = new DynamicSlider(1f, 0.1f, 5f); // Valore predefinito, min, max
 
     [HorizontalLine("Prefabs and Materials", 2)]
     [ForceFill] public GameObject cellPrefab;
@@ -81,9 +81,9 @@ public class Grid3DGenerator : MonoBehaviour
                 for (int z = 0; z < gridSizeZ; z++)
                 {
                     Vector3 cellCenter = origin + new Vector3(
-                        x * cellSize + cellSize / 2,
-                        y * cellSize + cellSize / 2,
-                        z * cellSize + cellSize / 2
+                        x * cellSize.value + cellSize.value / 2,
+                        y * cellSize.value + cellSize.value / 2,
+                        z * cellSize.value + cellSize.value / 2
                     );
 
                     GameObject instance = Instantiate(cellPrefab, cellCenter, Quaternion.identity, gridParent.transform);
@@ -92,7 +92,7 @@ public class Grid3DGenerator : MonoBehaviour
             }
         }
 
-        // Draw grid lines
+        // Disegna le linee della griglia
         DrawGridLines(origin, gridParent);
 
         EditorUtility.SetDirty(this);
@@ -124,21 +124,21 @@ public class Grid3DGenerator : MonoBehaviour
             return;
         }
 
-        // Assign the new object to the grid matrix
+        // Assegna il nuovo oggetto alla matrice della griglia
         gridMatrix[x, y, z] = newObject;
 
-        // Update the objectList
-        // First, remove any existing entries at the same coordinates
+        // Aggiorna l'objectList
+        // Prima, rimuovi eventuali voci esistenti alle stesse coordinate
         objectList.RemoveAll(entry => entry.x == x && entry.y == y && entry.z == z);
 
         if (newObject != null)
         {
-            // Add new entry
+            // Aggiungi una nuova voce
             GridEntry newEntry = new GridEntry(newObject, x, y, z);
             objectList.Add(newEntry);
         }
 
-        // Sort the list based on x, then z, then y
+        // Ordina la lista in base a x, poi z, poi y
         objectList.Sort((a, b) =>
         {
             int xComparison = a.x.CompareTo(b.x);
@@ -160,8 +160,8 @@ public class Grid3DGenerator : MonoBehaviour
             for (int y = 0; y <= gridSizeY; y++)
             {
                 DrawLine(
-                    origin + new Vector3(x * cellSize, y * cellSize, 0),
-                    origin + new Vector3(x * cellSize, y * cellSize, gridSizeZ * cellSize),
+                    origin + new Vector3(x * cellSize.value, y * cellSize.value, 0),
+                    origin + new Vector3(x * cellSize.value, y * cellSize.value, gridSizeZ * cellSize.value),
                     parent
                 );
             }
@@ -172,8 +172,8 @@ public class Grid3DGenerator : MonoBehaviour
             for (int z = 0; z <= gridSizeZ; z++)
             {
                 DrawLine(
-                    origin + new Vector3(0, y * cellSize, z * cellSize),
-                    origin + new Vector3(gridSizeX * cellSize, y * cellSize, z * cellSize),
+                    origin + new Vector3(0, y * cellSize.value, z * cellSize.value),
+                    origin + new Vector3(gridSizeX * cellSize.value, y * cellSize.value, z * cellSize.value),
                     parent
                 );
             }
@@ -184,8 +184,8 @@ public class Grid3DGenerator : MonoBehaviour
             for (int z = 0; z <= gridSizeZ; z++)
             {
                 DrawLine(
-                    origin + new Vector3(x * cellSize, 0, z * cellSize),
-                    origin + new Vector3(x * cellSize, gridSizeY * cellSize, z * cellSize),
+                    origin + new Vector3(x * cellSize.value, 0, z * cellSize.value),
+                    origin + new Vector3(x * cellSize.value, gridSizeY * cellSize.value, z * cellSize.value),
                     parent
                 );
             }
@@ -206,5 +206,33 @@ public class Grid3DGenerator : MonoBehaviour
         lineRenderer.positionCount = 2;
         lineRenderer.SetPosition(0, start);
         lineRenderer.SetPosition(1, end);
+    }
+
+    public void PlayAssignedNotes()
+    {
+        if (gridMatrix == null)
+        {
+            Debug.LogError("GridMatrix is not initialized.");
+            return;
+        }
+
+        for (int x = 0; x < gridSizeX; x++)
+        {
+            for (int y = 0; y < gridSizeY; y++)
+            {
+                for (int z = 0; z < gridSizeZ; z++)
+                {
+                    GameObject cellObject = gridMatrix[x, y, z];
+                    if (cellObject != null)
+                    {
+                        Note noteComponent = cellObject.GetComponent<Note>();
+                        if (noteComponent != null)
+                        {
+                            noteComponent.PlayNote();
+                        }
+                    }
+                }
+            }
+        }
     }
 }

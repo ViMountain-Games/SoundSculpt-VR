@@ -13,5 +13,5 @@ MonoBehaviour:
   m_Name: BasicNote
   m_EditorClassIdentifier: 
   noteName: Basic
-  audioClip: {fileID: 8300000, guid: 7e492ad07b6d548eea10ccbd1962e88f, type: 3}
+  audioClip: {fileID: 8300000, guid: 7336cd5e6e4f74693ac6c4b607b671ef, type: 3}
   color: {r: 1, g: 0.8979143, b: 0, a: 1}

@@ -19,7 +19,6 @@ public class NotePicker : MonoBehaviour
 
     private void Start()
     {
-        // Ottieni il riferimento all'istanza di Grid3DGenerator
         gridGenerator = Grid3DGenerator.Instance;
         if (gridGenerator == null)
         {
@@ -48,16 +47,19 @@ public class NotePicker : MonoBehaviour
 
         if (selectedObject != null && gridGenerator != null)
         {
-            int x = Mathf.FloorToInt((transform.position.x - gridGenerator.transform.position.x) / gridGenerator.cellSize);
-            int y = Mathf.FloorToInt((transform.position.y - gridGenerator.transform.position.y) / gridGenerator.cellSize);
-            int z = Mathf.FloorToInt((transform.position.z - gridGenerator.transform.position.z) / gridGenerator.cellSize);
+            int x = Mathf.FloorToInt((transform.position.x - gridGenerator.transform.position.x) / gridGenerator.cellSize.value);
+            int y = Mathf.FloorToInt((transform.position.y - gridGenerator.transform.position.y) / gridGenerator.cellSize.value);
+            int z = Mathf.FloorToInt((transform.position.z - gridGenerator.transform.position.z) / gridGenerator.cellSize.value);
 
             if (x >= 0 && x < gridGenerator.gridSizeX && y >= 0 && y < gridGenerator.gridSizeY && z >= 0 && z < gridGenerator.gridSizeZ)
             {
                 gridGenerator.UpdateGridMatrix(x, y, z, selectedObject);
 
-                // Debug: Stampa conferma di assegnazione
-                //Debug.Log($"Object {selectedObject.name} assigned to grid at ({x}, {y}, {z}).");
+                Note noteComponent = selectedObject.GetComponent<Note>();
+                if (noteComponent != null)
+                {
+                    noteComponent.SetGridPosition(x, y, z);
+                }
             }
             else
             {
@@ -72,24 +74,21 @@ public class NotePicker : MonoBehaviour
         EditorUtility.SetDirty(this);
     }
 
-
     public void RemoveAssignedObject()
     {
-        // Rimuovi l'oggetto dalla matrice
         if (gridGenerator != null && selectedObject != null)
         {
-            int x = Mathf.FloorToInt((transform.position.x - gridGenerator.transform.position.x) / gridGenerator.cellSize);
-            int y = Mathf.FloorToInt((transform.position.y - gridGenerator.transform.position.y) / gridGenerator.cellSize);
-            int z = Mathf.FloorToInt((transform.position.z - gridGenerator.transform.position.z) / gridGenerator.cellSize);
+            int x = Mathf.FloorToInt((transform.position.x - gridGenerator.transform.position.x) / gridGenerator.cellSize.value);
+            int y = Mathf.FloorToInt((transform.position.y - gridGenerator.transform.position.y) / gridGenerator.cellSize.value);
+            int z = Mathf.FloorToInt((transform.position.z - gridGenerator.transform.position.z) / gridGenerator.cellSize.value);
 
-            // Verifica che gli indici siano validi prima di rimuovere dalla matrice
             if (x >= 0 && x < gridGenerator.gridSizeX && y >= 0 && y < gridGenerator.gridSizeY && z >= 0 && z < gridGenerator.gridSizeZ)
             {
-                gridGenerator.UpdateGridMatrix(x, y, z, null); // Imposta a null la cella nella matrice
+                gridGenerator.UpdateGridMatrix(x, y, z, null);
             }
         }
 
         selectedObject = null;
-        EditorUtility.SetDirty(this); // Forza l'aggiornamento dell'Inspector
+        EditorUtility.SetDirty(this);
     }
 }

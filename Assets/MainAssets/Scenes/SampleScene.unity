@@ -5933,7 +5933,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d76bc7ba41dd512459085eb3a54053f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  octaveMappings: []
   audioSource: {fileID: 1350039902}
   minOctave: 2
   maxOctave: 4
@@ -6597,7 +6596,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridSizeX: 5
-  gridSizeY: 11
+  gridSizeY: 3
   gridSizeZ: 3
   cellSize:
     value: 0.07
@@ -6609,6 +6608,21 @@ MonoBehaviour:
   lineColor: {r: 0.7, g: 0.8, b: 0.88, a: 1}
   lineWidth: 0.006
   objectList: []
+  octaveMappings:
+  - zValue: 0
+    octave: 2
+  - zValue: 1
+    octave: 3
+  - zValue: 2
+    octave: 4
+  noteMappings:
+  - yValue: 0
+    noteName: 0
+  - yValue: 1
+    noteName: 2
+  - yValue: 2
+    noteName: 11
+  defaultOctave: 2
 --- !u!4 &1576117718
 Transform:
   m_ObjectHideFlags: 0

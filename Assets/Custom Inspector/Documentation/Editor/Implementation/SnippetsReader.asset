@@ -154,17 +154,17 @@ MonoBehaviour:
     //test it by starting your game and then look back on this editorwindow\r\n                                                     
     //or only check if playing (because it would get filled)\r\n            [ForceFill(onlyTestInPlayMode
     = true)] public GameObject gob = null;\r\n\r\n            void Start()\r\n           
-    {\r\n                //this.CheckForceFilled();\r\n                gob1 = GameObject.FindObjectOfType<GameObject>();\r\n           
-    }\r\n        }\r\n\r\n        [SerializeField] FromChildrenAttributeExamples
-    fromChildrenAttributeExamples = new FromChildrenAttributeExamples();\r\n\r\n       
-    [System.Serializable]\r\n        class FromChildrenAttributeExamples\r\n       
-    {\r\n            [MessageBox(\"Only references to my children\", MessageBoxType.Info)]\r\n           
-    [Space2(20)]\r\n\r\n            [SerializeField, FromChildren]\r\n           
-    MyMonoBehaviour _childs;\r\n\r\n            [Space2(20)]\r\n\r\n            [SerializeField,
-    FromChildren(allowNull = true)]\r\n            MyMonoBehaviour _childs2;\r\n\r\n           
-    public class MyMonoBehaviour : MonoBehaviour\r\n            {\r\n\r\n           
-    }\r\n        }\r\n\r\n        [SerializeField] GetSetAttributeExamples getSetAttributeExamples
-    = new GetSetAttributeExamples();\r\n\r\n        [System.Serializable]\r\n       
+    {\r\n                // this.CheckForceFilled();\r\n                // gob1 =
+    GameObject.FindObjectOfType<GameObject>();\r\n            }\r\n        }\r\n\r\n       
+    [SerializeField] FromChildrenAttributeExamples fromChildrenAttributeExamples
+    = new FromChildrenAttributeExamples();\r\n\r\n        [System.Serializable]\r\n       
+    class FromChildrenAttributeExamples\r\n        {\r\n            [MessageBox(\"Only
+    references to my children\", MessageBoxType.Info)]\r\n            [Space2(20)]\r\n\r\n           
+    [SerializeField, FromChildren]\r\n            MyMonoBehaviour _childs;\r\n\r\n           
+    [Space2(20)]\r\n\r\n            [SerializeField, FromChildren(allowNull = true)]\r\n           
+    MyMonoBehaviour _childs2;\r\n\r\n            public class MyMonoBehaviour : MonoBehaviour\r\n           
+    {\r\n\r\n            }\r\n        }\r\n\r\n        [SerializeField] GetSetAttributeExamples
+    getSetAttributeExamples = new GetSetAttributeExamples();\r\n\r\n        [System.Serializable]\r\n       
     class GetSetAttributeExamples\r\n        {\r\n            [MessageBox(\"Replace
     your property with a getter and a setter\" +\r\n                        \"\\n(this
     Vector2 was a Vector3 before)\", MessageBoxType.Info)]\r\n\r\n            [GetSet(nameof(FlattenVector),
@@ -860,147 +860,147 @@ MonoBehaviour:
       - start: 10020
         end: 10537
       - start: 10753
-        end: 11972
-      - start: 12200
-        end: 12613
-      - start: 12817
-        end: 13778
-      - start: 13990
-        end: 14823
-      - start: 15039
-        end: 15608
-      - start: 15804
-        end: 16187
-      - start: 16427
-        end: 18457
-      - start: 18693
-        end: 19509
-      - start: 19715
-        end: 20128
-      - start: 20360
-        end: 20719
-      - start: 20951
-        end: 21543
-      - start: 21743
-        end: 21999
-      - start: 22195
-        end: 23754
-      - start: 23946
-        end: 24547
-      - start: 24767
-        end: 25211
-      - start: 25407
-        end: 26193
-      - start: 26413
-        end: 26699
-      - start: 26907
-        end: 27269
-      - start: 27493
-        end: 28375
-      - start: 28587
-        end: 29282
-      - start: 29506
-        end: 30062
-      - start: 30274
-        end: 30806
-      - start: 31006
-        end: 31450
-      - start: 31747
-        end: 32211
-      - start: 32463
-        end: 32910
-      - start: 33114
-        end: 35508
-      - start: 35720
-        end: 35936
-      - start: 36160
-        end: 36375
-      - start: 36591
-        end: 37740
-      - start: 37960
-        end: 38335
-      - start: 38563
-        end: 38939
-      - start: 39143
-        end: 39362
-      - start: 39558
-        end: 40453
-      - start: 40645
-        end: 40733
-      - start: 40933
-        end: 41792
-      - start: 42000
-        end: 42466
-      - start: 42686
-        end: 42953
-      - start: 43157
-        end: 43378
-      - start: 43574
-        end: 43739
-      - start: 43943
-        end: 44476
-      - start: 44668
-        end: 45001
-      - start: 45213
-        end: 45620
-      - start: 45951
-        end: 46158
-      - start: 46354
-        end: 47313
-      - start: 47489
-        end: 48033
-      - start: 48217
-        end: 49051
-      - start: 49231
-        end: 49762
-      - start: 49958
-        end: 50986
-      - start: 51182
-        end: 51763
-      - start: 52914
-        end: 53413
-      - start: 53637
-        end: 54122
-      - start: 54354
-        end: 55953
-      - start: 56181
-        end: 57100
-      - start: 51987
-        end: 52686
-      - start: 57356
-        end: 57886
-      - start: 58090
-        end: 59427
-      - start: 59655
-        end: 60089
-      - start: 60848
-        end: 61174
-      - start: 60287
-        end: 60636
-      - start: 61553
-        end: 61961
-      - start: 62169
-        end: 62583
-      - start: 62789
-        end: 63036
-      - start: 63276
-        end: 63717
-      - start: 63909
-        end: 64087
-      - start: 64303
-        end: 64387
-      - start: 64623
-        end: 64780
-      - start: 65012
-        end: 65337
-      - start: 65537
-        end: 65630
-      - start: 65830
-        end: 65983
-      - start: 66191
-        end: 66595
-      - start: 66807
-        end: 66993
+        end: 11976
+      - start: 12204
+        end: 12617
+      - start: 12821
+        end: 13782
+      - start: 13994
+        end: 14827
+      - start: 15043
+        end: 15612
+      - start: 15808
+        end: 16191
+      - start: 16431
+        end: 18461
+      - start: 18697
+        end: 19513
+      - start: 19719
+        end: 20132
+      - start: 20364
+        end: 20723
+      - start: 20955
+        end: 21547
+      - start: 21747
+        end: 22003
+      - start: 22199
+        end: 23758
+      - start: 23950
+        end: 24551
+      - start: 24771
+        end: 25215
+      - start: 25411
+        end: 26197
+      - start: 26417
+        end: 26703
+      - start: 26911
+        end: 27273
+      - start: 27497
+        end: 28379
+      - start: 28591
+        end: 29286
+      - start: 29510
+        end: 30066
+      - start: 30278
+        end: 30810
+      - start: 31010
+        end: 31454
+      - start: 31751
+        end: 32215
+      - start: 32467
+        end: 32914
+      - start: 33118
+        end: 35512
+      - start: 35724
+        end: 35940
+      - start: 36164
+        end: 36379
+      - start: 36595
+        end: 37744
+      - start: 37964
+        end: 38339
+      - start: 38567
+        end: 38943
+      - start: 39147
+        end: 39366
+      - start: 39562
+        end: 40457
+      - start: 40649
+        end: 40737
+      - start: 40937
+        end: 41796
+      - start: 42004
+        end: 42470
+      - start: 42690
+        end: 42957
+      - start: 43161
+        end: 43382
+      - start: 43578
+        end: 43743
+      - start: 43947
+        end: 44480
+      - start: 44672
+        end: 45005
+      - start: 45217
+        end: 45624
+      - start: 45955
+        end: 46162
+      - start: 46358
+        end: 47317
+      - start: 47493
+        end: 48037
+      - start: 48221
+        end: 49055
+      - start: 49235
+        end: 49766
+      - start: 49962
+        end: 50990
+      - start: 51186
+        end: 51767
+      - start: 52918
+        end: 53417
+      - start: 53641
+        end: 54126
+      - start: 54358
+        end: 55957
+      - start: 56185
+        end: 57104
+      - start: 51991
+        end: 52690
+      - start: 57360
+        end: 57890
+      - start: 58094
+        end: 59431
+      - start: 59659
+        end: 60093
+      - start: 60852
+        end: 61178
+      - start: 60291
+        end: 60640
+      - start: 61557
+        end: 61965
+      - start: 62173
+        end: 62587
+      - start: 62793
+        end: 63040
+      - start: 63280
+        end: 63721
+      - start: 63913
+        end: 64091
+      - start: 64307
+        end: 64391
+      - start: 64627
+        end: 64784
+      - start: 65016
+        end: 65341
+      - start: 65541
+        end: 65634
+      - start: 65834
+        end: 65987
+      - start: 66195
+        end: 66599
+      - start: 66811
+        end: 66997
     editor_keyInput: 0
     editor_valueInput:
       start: 0
@@ -1010,7 +1010,7 @@ MonoBehaviour:
     animatorParameterAttributeExamples:
       animatorController: {fileID: 9100000, guid: 3a1cea91d6692bf40b069a1d3b66f1b5, type: 2}
       animator: {fileID: 0}
-      paramName2: NewFloat
+      paramName2: <missing>
       paramName: <missing>
     asButtonAttributeExamples:
       selectableBoolean: 0
@@ -1060,8 +1060,8 @@ MonoBehaviour:
     displayAutoPropertyAttributeExamples:
       _: 0
     fixedValuesAttributeExamples:
-      integer: 1
-      name: Bob
+      integer: 7
+      name: John
     foldoutAttributeExamples:
       scriptable1: {fileID: 0}
       scriptable2: {fileID: 0}

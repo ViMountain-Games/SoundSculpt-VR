@@ -1,20 +1,10 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using CustomInspector;
 
 public class MusicScaleGenerator : MonoBehaviour
 {
-    [System.Serializable]
-    public class OctaveMapping
-    {
-        public int zValue;
-        public int octave;
-    }
-
-    [Header("Dynamic Octave Mapping")]
-    [SerializeField]
-    private List<OctaveMapping> octaveMappings = new List<OctaveMapping>();
-
     private AudioClip baseNote;
 
     [SelfFill(hideIfFilled: true), SerializeField]
@@ -26,28 +16,41 @@ public class MusicScaleGenerator : MonoBehaviour
     public int minOctave = 2;
     public int maxOctave = 4;
 
-    private readonly string[] noteNamesInOctave =
+    private readonly Grid3DGenerator.NoteName[] noteNamesInOctave =
     {
-        "Do", "Do#", "Re", "Re#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si"
+        Grid3DGenerator.NoteName.Do,
+        Grid3DGenerator.NoteName.DoSharp,
+        Grid3DGenerator.NoteName.Re,
+        Grid3DGenerator.NoteName.ReSharp,
+        Grid3DGenerator.NoteName.Mi,
+        Grid3DGenerator.NoteName.Fa,
+        Grid3DGenerator.NoteName.FaSharp,
+        Grid3DGenerator.NoteName.Sol,
+        Grid3DGenerator.NoteName.SolSharp,
+        Grid3DGenerator.NoteName.La,
+        Grid3DGenerator.NoteName.LaSharp,
+        Grid3DGenerator.NoteName.Si
     };
 
-    private Dictionary<string, int> noteOffsets = new Dictionary<string, int>
+    private Dictionary<Grid3DGenerator.NoteName, int> noteOffsets = new Dictionary<Grid3DGenerator.NoteName, int>
     {
-        {"Do", 0},
-        {"Do#", 1},
-        {"Re", 2},
-        {"Re#", 3},
-        {"Mi", 4},
-        {"Fa", 5},
-        {"Fa#", 6},
-        {"Sol", 7},
-        {"Sol#", 8},
-        {"La", 9},
-        {"La#", 10},
-        {"Si", 11}
+        {Grid3DGenerator.NoteName.Do, 0},
+        {Grid3DGenerator.NoteName.DoSharp, 1},
+        {Grid3DGenerator.NoteName.Re, 2},
+        {Grid3DGenerator.NoteName.ReSharp, 3},
+        {Grid3DGenerator.NoteName.Mi, 4},
+        {Grid3DGenerator.NoteName.Fa, 5},
+        {Grid3DGenerator.NoteName.FaSharp, 6},
+        {Grid3DGenerator.NoteName.Sol, 7},
+        {Grid3DGenerator.NoteName.SolSharp, 8},
+        {Grid3DGenerator.NoteName.La, 9},
+        {Grid3DGenerator.NoteName.LaSharp, 10},
+        {Grid3DGenerator.NoteName.Si, 11}
     };
 
     private List<NoteDataEntry> notes = new List<NoteDataEntry>();
+
+    private Grid3DGenerator gridGenerator;
 
     private void Awake()
     {
@@ -59,12 +62,21 @@ public class MusicScaleGenerator : MonoBehaviour
         GenerateNotes();
     }
 
+    private void Start()
+    {
+        gridGenerator = Grid3DGenerator.Instance;
+        if (gridGenerator == null)
+        {
+            Debug.LogError("Grid3DGenerator instance not found!");
+        }
+    }
+
     private void GenerateNotes()
     {
         notes.Clear();
         for (int octave = minOctave; octave <= maxOctave; octave++)
         {
-            foreach (string noteName in noteNamesInOctave)
+            foreach (Grid3DGenerator.NoteName noteName in noteNamesInOctave)
             {
                 float frequency = CalculateFrequency(noteName, octave);
                 notes.Add(new NoteDataEntry { Name = noteName, Octave = octave, Frequency = frequency });
@@ -72,12 +84,12 @@ public class MusicScaleGenerator : MonoBehaviour
         }
     }
 
-    private int GetMIDINoteNumber(string noteName, int octave)
+    private int GetMIDINoteNumber(Grid3DGenerator.NoteName noteName, int octave)
     {
         return (octave + 1) * 12 + noteOffsets[noteName];
     }
 
-    private float CalculateFrequency(string noteName, int octave)
+    private float CalculateFrequency(Grid3DGenerator.NoteName noteName, int octave)
     {
         int noteNumber = GetMIDINoteNumber(noteName, octave);
         return 440f * Mathf.Pow(2f, (noteNumber - 69f) / 12f);
@@ -85,14 +97,14 @@ public class MusicScaleGenerator : MonoBehaviour
 
     public void PlayNoteByPosition(int x, int y, int z)
     {
-        string noteName = GetNoteNameFromY(y);
-        int octave = GetOctaveFromZ(z);
-
-        if (noteName == null)
+        if (gridGenerator == null)
         {
-            Debug.LogError($"Invalid Y coordinate for note: {y}");
+            Debug.LogError("Grid3DGenerator instance not found!");
             return;
         }
+
+        Grid3DGenerator.NoteName noteName = gridGenerator.GetNoteNameFromY(y);
+        int octave = gridGenerator.GetOctaveFromZ(z);
 
         float frequency = CalculateFrequency(noteName, octave);
 
@@ -103,38 +115,12 @@ public class MusicScaleGenerator : MonoBehaviour
         audioSource.Play();
     }
 
-    private string GetNoteNameFromY(int y)
-    {
-        if (y >= 0 && y < noteNamesInOctave.Length)
-        {
-            return noteNamesInOctave[y];
-        }
-        else
-        {
-            return null;
-        }
-    }
-
-    private int GetOctaveFromZ(int z)
-    {
-        foreach (var mapping in octaveMappings)
-        {
-            if (mapping.zValue == z)
-            {
-                return mapping.octave;
-            }
-        }
-
-        Debug.LogWarning($"No mapping found for z: {z}. Using default octave {minOctave}.");
-        return minOctave; // Default octave if no mapping is found
-    }
-
     private AudioClip GenerateNote(AudioClip originalClip, float targetFrequency)
     {
         float[] originalData = new float[originalClip.samples * originalClip.channels];
         originalClip.GetData(originalData, 0);
 
-        float originalFrequency = 261.63f;
+        float originalFrequency = 261.63f; // Frequenza della nota di base (Do)
         float frequencyRatio = targetFrequency / originalFrequency;
 
         int newSampleCount = Mathf.CeilToInt(originalData.Length / frequencyRatio);
@@ -158,7 +144,7 @@ public class MusicScaleGenerator : MonoBehaviour
 
     public class NoteDataEntry
     {
-        public string Name;
+        public Grid3DGenerator.NoteName Name;
         public int Octave;
         public float Frequency;
     }

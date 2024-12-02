@@ -1,13 +1,30 @@
-// Grid3DGenerator.cs
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using CustomInspector;
 using UnityEditor;
 
+[DefaultExecutionOrder(-100)] // Assicura che questo script venga eseguito prima degli altri
 public class Grid3DGenerator : MonoBehaviour
 {
     public static Grid3DGenerator Instance { get; private set; }
+
+    // Definizione dell'enum NoteName
+    public enum NoteName
+    {
+        Do,
+        DoSharp,
+        Re,
+        ReSharp,
+        Mi,
+        Fa,
+        FaSharp,
+        Sol,
+        SolSharp,
+        La,
+        LaSharp,
+        Si
+    }
 
     [System.Serializable]
     public class GridEntry
@@ -24,12 +41,26 @@ public class Grid3DGenerator : MonoBehaviour
         }
     }
 
+    [System.Serializable]
+    public class OctaveMapping
+    {
+        public int zValue;
+        public int octave;
+    }
+
+    [System.Serializable]
+    public class NoteMapping
+    {
+        public int yValue;
+        public NoteName noteName; // Utilizza l'enum invece di una stringa
+    }
+
     [Title("Grid Settings", fontSize = 14, alignment = TextAlignment.Center)]
     [Min(1)] public int gridSizeX = 5;
-    [Min(1)] public int gridSizeY = 12; // 12 note
-    [Min(1)] public int gridSizeZ = 3; // Tre ottave
+    [Min(1)] public int gridSizeY = 12; // Numero di note
+    [Min(1)] public int gridSizeZ = 3;  // Numero di ottave
     [DynamicSlider]
-    public DynamicSlider cellSize = new DynamicSlider(1f, 0.1f, 5f); // Valore predefinito, min, max
+    public DynamicSlider cellSize = new DynamicSlider(1f, 0.1f, 5f);
 
     [HorizontalLine("Prefabs and Materials", 2)]
     [ForceFill] public GameObject cellPrefab;
@@ -45,6 +76,18 @@ public class Grid3DGenerator : MonoBehaviour
 
     [HorizontalLine("Object List", 2)]
     [ReadOnly] public List<GridEntry> objectList = new List<GridEntry>();
+
+    [Header("Octave Mappings")]
+    [SerializeField]
+    public List<OctaveMapping> octaveMappings = new List<OctaveMapping>();
+
+    [Header("Default Octave Settings")]
+    [Min(1)] public int defaultOctave = 2; // Ottava predefinita se non viene trovata una mappatura
+
+    [Header("Note Mappings")]
+    [SerializeField]
+    public List<NoteMapping> noteMappings = new List<NoteMapping>();
+
 
     private void Awake()
     {
@@ -234,5 +277,33 @@ public class Grid3DGenerator : MonoBehaviour
                 }
             }
         }
+    }
+
+    public int GetOctaveFromZ(int z)
+    {
+        foreach (var mapping in octaveMappings)
+        {
+            if (mapping.zValue == z)
+            {
+                return mapping.octave;
+            }
+        }
+
+        Debug.LogWarning($"No octave mapping found for z: {z}. Using default octave {defaultOctave}.");
+        return defaultOctave; // Usa l'ottava predefinita se non viene trovata una mappatura
+    }
+
+    public NoteName GetNoteNameFromY(int y)
+    {
+        foreach (var mapping in noteMappings)
+        {
+            if (mapping.yValue == y)
+            {
+                return mapping.noteName;
+            }
+        }
+
+        Debug.LogWarning($"No note mapping found for y: {y}. Using default note 'Do'.");
+        return NoteName.Do; // Nota predefinita se non viene trovata una mappatura
     }
 }

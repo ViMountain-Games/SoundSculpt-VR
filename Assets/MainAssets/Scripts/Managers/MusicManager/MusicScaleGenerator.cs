@@ -1,28 +1,36 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using CustomInspector;
 
 public class MusicScaleGenerator : MonoBehaviour
 {
-    private AudioClip baseNote; // L'audioclip della tua nota di base (es. Do)
+    [System.Serializable]
+    public class OctaveMapping
+    {
+        public int zValue;
+        public int octave;
+    }
+
+    [Header("Dynamic Octave Mapping")]
+    [SerializeField]
+    private List<OctaveMapping> octaveMappings = new List<OctaveMapping>();
+
+    private AudioClip baseNote;
 
     [SelfFill(hideIfFilled: true), SerializeField]
-    private AudioSource audioSource; // AudioSource da cui verranno riprodotte le note
+    private AudioSource audioSource;
 
-    private const int sampleRate = 44100; // Frequenza di campionamento standard
+    private const int sampleRate = 44100;
 
     [Header("Octave Settings")]
     public int minOctave = 2;
     public int maxOctave = 4;
 
-    // Nomi delle note all'interno di un'ottava
     private readonly string[] noteNamesInOctave =
     {
         "Do", "Do#", "Re", "Re#", "Mi", "Fa", "Fa#", "Sol", "Sol#", "La", "La#", "Si"
     };
 
-    // Mappatura dei nomi delle note ai semitoni
     private Dictionary<string, int> noteOffsets = new Dictionary<string, int>
     {
         {"Do", 0},
@@ -109,14 +117,16 @@ public class MusicScaleGenerator : MonoBehaviour
 
     private int GetOctaveFromZ(int z)
     {
-        if (z == 0)
-            return 2;
-        else if (z == 1)
-            return 3;
-        else if (z == 2)
-            return 4; // Modificato per restituire l'ottava 3 quando z == 2
-        else
-            return 1; // Default all'ottava 2 se z è fuori dal range previsto
+        foreach (var mapping in octaveMappings)
+        {
+            if (mapping.zValue == z)
+            {
+                return mapping.octave;
+            }
+        }
+
+        Debug.LogWarning($"No mapping found for z: {z}. Using default octave {minOctave}.");
+        return minOctave; // Default octave if no mapping is found
     }
 
     private AudioClip GenerateNote(AudioClip originalClip, float targetFrequency)
@@ -124,7 +134,7 @@ public class MusicScaleGenerator : MonoBehaviour
         float[] originalData = new float[originalClip.samples * originalClip.channels];
         originalClip.GetData(originalData, 0);
 
-        float originalFrequency = 261.63f; // Frequenza della nota di base (Do)
+        float originalFrequency = 261.63f;
         float frequencyRatio = targetFrequency / originalFrequency;
 
         int newSampleCount = Mathf.CeilToInt(originalData.Length / frequencyRatio);

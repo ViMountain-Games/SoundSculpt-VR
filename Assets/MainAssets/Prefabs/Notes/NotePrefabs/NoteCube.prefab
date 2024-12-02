@@ -486,7 +486,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d76bc7ba41dd512459085eb3a54053f7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  baseNote: {fileID: 0}
+  octaveMappings:
+  - zValue: 0
+    octave: 3
+  - zValue: 1
+    octave: 2
+  - zValue: 2
+    octave: 4
   audioSource: {fileID: 2958456752219626552}
   minOctave: 2
   maxOctave: 4

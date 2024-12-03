@@ -1,7 +1,10 @@
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 using CustomInspector;
 
+#if UNITY_EDITOR
 [CustomEditor(typeof(Grid3DGenerator))]
 public class Grid3DGeneratorEditor : Editor
 {
@@ -102,3 +105,4 @@ public class Grid3DGeneratorEditor : Editor
         return result;
     }
 }
+#endif

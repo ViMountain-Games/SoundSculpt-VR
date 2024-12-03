@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using CustomInspector;
 using TMPro; // For TextMeshPro
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 
 [DefaultExecutionOrder(-100)] // Ensure this script runs before others
 public class Grid3DGenerator : MonoBehaviour
@@ -187,7 +189,9 @@ public class Grid3DGenerator : MonoBehaviour
         // Draw grid lines
         DrawGridLines(origin, gridParent);
 
+#if UNITY_EDITOR
         EditorUtility.SetDirty(this);
+#endif
     }
 
     public void ClearGrid()
@@ -206,7 +210,9 @@ public class Grid3DGenerator : MonoBehaviour
             labelsParent = null;
         }
 
+#if UNITY_EDITOR
         EditorUtility.SetDirty(this);
+#endif
     }
 
     private void DrawGridLines(Vector3 origin, GameObject parent)

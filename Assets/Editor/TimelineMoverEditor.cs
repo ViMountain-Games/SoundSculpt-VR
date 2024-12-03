@@ -1,6 +1,9 @@
+#if UNITY_EDITOR
 using UnityEditor;
+#endif
 using UnityEngine;
 
+#if UNITY_EDITOR
 [CustomEditor(typeof(TimelineMover))]
 public class TimelineMoverEditor : Editor
 {
@@ -19,3 +22,4 @@ public class TimelineMoverEditor : Editor
         }
     }
 }
+#endif

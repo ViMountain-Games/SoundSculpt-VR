@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEditor;  // Necessario per usare EditorUtility.SetDirty
+#if UNITY_EDITOR
+using UnityEditor; // Questo rimane per il codice editor
+#endif
 using CustomInspector;
 
 public class NotePicker : MonoBehaviour
@@ -71,7 +73,9 @@ public class NotePicker : MonoBehaviour
             Debug.LogError("SelectedObject is invalid or Grid3DGenerator is not assigned.");
         }
 
+#if UNITY_EDITOR
         EditorUtility.SetDirty(this);
+#endif
     }
 
     public void RemoveAssignedObject()
@@ -89,6 +93,9 @@ public class NotePicker : MonoBehaviour
         }
 
         selectedObject = null;
+
+#if UNITY_EDITOR
         EditorUtility.SetDirty(this);
+#endif
     }
 }

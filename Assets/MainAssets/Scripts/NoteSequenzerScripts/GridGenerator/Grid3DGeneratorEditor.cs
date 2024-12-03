@@ -18,7 +18,6 @@ public class Grid3DGeneratorEditor : Editor
         EditorGUILayout.BeginHorizontal();
         if (GUILayout.Button("Generate Grid")) gridGenerator.GenerateGrid();
         if (GUILayout.Button("Clear Grid")) gridGenerator.ClearGrid();
-        if (GUILayout.Button("Play Assigned Notes")) gridGenerator.PlayAssignedNotes();
         EditorGUILayout.EndHorizontal();
 
         if (gridGenerator.gridMatrix != null)

@@ -15,10 +15,7 @@ public class TimelineMover : MonoBehaviour
     [Range(0.1f, 5f)]
     public float speedScale = 1f;
 
-    [Tooltip("Maximum distance before resetting.")]
-    [Min(1)]
-    public float maxDistance = 10f;
-
+    // Removed public maxDistance; it will be calculated based on grid size
     [Tooltip("Time scaling factor to adjust real-world movement.")]
     [Range(0.1f, 2f)]
     public float timeScale = 1f;
@@ -33,9 +30,51 @@ public class TimelineMover : MonoBehaviour
     private Vector3 startPosition;
     private bool isMoving = false;
 
+    private Grid3DGenerator gridGenerator;
+
+    private float maxDistance; // Now calculated based on grid size
+
     void Start()
     {
-        startPosition = transform.position;
+        // Get the instance of Grid3DGenerator
+        gridGenerator = Grid3DGenerator.Instance;
+        if (gridGenerator == null)
+        {
+            Debug.LogError("Grid3DGenerator instance not found!");
+            return;
+        }
+
+        // Calculate grid dimensions
+        float gridHeight = gridGenerator.gridSizeY * gridGenerator.cellSize.value;
+        float gridDepth = gridGenerator.gridSizeZ * gridGenerator.cellSize.value;
+        float gridWidth = gridGenerator.gridSizeX * gridGenerator.cellSize.value; // Get grid width
+
+        // Scale the TimelineMover based on grid dimensions on Y and Z axes
+        Vector3 newScale = transform.localScale;
+        newScale.y = gridHeight;
+        newScale.z = gridDepth;
+        transform.localScale = newScale;
+
+        // Position the TimelineMover to the left of the grid
+        Vector3 gridOrigin = gridGenerator.transform.position;
+
+        float gridCenterY = gridOrigin.y + gridHeight / 2;
+        float gridCenterZ = gridOrigin.z + gridDepth / 2;
+
+        float halfTimelineWidth = transform.localScale.x / 2;
+
+        // Set the initial position
+        startPosition = new Vector3(
+            gridOrigin.x - halfTimelineWidth, // To the left of the grid
+            gridCenterY,                      // Centered on Y axis
+            gridCenterZ                       // Centered on Z axis
+        );
+
+        transform.position = startPosition;
+
+        // Set maxDistance based on the length of the grid on the X axis
+        maxDistance = gridWidth + halfTimelineWidth * 2; // So it moves past the grid
+
         CalculateSpeed();
     }
 
@@ -53,7 +92,7 @@ public class TimelineMover : MonoBehaviour
         if (!isMoving)
         {
             isMoving = true;
-            startPosition = transform.position; // Reset the initial position
+            transform.position = startPosition; // Reset position
             Debug.Log("Movement started.");
         }
     }
@@ -61,7 +100,7 @@ public class TimelineMover : MonoBehaviour
     [ContextMenu("Calculate Speed")]
     private void CalculateSpeed()
     {
-        // Normalizing speed based on timeScale
+        // Normalize speed based on timeScale
         speed = (bpm / 60f) * speedScale * timeScale;
         Debug.Log("Speed recalculated: " + speed);
     }

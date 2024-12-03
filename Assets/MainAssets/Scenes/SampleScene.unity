@@ -1650,7 +1650,6 @@ MonoBehaviour:
   bpm: 120
   direction: {x: 1, y: 0, z: 0}
   speedScale: 0.1
-  maxDistance: 1.5
   timeScale: 1
   gizmoColor: {r: 1, g: 0, b: 0, a: 1}
   speed: 0
@@ -6580,7 +6579,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   gridSizeX: 5
-  gridSizeY: 3
+  gridSizeY: 17
   gridSizeZ: 3
   cellSize:
     value: 0.07
@@ -6588,6 +6587,11 @@ MonoBehaviour:
     max: 5
   cellPrefab: {fileID: 9207010278840529839, guid: 8afecae0636a3cf4d9e15f87b15ec761, type: 3}
   lineMaterial: {fileID: 2100000, guid: 2ed5da7ffe0c1f1439cb06a962cb647d, type: 2}
+  labelPrefab: {fileID: 3476761144244187499, guid: daf0e9ed479fa60408f309ce83b89744, type: 3}
+  labelSettings:
+    offsetX: -0.8
+    textSize: 0.51
+    textColor: {r: 1, g: 1, b: 1, a: 1}
   emptyCellColor: {r: 0.02, g: 0.02, b: 0.05, a: 1}
   lineColor: {r: 0.7, g: 0.8, b: 0.88, a: 1}
   lineWidth: 0.006
@@ -6604,9 +6608,37 @@ MonoBehaviour:
   - yValue: 0
     noteName: 0
   - yValue: 1
-    noteName: 2
+    noteName: 1
   - yValue: 2
+    noteName: 2
+  - yValue: 3
+    noteName: 3
+  - yValue: 4
+    noteName: 4
+  - yValue: 5
+    noteName: 5
+  - yValue: 6
+    noteName: 6
+  - yValue: 7
+    noteName: 7
+  - yValue: 8
+    noteName: 8
+  - yValue: 9
+    noteName: 9
+  - yValue: 10
+    noteName: 10
+  - yValue: 11
     noteName: 11
+  - yValue: 12
+    noteName: 12
+  - yValue: 13
+    noteName: 13
+  - yValue: 14
+    noteName: 14
+  - yValue: 15
+    noteName: 15
+  - yValue: 16
+    noteName: 16
 --- !u!4 &1576117718
 Transform:
   m_ObjectHideFlags: 0
@@ -7783,6 +7815,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 226882359}
     m_Modifications:
+    - target: {fileID: 2855172451392143961, guid: 8afecae0636a3cf4d9e15f87b15ec761, type: 3}
+      propertyPath: rolloffMode
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4913046769499813163, guid: 8afecae0636a3cf4d9e15f87b15ec761, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.11035639

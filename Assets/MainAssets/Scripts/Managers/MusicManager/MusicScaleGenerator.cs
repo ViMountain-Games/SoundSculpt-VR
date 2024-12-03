@@ -1,4 +1,4 @@
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using CustomInspector;
@@ -22,33 +22,41 @@ public class MusicScaleGenerator : MonoBehaviour
         Grid3DGenerator.NoteName.DoSharp,
         Grid3DGenerator.NoteName.Re,
         Grid3DGenerator.NoteName.ReSharp,
+        Grid3DGenerator.NoteName.ReFlat,
         Grid3DGenerator.NoteName.Mi,
+        Grid3DGenerator.NoteName.MiFlat,
         Grid3DGenerator.NoteName.Fa,
         Grid3DGenerator.NoteName.FaSharp,
         Grid3DGenerator.NoteName.Sol,
         Grid3DGenerator.NoteName.SolSharp,
+        Grid3DGenerator.NoteName.SolFlat,
         Grid3DGenerator.NoteName.La,
         Grid3DGenerator.NoteName.LaSharp,
-        Grid3DGenerator.NoteName.Si
+        Grid3DGenerator.NoteName.LaFlat,
+        Grid3DGenerator.NoteName.Si,
+        Grid3DGenerator.NoteName.SiFlat
     };
 
     private Dictionary<Grid3DGenerator.NoteName, int> noteOffsets = new Dictionary<Grid3DGenerator.NoteName, int>
     {
         {Grid3DGenerator.NoteName.Do, 0},
         {Grid3DGenerator.NoteName.DoSharp, 1},
+        {Grid3DGenerator.NoteName.ReFlat, 1},
         {Grid3DGenerator.NoteName.Re, 2},
         {Grid3DGenerator.NoteName.ReSharp, 3},
+        {Grid3DGenerator.NoteName.MiFlat, 3},
         {Grid3DGenerator.NoteName.Mi, 4},
         {Grid3DGenerator.NoteName.Fa, 5},
         {Grid3DGenerator.NoteName.FaSharp, 6},
+        {Grid3DGenerator.NoteName.SolFlat, 6},
         {Grid3DGenerator.NoteName.Sol, 7},
         {Grid3DGenerator.NoteName.SolSharp, 8},
+        {Grid3DGenerator.NoteName.LaFlat, 8},
         {Grid3DGenerator.NoteName.La, 9},
         {Grid3DGenerator.NoteName.LaSharp, 10},
+        {Grid3DGenerator.NoteName.SiFlat, 10},
         {Grid3DGenerator.NoteName.Si, 11}
     };
-
-    private List<NoteDataEntry> notes = new List<NoteDataEntry>();
 
     private Grid3DGenerator gridGenerator;
 
@@ -58,8 +66,6 @@ public class MusicScaleGenerator : MonoBehaviour
             audioSource = GetComponent<AudioSource>();
 
         baseNote = GetComponent<Note>().noteData.audioClip;
-
-        GenerateNotes();
     }
 
     private void Start()
@@ -69,30 +75,6 @@ public class MusicScaleGenerator : MonoBehaviour
         {
             Debug.LogError("Grid3DGenerator instance not found!");
         }
-    }
-
-    private void GenerateNotes()
-    {
-        notes.Clear();
-        for (int octave = minOctave; octave <= maxOctave; octave++)
-        {
-            foreach (Grid3DGenerator.NoteName noteName in noteNamesInOctave)
-            {
-                float frequency = CalculateFrequency(noteName, octave);
-                notes.Add(new NoteDataEntry { Name = noteName, Octave = octave, Frequency = frequency });
-            }
-        }
-    }
-
-    private int GetMIDINoteNumber(Grid3DGenerator.NoteName noteName, int octave)
-    {
-        return (octave + 1) * 12 + noteOffsets[noteName];
-    }
-
-    private float CalculateFrequency(Grid3DGenerator.NoteName noteName, int octave)
-    {
-        int noteNumber = GetMIDINoteNumber(noteName, octave);
-        return 440f * Mathf.Pow(2f, (noteNumber - 69f) / 12f);
     }
 
     public void PlayNoteByPosition(int x, int y, int z)
@@ -115,12 +97,23 @@ public class MusicScaleGenerator : MonoBehaviour
         audioSource.Play();
     }
 
+    private int GetMIDINoteNumber(Grid3DGenerator.NoteName noteName, int octave)
+    {
+        return (octave + 1) * 12 + noteOffsets[noteName];
+    }
+
+    private float CalculateFrequency(Grid3DGenerator.NoteName noteName, int octave)
+    {
+        int noteNumber = GetMIDINoteNumber(noteName, octave);
+        return 440f * Mathf.Pow(2f, (noteNumber - 69f) / 12f);
+    }
+
     private AudioClip GenerateNote(AudioClip originalClip, float targetFrequency)
     {
         float[] originalData = new float[originalClip.samples * originalClip.channels];
         originalClip.GetData(originalData, 0);
 
-        float originalFrequency = 261.63f; // Frequenza della nota di base (Do)
+        float originalFrequency = 261.63f; // Frequency of base note (Do)
         float frequencyRatio = targetFrequency / originalFrequency;
 
         int newSampleCount = Mathf.CeilToInt(originalData.Length / frequencyRatio);
@@ -140,12 +133,5 @@ public class MusicScaleGenerator : MonoBehaviour
         newClip.SetData(newData, 0);
 
         return newClip;
-    }
-
-    public class NoteDataEntry
-    {
-        public Grid3DGenerator.NoteName Name;
-        public int Octave;
-        public float Frequency;
     }
 }

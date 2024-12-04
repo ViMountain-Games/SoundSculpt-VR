@@ -1809,6 +1809,7 @@ MonoBehaviour:
   direction: {x: 1, y: 0, z: 0}
   speedScale: 0.1
   timeScale: 1
+  positionOffset: {x: -0.0025, y: 0, z: 0}
   gizmoColor: {r: 1, g: 0, b: 0, a: 1}
   speed: 0
 --- !u!136 &488566305
@@ -7046,23 +7047,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b84d5910ab2da246bee930f096f7a16, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gridSizeX: 20
+  gridSizeX: 5
   gridSizeY: 5
   gridSizeZ: 3
   cellSize:
-    value: 0.07
-    min: 0.07
+    value: 0.04
+    min: 0.01
     max: 5
   cellPrefab: {fileID: 9207010278840529839, guid: 8afecae0636a3cf4d9e15f87b15ec761, type: 3}
   lineMaterial: {fileID: 2100000, guid: 2ed5da7ffe0c1f1439cb06a962cb647d, type: 2}
   labelPrefab: {fileID: 3476761144244187499, guid: daf0e9ed479fa60408f309ce83b89744, type: 3}
   labelSettings:
-    offsetX: -0.8
-    textSize: 0.51
+    offsetX: -1.13
+    textSize: 0.25
     textColor: {r: 1, g: 1, b: 1, a: 1}
   emptyCellColor: {r: 0.02, g: 0.02, b: 0.05, a: 1}
   lineColor: {r: 0.7, g: 0.8, b: 0.88, a: 1}
-  lineWidth: 0.006
+  lineWidth: 0.001
   objectList: []
   octaveMappings:
   - zValue: 0
@@ -8283,10 +8284,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 226882359}
     m_Modifications:
-    - target: {fileID: 2855172451392143961, guid: 8afecae0636a3cf4d9e15f87b15ec761, type: 3}
-      propertyPath: rolloffMode
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 4913046769499813163, guid: 8afecae0636a3cf4d9e15f87b15ec761, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.11035639

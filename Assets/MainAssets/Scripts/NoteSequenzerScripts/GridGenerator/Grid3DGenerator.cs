@@ -7,6 +7,7 @@ using TMPro; // For TextMeshPro
 using UnityEditor;
 #endif
 
+
 [DefaultExecutionOrder(-100)] // Ensure this script runs before others
 public class Grid3DGenerator : MonoBehaviour
 {

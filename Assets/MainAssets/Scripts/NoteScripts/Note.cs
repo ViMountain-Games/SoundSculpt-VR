@@ -28,7 +28,7 @@ public class Note : MonoBehaviour
     {
         if (musicScaleGenerator != null)
         {
-            musicScaleGenerator.PlayNoteByPosition(gridX, gridY, gridZ);
+            musicScaleGenerator.PlayNoteByPosition(gridX, gridY, gridZ, noteData.duration, noteData.fadeOutTime);
         }
     }
 }

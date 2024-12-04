@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using CustomInspector;
 
@@ -38,6 +39,9 @@ public class MusicScaleGenerator : MonoBehaviour
 
     private Grid3DGenerator gridGenerator;
 
+    // Cache for generated AudioClips
+    private Dictionary<string, AudioClip> noteCache = new Dictionary<string, AudioClip>();
+
     private void Awake()
     {
         if (audioSource == null)
@@ -53,6 +57,31 @@ public class MusicScaleGenerator : MonoBehaviour
         {
             Debug.LogError("Grid3DGenerator instance not found!");
         }
+
+        PreGenerateNotes();
+    }
+
+    private void PreGenerateNotes()
+    {
+        // Pre-generate notes for the required octaves and note names
+        for (int octave = minOctave; octave <= maxOctave; octave++)
+        {
+            foreach (Grid3DGenerator.NoteName noteName in noteNamesInOctave)
+            {
+                float frequency = CalculateFrequency(noteName, octave);
+                AudioClip newNote = GenerateNote(baseNote, frequency);
+
+                string noteKey = GetNoteKey(noteName, octave);
+                noteCache[noteKey] = newNote;
+            }
+        }
+
+        Debug.Log("All notes pre-generated and cached.");
+    }
+
+    private string GetNoteKey(Grid3DGenerator.NoteName noteName, int octave)
+    {
+        return noteName.ToString() + "_" + octave;
     }
 
     public void PlayNoteByPosition(int x, int y, int z, NoteData.NoteDuration duration, float fadeOutTime)
@@ -66,21 +95,27 @@ public class MusicScaleGenerator : MonoBehaviour
         Grid3DGenerator.NoteName noteName = gridGenerator.GetNoteNameFromY(y);
         int octave = gridGenerator.GetOctaveFromZ(z);
 
-        float frequency = CalculateFrequency(noteName, octave);
+        string noteKey = GetNoteKey(noteName, octave);
 
-        Debug.Log($"Playing note {noteName} in octave {octave} with duration {duration} and fade-out time {fadeOutTime} at position ({x}, {y}, {z})");
+        if (noteCache.TryGetValue(noteKey, out AudioClip newNote))
+        {
+            Debug.Log($"Playing note {noteName} in octave {octave} with duration {duration} and fade-out time {fadeOutTime} at position ({x}, {y}, {z})");
 
-        AudioClip newNote = GenerateNote(baseNote, frequency);
-        audioSource.clip = newNote;
-        audioSource.Play();
+            audioSource.clip = newNote;
+            audioSource.Play();
 
-        StartCoroutine(StopNoteWithFadeOut(duration, fadeOutTime));
+            StartCoroutine(StopNoteWithFadeOut(duration, fadeOutTime));
+        }
+        else
+        {
+            Debug.LogError($"Note {noteName} in octave {octave} not found in cache.");
+        }
     }
 
     private IEnumerator StopNoteWithFadeOut(NoteData.NoteDuration duration, float fadeOutTime)
     {
         float durationInSeconds = (float)duration / 4f;
-        yield return new WaitForSeconds(durationInSeconds - fadeOutTime); // Attendi prima del fade-out
+        yield return new WaitForSeconds(durationInSeconds - fadeOutTime); // Wait before starting fade-out
 
         float startVolume = audioSource.volume;
         float fadeStep = startVolume / fadeOutTime;
@@ -91,7 +126,7 @@ public class MusicScaleGenerator : MonoBehaviour
         }
 
         audioSource.Stop();
-        audioSource.volume = startVolume; // Ripristina il volume originale
+        audioSource.volume = startVolume; // Restore original volume
         Debug.Log("Note stopped with fade-out.");
     }
 

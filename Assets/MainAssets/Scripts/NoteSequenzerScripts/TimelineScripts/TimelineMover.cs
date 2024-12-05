@@ -36,6 +36,10 @@ public class TimelineMover : MonoBehaviour
 
     private float maxDistance;
 
+    [Header("Loop Settings")]
+    [Tooltip("Enable or disable loop mode.")]
+    public bool loopMode = false; // Toggle for loop mode
+
     void Start()
     {
         gridGenerator = Grid3DGenerator.Instance;
@@ -93,6 +97,20 @@ public class TimelineMover : MonoBehaviour
         }
     }
 
+    [ContextMenu("Stop Movement")]
+    public void StopMovement()
+    {
+        isMoving = false;
+        Debug.Log("Movement stopped.");
+    }
+
+    [ContextMenu("Toggle Loop Mode")]
+    public void ToggleLoopMode()
+    {
+        loopMode = !loopMode;
+        Debug.Log("Loop mode toggled. Current state: " + (loopMode ? "Enabled" : "Disabled"));
+    }
+
     [ContextMenu("Calculate Speed")]
     private void CalculateSpeed()
     {
@@ -106,15 +124,17 @@ public class TimelineMover : MonoBehaviour
 
         if (Vector3.Distance(startPosition, transform.position) >= maxDistance)
         {
-            StopMovement();
-            ReturnToStartPosition();
+            if (loopMode)
+            {
+                transform.position = startPosition; // Reset position for looping
+                Debug.Log("Timeline looped.");
+            }
+            else
+            {
+                StopMovement();
+                ReturnToStartPosition();
+            }
         }
-    }
-
-    private void StopMovement()
-    {
-        isMoving = false;
-        Debug.Log("Movement stopped.");
     }
 
     private void ReturnToStartPosition()

@@ -1,42 +1,92 @@
+using System.Collections.Generic;
 using UnityEngine;
 
+[RequireComponent(typeof(SphereCollider))]
 public class GravityToCenter : MonoBehaviour
 {
-    public float sphereRadius = 5f; // Raggio della sfera
-    public float attractionForce = 10f; // Forza di attrazione
-    public float maxSpeed = 5f; // Velocit� massima dell'oggetto attirato
+    [Header("Settings")]
+    [Tooltip("Raggio della zona 'sicura' in cui gli oggetti non vengono attratti.")]
+    public float sphereRadius = 5f;
+
+    [Tooltip("Raggio totale in cui controlliamo la presenza di oggetti (deve essere >= sphereRadius).")]
+    public float checkRadius = 10f;
+
+    [Tooltip("Forza di attrazione verso il centro (deve essere moderata per non risultare violenta).")]
+    public float attractionForce = 10f;
+
+    [Tooltip("Velocità massima degli oggetti.")]
+    public float maxSpeed = 5f;
+
+    // Set per tenere traccia degli oggetti considerati all'interno della zona sicura
+    private HashSet<Rigidbody> insideSet = new HashSet<Rigidbody>();
+
+    private SphereCollider triggerCollider;
+
+    private void Awake()
+    {
+        // Assicuriamoci che il collider sia un trigger e che abbia il radius = sphereRadius
+        triggerCollider = GetComponent<SphereCollider>();
+        triggerCollider.isTrigger = true;
+        triggerCollider.radius = sphereRadius;
+    }
 
     private void OnDrawGizmos()
     {
-        // Disegna una sfera visibile nell'editor per rappresentare il range
+        // Disegna la sfera del range "sicuro"
         Gizmos.color = Color.green;
         Gizmos.DrawWireSphere(transform.position, sphereRadius);
+
+        // Disegna anche la sfera del range di controllo totale
+        Gizmos.color = Color.yellow;
+        Gizmos.DrawWireSphere(transform.position, checkRadius);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        Rigidbody rb = other.attachedRigidbody;
+        if (rb != null && !rb.isKinematic)
+        {
+            // Oggetto entrato nella zona sicura
+            insideSet.Add(rb);
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        Rigidbody rb = other.attachedRigidbody;
+        if (rb != null && insideSet.Contains(rb))
+        {
+            // Oggetto uscito dalla zona sicura, ora potrà essere attratto se si trova fuori da sphereRadius
+            insideSet.Remove(rb);
+        }
     }
 
     private void FixedUpdate()
     {
-        // Trova tutti i collider all'interno della scena
-        Collider[] colliders = Physics.OverlapSphere(transform.position, sphereRadius);
+        // Trova tutti i collider entro checkRadius
+        Collider[] colliders = Physics.OverlapSphere(transform.position, checkRadius);
         foreach (var col in colliders)
         {
-            // Verifica se l'oggetto ha un Rigidbody
             Rigidbody rb = col.attachedRigidbody;
             if (rb != null && !rb.isKinematic)
             {
                 Vector3 toCenter = transform.position - rb.position;
+                float distance = toCenter.magnitude;
 
-                // Se l'oggetto � fuori dal range, applica una forza
-                if (toCenter.magnitude > sphereRadius)
+                // Se l'oggetto è fuori dalla zona sicura (distance > sphereRadius) e non è dentro il set dei "sicuri"
+                if (distance > sphereRadius && !insideSet.Contains(rb))
                 {
+                    // Applica la forza di attrazione verso il centro
                     Vector3 attraction = toCenter.normalized * attractionForce;
-                    rb.AddForce(attraction);
+                    rb.AddForce(attraction, ForceMode.Acceleration);
 
-                    // Limita la velocit� massima
+                    // Limita la velocità massima
                     if (rb.linearVelocity.magnitude > maxSpeed)
                     {
                         rb.linearVelocity = rb.linearVelocity.normalized * maxSpeed;
                     }
                 }
+                // Se l'oggetto è dentro la zona sicura (insideSet) o entro sphereRadius, non applichiamo forza.
             }
         }
     }

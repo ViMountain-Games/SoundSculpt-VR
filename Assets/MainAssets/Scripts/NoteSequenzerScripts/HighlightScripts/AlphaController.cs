@@ -40,6 +40,8 @@ public class AlphaController : MonoBehaviour
             _material.SetFloat(AlphaProperty, _currentAlpha);
         }
         _transitionTime = 0f;
+
+        DecreaseAlpha();
     }
 
     private void Update()
@@ -47,7 +49,7 @@ public class AlphaController : MonoBehaviour
         if (_material == null || TransitionDuration <= 0f) return;
 
         // Controlla se la transizione è in corso
-        if (Mathf.Abs(_currentAlpha - _targetAlpha) > Mathf.Epsilon)
+        if (!Mathf.Approximately(_currentAlpha, _targetAlpha))
         {
             // Calcola il progresso della transizione
             _transitionTime += Time.deltaTime / TransitionDuration;
@@ -62,19 +64,18 @@ public class AlphaController : MonoBehaviour
             _currentAlpha = Mathf.Lerp(MinAlpha, MaxAlpha, curveValue);
             _material.SetFloat(AlphaProperty, _currentAlpha);
 
+            Debug.Log($"CurrentAlpha: {_currentAlpha}, TargetAlpha: {_targetAlpha}");
+
             // Controlla se la transizione è completa
             if (progress >= 1f)
             {
-                _currentAlpha = _targetAlpha; // Forza il valore finale
+                _currentAlpha = Mathf.Clamp(_targetAlpha, MinAlpha, MaxAlpha); // Forza il valore finale
                 _material.SetFloat(AlphaProperty, _currentAlpha);
                 _transitionTime = 0f; // Resetta il tempo di transizione
             }
         }
     }
 
-    /// <summary>
-    /// Aumenta il valore dell'alpha verso il massimo configurato.
-    /// </summary>
     public void IncreaseAlpha()
     {
         _isIncreasing = true;
@@ -82,9 +83,6 @@ public class AlphaController : MonoBehaviour
         _transitionTime = 0f; // Resetta il tempo di transizione
     }
 
-    /// <summary>
-    /// Diminuisce il valore dell'alpha verso il minimo configurato.
-    /// </summary>
     public void DecreaseAlpha()
     {
         _isIncreasing = false;

@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 using CustomInspector;
-using TMPro; // For TextMeshPro
+using TMPro; // Per TextMeshPro
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
 
-[DefaultExecutionOrder(-100)] // Ensure this script runs before others
+[DefaultExecutionOrder(-100)] // Assicura che questo script venga eseguito prima degli altri
 public class Grid3DGenerator : MonoBehaviour
 {
     public static Grid3DGenerator Instance { get; private set; }
@@ -93,8 +93,12 @@ public class Grid3DGenerator : MonoBehaviour
     [HorizontalLine("Bar Line Settings", 2)]
     [Min(1)] public int cellsPerBar = 4;
     [ForceFill] public GameObject barLinePrefab;
-    public float yOffset = 0f; // Offset for the bar line height
-    public float zOffset = 0f; // Offset for the bar line depth
+    public float yOffset = 0f; // Offset per l'altezza della bar line
+    public float zOffset = 0f; // Offset per la profondità della bar line
+
+    [HorizontalLine("Animation Settings", 2)]
+    public float lineAnimationDuration = 1f; // Durata dell'animazione delle linee
+    public float lineAnimationDelay = 0.05f; // Ritardo tra l'animazione di ogni linea
 
     [HorizontalLine("Grid Matrix", 2)]
     [ReadOnly] public GameObject[,,] gridMatrix;
@@ -123,7 +127,7 @@ public class Grid3DGenerator : MonoBehaviour
         }
         else
         {
-            Debug.LogError("Another instance of Grid3DGenerator already exists!");
+            Debug.LogError("Un'altra istanza di Grid3DGenerator esiste già!");
         }
     }
 
@@ -144,7 +148,7 @@ public class Grid3DGenerator : MonoBehaviour
         labelsParent = new GameObject("Labels") { transform = { parent = this.transform } };
         Vector3 origin = transform.position;
 
-        // Generate grid cells
+        // Genera le celle della griglia
         for (int x = 0; x < gridSizeX; x++)
         {
             for (int y = 0; y < gridSizeY; y++)
@@ -158,12 +162,12 @@ public class Grid3DGenerator : MonoBehaviour
                     );
 
                     Instantiate(cellPrefab, cellCenter, Quaternion.identity, gridParent.transform);
-                    gridMatrix[x, y, z] = null; // Default to empty
+                    gridMatrix[x, y, z] = null; // Default a vuoto
                 }
             }
         }
 
-        // Generate labels to the left of the grid
+        // Genera le etichette a sinistra della griglia
         float gridDepth = gridSizeZ * cellSize.value;
 
         for (int y = 0; y < gridSizeY; y++)
@@ -187,14 +191,14 @@ public class Grid3DGenerator : MonoBehaviour
             }
             else
             {
-                Debug.LogError("Label prefab does not have a TextMeshPro component in its children.");
+                Debug.LogError("Il prefab dell'etichetta non ha un componente TextMeshPro nei suoi figli.");
             }
         }
 
-        // Draw grid lines
-        DrawGridLines(origin, gridParent);
+        // Disegna le linee della griglia con animazione
+        StartCoroutine(DrawGridLinesAnimated(origin, gridParent));
 
-        // Generate bar lines
+        // Genera le bar line
         GenerateBarLines(origin);
 
 #if UNITY_EDITOR
@@ -223,17 +227,18 @@ public class Grid3DGenerator : MonoBehaviour
 #endif
     }
 
-    private void DrawGridLines(Vector3 origin, GameObject parent)
+    private IEnumerator DrawGridLinesAnimated(Vector3 origin, GameObject parent)
     {
+        List<LineData> linesToAnimate = new List<LineData>();
+
+        // Raccoglie tutte le linee da disegnare
         for (int x = 0; x <= gridSizeX; x++)
         {
             for (int y = 0; y <= gridSizeY; y++)
             {
-                DrawLine(
-                    origin + new Vector3(x * cellSize.value, y * cellSize.value, 0),
-                    origin + new Vector3(x * cellSize.value, y * cellSize.value, gridSizeZ * cellSize.value),
-                    parent
-                );
+                Vector3 start = origin + new Vector3(x * cellSize.value, y * cellSize.value, 0);
+                Vector3 end = origin + new Vector3(x * cellSize.value, y * cellSize.value, gridSizeZ * cellSize.value);
+                linesToAnimate.Add(new LineData(start, end));
             }
         }
 
@@ -241,11 +246,9 @@ public class Grid3DGenerator : MonoBehaviour
         {
             for (int z = 0; z <= gridSizeZ; z++)
             {
-                DrawLine(
-                    origin + new Vector3(0, y * cellSize.value, z * cellSize.value),
-                    origin + new Vector3(gridSizeX * cellSize.value, y * cellSize.value, z * cellSize.value),
-                    parent
-                );
+                Vector3 start = origin + new Vector3(0, y * cellSize.value, z * cellSize.value);
+                Vector3 end = origin + new Vector3(gridSizeX * cellSize.value, y * cellSize.value, z * cellSize.value);
+                linesToAnimate.Add(new LineData(start, end));
             }
         }
 
@@ -253,16 +256,21 @@ public class Grid3DGenerator : MonoBehaviour
         {
             for (int z = 0; z <= gridSizeZ; z++)
             {
-                DrawLine(
-                    origin + new Vector3(x * cellSize.value, 0, z * cellSize.value),
-                    origin + new Vector3(x * cellSize.value, gridSizeY * cellSize.value, z * cellSize.value),
-                    parent
-                );
+                Vector3 start = origin + new Vector3(x * cellSize.value, 0, z * cellSize.value);
+                Vector3 end = origin + new Vector3(x * cellSize.value, gridSizeY * cellSize.value, z * cellSize.value);
+                linesToAnimate.Add(new LineData(start, end));
             }
+        }
+
+        // Anima ogni linea con un leggero ritardo
+        foreach (LineData lineData in linesToAnimate)
+        {
+            DrawLineAnimated(lineData.start, lineData.end, parent);
+            yield return new WaitForSeconds(lineAnimationDelay);
         }
     }
 
-    private void DrawLine(Vector3 start, Vector3 end, GameObject parent)
+    private void DrawLineAnimated(Vector3 start, Vector3 end, GameObject parent)
     {
         GameObject lineObject = new GameObject("GridLine");
         lineObject.transform.parent = parent.transform;
@@ -274,7 +282,29 @@ public class Grid3DGenerator : MonoBehaviour
         lineRenderer.startWidth = lineWidth;
         lineRenderer.endWidth = lineWidth;
         lineRenderer.positionCount = 2;
+
+        // Inizializza la linea al punto di partenza
         lineRenderer.SetPosition(0, start);
+        lineRenderer.SetPosition(1, start);
+
+        // Inizia ad animare la linea
+        StartCoroutine(AnimateLine(lineRenderer, start, end));
+    }
+
+    private IEnumerator AnimateLine(LineRenderer lineRenderer, Vector3 start, Vector3 end)
+    {
+        float elapsedTime = 0f;
+
+        while (elapsedTime < lineAnimationDuration)
+        {
+            elapsedTime += Time.deltaTime;
+            float t = elapsedTime / lineAnimationDuration;
+            Vector3 currentPosition = Vector3.Lerp(start, end, t);
+            lineRenderer.SetPosition(1, currentPosition);
+            yield return null;
+        }
+
+        // Assicura che la linea raggiunga la posizione finale
         lineRenderer.SetPosition(1, end);
     }
 
@@ -282,7 +312,7 @@ public class Grid3DGenerator : MonoBehaviour
     {
         if (cellsPerBar < 1)
         {
-            Debug.LogError("cellsPerBar must be at least 1.");
+            Debug.LogError("cellsPerBar deve essere almeno 1.");
             return;
         }
 
@@ -298,11 +328,11 @@ public class Grid3DGenerator : MonoBehaviour
 
             GameObject barLineInstance = Instantiate(barLinePrefab, barLinePosition, Quaternion.identity, barLinesParent.transform);
 
-            // Adjust the scale of the bar line to match the grid's height and depth, with offsets
+            // Regola la scala della bar line per adattarla all'altezza e profondità della griglia, con offset
             Vector3 barLineScale = barLineInstance.transform.localScale;
             barLineScale.y = gridSizeY * cellSize.value + yOffset;
             barLineScale.z = gridSizeZ * cellSize.value + zOffset;
-            barLineScale.x = barLineScale.x; // Keep the original thickness or adjust as needed
+            barLineScale.x = barLineScale.x; // Mantiene lo spessore originale o lo regola se necessario
             barLineInstance.transform.localScale = barLineScale;
         }
     }
@@ -316,11 +346,11 @@ public class Grid3DGenerator : MonoBehaviour
             NoteName.FaSharp => "Fa♯",
             NoteName.SolSharp => "Sol♯",
             NoteName.LaSharp => "La♯",
-            NoteName.ReFlat => "Re♭",
-            NoteName.MiFlat => "Mi♭",
-            NoteName.SolFlat => "Sol♭",
-            NoteName.LaFlat => "La♭",
-            NoteName.SiFlat => "Si♭",
+            NoteName.ReFlat => "Reb",
+            NoteName.MiFlat => "Mib",
+            NoteName.SolFlat => "Solb",
+            NoteName.LaFlat => "Lab",
+            NoteName.SiFlat => "Sib",
             _ => noteName.ToString()
         };
     }
@@ -335,7 +365,7 @@ public class Grid3DGenerator : MonoBehaviour
             }
         }
 
-        Debug.LogWarning($"No octave mapping found for z: {z}. Using default octave {defaultOctave}.");
+        Debug.LogWarning($"Nessuna mappatura di ottava trovata per z: {z}. Utilizzo l'ottava di default {defaultOctave}.");
         return defaultOctave;
     }
 
@@ -349,7 +379,7 @@ public class Grid3DGenerator : MonoBehaviour
             }
         }
 
-        Debug.LogWarning($"No note mapping found for y: {y}. Using default note 'Do'.");
+        Debug.LogWarning($"Nessuna mappatura di nota trovata per y: {y}. Utilizzo la nota di default 'Do'.");
         return NoteName.Do;
     }
 
@@ -357,20 +387,33 @@ public class Grid3DGenerator : MonoBehaviour
     {
         if (gridMatrix == null)
         {
-            Debug.LogError("GridMatrix is not initialized. Ensure you call GenerateGrid before updating the matrix.");
+            Debug.LogError("GridMatrix non è inizializzata. Assicurati di chiamare GenerateGrid prima di aggiornare la matrice.");
             return;
         }
 
         if (x < 0 || x >= gridSizeX || y < 0 || y >= gridSizeY || z < 0 || z >= gridSizeZ)
         {
-            Debug.LogError($"Invalid indices: ({x}, {y}, {z}). Ensure they are within the grid bounds.");
+            Debug.LogError($"Indici non validi: ({x}, {y}, {z}). Assicurati che siano all'interno dei limiti della griglia.");
             return;
         }
 
-        // Assign the new object to the grid matrix
+        // Assegna il nuovo oggetto alla matrice della griglia
         gridMatrix[x, y, z] = newObject;
 
-        // Log for debugging
-        Debug.Log($"Updated grid at ({x}, {y}, {z}) with object: {newObject?.name}");
+        // Log per il debugging
+        Debug.Log($"Aggiornata la griglia in ({x}, {y}, {z}) con l'oggetto: {newObject?.name}");
+    }
+
+    // Classe helper per memorizzare i dati delle linee
+    private class LineData
+    {
+        public Vector3 start;
+        public Vector3 end;
+
+        public LineData(Vector3 start, Vector3 end)
+        {
+            this.start = start;
+            this.end = end;
+        }
     }
 }

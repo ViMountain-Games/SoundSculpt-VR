@@ -7,13 +7,11 @@ using TMPro; // For TextMeshPro
 using UnityEditor;
 #endif
 
-
 [DefaultExecutionOrder(-100)] // Ensure this script runs before others
 public class Grid3DGenerator : MonoBehaviour
 {
     public static Grid3DGenerator Instance { get; private set; }
 
-    // Updated NoteName enum with correct notes
     public enum NoteName
     {
         Do,
@@ -74,7 +72,7 @@ public class Grid3DGenerator : MonoBehaviour
 
     [Title("Grid Settings", fontSize = 14, alignment = TextAlignment.Center)]
     [Min(1)] public int gridSizeX = 5;
-    [Min(1)] public int gridSizeY = 17; // Adjusted to fit all notes
+    [Min(1)] public int gridSizeY = 17;
     [Min(1)] public int gridSizeZ = 3;
     [DynamicSlider]
     public DynamicSlider cellSize = new DynamicSlider(1f, 0.1f, 5f);
@@ -91,6 +89,12 @@ public class Grid3DGenerator : MonoBehaviour
     [ColorPalette] public Color emptyCellColor = Color.gray;
     [ColorPalette] public Color lineColor = Color.white;
     [Range(0.001f, 0.5f)] public float lineWidth = 0.05f;
+
+    [HorizontalLine("Bar Line Settings", 2)]
+    [Min(1)] public int cellsPerBar = 4;
+    [ForceFill] public GameObject barLinePrefab;
+    public float yOffset = 0f; // Offset for the bar line height
+    public float zOffset = 0f; // Offset for the bar line depth
 
     [HorizontalLine("Grid Matrix", 2)]
     [ReadOnly] public GameObject[,,] gridMatrix;
@@ -190,6 +194,9 @@ public class Grid3DGenerator : MonoBehaviour
         // Draw grid lines
         DrawGridLines(origin, gridParent);
 
+        // Generate bar lines
+        GenerateBarLines(origin);
+
 #if UNITY_EDITOR
         EditorUtility.SetDirty(this);
 #endif
@@ -271,6 +278,35 @@ public class Grid3DGenerator : MonoBehaviour
         lineRenderer.SetPosition(1, end);
     }
 
+    private void GenerateBarLines(Vector3 origin)
+    {
+        if (cellsPerBar < 1)
+        {
+            Debug.LogError("cellsPerBar must be at least 1.");
+            return;
+        }
+
+        GameObject barLinesParent = new GameObject("BarLines") { transform = { parent = this.transform } };
+
+        for (int x = cellsPerBar; x < gridSizeX; x += cellsPerBar)
+        {
+            Vector3 barLinePosition = origin + new Vector3(
+                x * cellSize.value,
+                gridSizeY * cellSize.value / 2,
+                gridSizeZ * cellSize.value / 2
+            );
+
+            GameObject barLineInstance = Instantiate(barLinePrefab, barLinePosition, Quaternion.identity, barLinesParent.transform);
+
+            // Adjust the scale of the bar line to match the grid's height and depth, with offsets
+            Vector3 barLineScale = barLineInstance.transform.localScale;
+            barLineScale.y = gridSizeY * cellSize.value + yOffset;
+            barLineScale.z = gridSizeZ * cellSize.value + zOffset;
+            barLineScale.x = barLineScale.x; // Keep the original thickness or adjust as needed
+            barLineInstance.transform.localScale = barLineScale;
+        }
+    }
+
     private string FormatNoteName(NoteName noteName)
     {
         return noteName switch
@@ -280,11 +316,11 @@ public class Grid3DGenerator : MonoBehaviour
             NoteName.FaSharp => "Fa♯",
             NoteName.SolSharp => "Sol♯",
             NoteName.LaSharp => "La♯",
-            NoteName.ReFlat => "Reb",
-            NoteName.MiFlat => "Mib",
-            NoteName.SolFlat => "Solb",
-            NoteName.LaFlat => "Lab",
-            NoteName.SiFlat => "Sib",
+            NoteName.ReFlat => "Re♭",
+            NoteName.MiFlat => "Mi♭",
+            NoteName.SolFlat => "Sol♭",
+            NoteName.LaFlat => "La♭",
+            NoteName.SiFlat => "Si♭",
             _ => noteName.ToString()
         };
     }

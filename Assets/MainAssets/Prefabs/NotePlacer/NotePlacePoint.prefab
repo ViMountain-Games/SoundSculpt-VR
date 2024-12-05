@@ -735,7 +735,7 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  MinAlpha: 0
+  MinAlpha: 0.01
   MaxAlpha: 0.2
 --- !u!1 &5687646078406486793
 GameObject:

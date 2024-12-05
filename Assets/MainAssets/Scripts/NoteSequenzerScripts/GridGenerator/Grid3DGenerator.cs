@@ -97,8 +97,10 @@ public class Grid3DGenerator : MonoBehaviour
     public float zOffset = 0f; // Offset per la profondità della bar line
 
     [HorizontalLine("Animation Settings", 2)]
-    public float lineAnimationDuration = 1f; // Durata dell'animazione delle linee
-    public float lineAnimationDelay = 0.05f; // Ritardo tra l'animazione di ogni linea
+    [Header("Animation Settings")]
+    public float lineAnimationDuration = 0.5f; // Durata dell'animazione di ogni linea
+    public float lineAnimationDelay = 0.05f; // Ritardo tra l'inizio dell'animazione di ogni linea
+    public float cellInstantiationDelay = 0.1f; // Ritardo tra l'instanziazione di ogni cella
 
     [HorizontalLine("Grid Matrix", 2)]
     [ReadOnly] public GameObject[,,] gridMatrix;
@@ -118,6 +120,9 @@ public class Grid3DGenerator : MonoBehaviour
     public List<NoteMapping> noteMappings = new List<NoteMapping>();
 
     private GameObject labelsParent;
+
+    // Lista delle linee da animare
+    private List<LineData> lineDataList = new List<LineData>();
 
     private void Awake()
     {
@@ -148,25 +153,6 @@ public class Grid3DGenerator : MonoBehaviour
         labelsParent = new GameObject("Labels") { transform = { parent = this.transform } };
         Vector3 origin = transform.position;
 
-        // Genera le celle della griglia
-        for (int x = 0; x < gridSizeX; x++)
-        {
-            for (int y = 0; y < gridSizeY; y++)
-            {
-                for (int z = 0; z < gridSizeZ; z++)
-                {
-                    Vector3 cellCenter = origin + new Vector3(
-                        x * cellSize.value + cellSize.value / 2,
-                        y * cellSize.value + cellSize.value / 2,
-                        z * cellSize.value + cellSize.value / 2
-                    );
-
-                    Instantiate(cellPrefab, cellCenter, Quaternion.identity, gridParent.transform);
-                    gridMatrix[x, y, z] = null; // Default a vuoto
-                }
-            }
-        }
-
         // Genera le etichette a sinistra della griglia
         float gridDepth = gridSizeZ * cellSize.value;
 
@@ -195,8 +181,11 @@ public class Grid3DGenerator : MonoBehaviour
             }
         }
 
-        // Disegna le linee della griglia con animazione
-        StartCoroutine(DrawGridLinesAnimated(origin, gridParent));
+        // Genera le linee della griglia e le memorizza per l'animazione
+        CreateGridLines(origin, gridParent);
+
+        // Inizia l'animazione delle linee e l'instanziazione delle celle
+        StartCoroutine(AnimateGridLinesAndInstantiateCells());
 
         // Genera le bar line
         GenerateBarLines(origin);
@@ -208,6 +197,8 @@ public class Grid3DGenerator : MonoBehaviour
 
     public void ClearGrid()
     {
+        StopAllCoroutines();
+
         foreach (Transform child in transform)
         {
             DestroyImmediate(child.gameObject);
@@ -215,6 +206,7 @@ public class Grid3DGenerator : MonoBehaviour
 
         gridMatrix = null;
         objectList.Clear();
+        lineDataList.Clear();
 
         if (labelsParent != null)
         {
@@ -227,68 +219,66 @@ public class Grid3DGenerator : MonoBehaviour
 #endif
     }
 
-    private IEnumerator DrawGridLinesAnimated(Vector3 origin, GameObject parent)
+    private void CreateGridLines(Vector3 origin, GameObject parent)
     {
-        List<LineData> linesToAnimate = new List<LineData>();
+        // Creiamo linee per ogni asse e le aggiungiamo alla lista lineDataList
+        // Le linee saranno disattivate fino all'animazione
 
-        // Raccoglie tutte le linee da disegnare
+        // Asse X
         for (int x = 0; x <= gridSizeX; x++)
         {
             for (int y = 0; y <= gridSizeY; y++)
             {
                 Vector3 start = origin + new Vector3(x * cellSize.value, y * cellSize.value, 0);
                 Vector3 end = origin + new Vector3(x * cellSize.value, y * cellSize.value, gridSizeZ * cellSize.value);
-                linesToAnimate.Add(new LineData(start, end));
+
+                lineDataList.Add(new LineData(start, end, parent, lineMaterial, lineColor, lineWidth));
             }
         }
 
+        // Asse Y
         for (int y = 0; y <= gridSizeY; y++)
         {
             for (int z = 0; z <= gridSizeZ; z++)
             {
                 Vector3 start = origin + new Vector3(0, y * cellSize.value, z * cellSize.value);
                 Vector3 end = origin + new Vector3(gridSizeX * cellSize.value, y * cellSize.value, z * cellSize.value);
-                linesToAnimate.Add(new LineData(start, end));
+
+                lineDataList.Add(new LineData(start, end, parent, lineMaterial, lineColor, lineWidth));
             }
         }
 
+        // Asse Z
         for (int x = 0; x <= gridSizeX; x++)
         {
             for (int z = 0; z <= gridSizeZ; z++)
             {
                 Vector3 start = origin + new Vector3(x * cellSize.value, 0, z * cellSize.value);
                 Vector3 end = origin + new Vector3(x * cellSize.value, gridSizeY * cellSize.value, z * cellSize.value);
-                linesToAnimate.Add(new LineData(start, end));
-            }
-        }
 
-        // Anima ogni linea con un leggero ritardo
-        foreach (LineData lineData in linesToAnimate)
-        {
-            DrawLineAnimated(lineData.start, lineData.end, parent);
-            yield return new WaitForSeconds(lineAnimationDelay);
+                lineDataList.Add(new LineData(start, end, parent, lineMaterial, lineColor, lineWidth));
+            }
         }
     }
 
-    private void DrawLineAnimated(Vector3 start, Vector3 end, GameObject parent)
+    private IEnumerator AnimateGridLinesAndInstantiateCells()
     {
-        GameObject lineObject = new GameObject("GridLine");
-        lineObject.transform.parent = parent.transform;
+        // Anima le linee una alla volta, iniziando ogni animazione dopo un ritardo specificato
+        for (int i = 0; i < lineDataList.Count; i++)
+        {
+            LineData lineData = lineDataList[i];
+            lineData.lineRenderer.enabled = true;
 
-        LineRenderer lineRenderer = lineObject.AddComponent<LineRenderer>();
-        lineRenderer.material = lineMaterial;
-        lineRenderer.startColor = lineColor;
-        lineRenderer.endColor = lineColor;
-        lineRenderer.startWidth = lineWidth;
-        lineRenderer.endWidth = lineWidth;
-        lineRenderer.positionCount = 2;
+            StartCoroutine(AnimateLine(lineData.lineRenderer, lineData.start, lineData.end));
 
-        // Inizializza la linea al punto di partenza
-        lineRenderer.SetPosition(0, start);
-        lineRenderer.SetPosition(1, start);
+            yield return new WaitForSeconds(lineAnimationDelay);
+        }
 
-        // Inizia ad animare la linea
-        StartCoroutine(AnimateLine(lineRenderer, start, end));
+        // Attendi che tutte le animazioni delle linee siano completate
+        yield return new WaitForSeconds(lineAnimationDuration);
+
+        // Iniziamo l'instanziazione delle celle
+        yield return StartCoroutine(InstantiateCells());
     }
 
     private IEnumerator AnimateLine(LineRenderer lineRenderer, Vector3 start, Vector3 end)
@@ -299,13 +289,37 @@ public class Grid3DGenerator : MonoBehaviour
         {
             elapsedTime += Time.deltaTime;
             float t = elapsedTime / lineAnimationDuration;
-            Vector3 currentPosition = Vector3.Lerp(start, end, t);
-            lineRenderer.SetPosition(1, currentPosition);
+
+            Vector3 currentPos = Vector3.Lerp(start, end, t);
+            lineRenderer.SetPosition(1, currentPos);
+
             yield return null;
         }
 
-        // Assicura che la linea raggiunga la posizione finale
         lineRenderer.SetPosition(1, end);
+    }
+
+    private IEnumerator InstantiateCells()
+    {
+        for (int x = 0; x < gridSizeX; x++)
+        {
+            for (int y = 0; y < gridSizeY; y++)
+            {
+                for (int z = 0; z < gridSizeZ; z++)
+                {
+                    Vector3 cellCenter = transform.position + new Vector3(
+                        x * cellSize.value + cellSize.value / 2,
+                        y * cellSize.value + cellSize.value / 2,
+                        z * cellSize.value + cellSize.value / 2
+                    );
+
+                    Instantiate(cellPrefab, cellCenter, Quaternion.identity, transform);
+                    gridMatrix[x, y, z] = null; // Default a vuoto
+
+                    yield return new WaitForSeconds(cellInstantiationDelay);
+                }
+            }
+        }
     }
 
     private void GenerateBarLines(Vector3 origin)
@@ -404,16 +418,31 @@ public class Grid3DGenerator : MonoBehaviour
         Debug.Log($"Aggiornata la griglia in ({x}, {y}, {z}) con l'oggetto: {newObject?.name}");
     }
 
-    // Classe helper per memorizzare i dati delle linee
+    // Classe per memorizzare i dati delle linee
     private class LineData
     {
         public Vector3 start;
         public Vector3 end;
+        public LineRenderer lineRenderer;
 
-        public LineData(Vector3 start, Vector3 end)
+        public LineData(Vector3 start, Vector3 end, GameObject parent, Material material, Color color, float width)
         {
             this.start = start;
             this.end = end;
+
+            GameObject lineObject = new GameObject("Line");
+            lineObject.transform.parent = parent.transform;
+
+            lineRenderer = lineObject.AddComponent<LineRenderer>();
+            lineRenderer.material = material;
+            lineRenderer.startColor = color;
+            lineRenderer.endColor = color;
+            lineRenderer.startWidth = width;
+            lineRenderer.endWidth = width;
+            lineRenderer.positionCount = 2;
+            lineRenderer.SetPosition(0, start);
+            lineRenderer.SetPosition(1, start); // Inizialmente la linea è di lunghezza zero
+            lineRenderer.enabled = false;
         }
     }
 }

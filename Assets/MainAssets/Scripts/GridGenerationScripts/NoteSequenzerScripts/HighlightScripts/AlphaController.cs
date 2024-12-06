@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class AlphaController : MonoBehaviour
 {
@@ -41,7 +42,7 @@ public class AlphaController : MonoBehaviour
         }
         _transitionTime = 0f;
 
-        DecreaseAlpha();
+        StartCoroutine(Blink());
     }
 
     private void Update()
@@ -64,7 +65,7 @@ public class AlphaController : MonoBehaviour
             _currentAlpha = Mathf.Lerp(MinAlpha, MaxAlpha, curveValue);
             _material.SetFloat(AlphaProperty, _currentAlpha);
 
-            Debug.Log($"CurrentAlpha: {_currentAlpha}, TargetAlpha: {_targetAlpha}");
+            //Debug.Log($"CurrentAlpha: {_currentAlpha}, TargetAlpha: {_targetAlpha}");
 
             // Controlla se la transizione è completa
             if (progress >= 1f)
@@ -75,6 +76,24 @@ public class AlphaController : MonoBehaviour
             }
         }
     }
+
+    public IEnumerator Blink()
+    {
+        // Imposta l'alpha iniziale a 0 manualmente
+        _currentAlpha = 0f;
+        if (_material != null)
+        {
+            _material.SetFloat(AlphaProperty, _currentAlpha);
+        }
+
+        // Avvia l'incremento
+        IncreaseAlpha();
+        yield return new WaitForSeconds(1);
+
+        // Avvia il decremento
+        DecreaseAlpha();
+    }
+
 
     public void IncreaseAlpha()
     {

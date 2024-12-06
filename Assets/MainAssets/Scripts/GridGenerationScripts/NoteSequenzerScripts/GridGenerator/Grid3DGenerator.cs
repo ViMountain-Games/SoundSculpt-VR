@@ -121,6 +121,9 @@ namespace GridGen
         [SerializeField]
         public List<NoteMapping> noteMappings = new List<NoteMapping>();
 
+        [Header("Auto Generate Settings")]
+        public bool generateOnStart = false;
+
         private GameObject labelsParent;
 
         // Lista delle linee da animare
@@ -135,6 +138,11 @@ namespace GridGen
             else
             {
                 Debug.LogError("Un'altra istanza di Grid3DGenerator esiste già!");
+            }
+
+            if (generateOnStart)
+            {
+                GenerateGrid();
             }
         }
 

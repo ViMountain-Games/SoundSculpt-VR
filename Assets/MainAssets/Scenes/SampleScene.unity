@@ -204,6 +204,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: NoteCube3 (4)
       objectReference: {fileID: 0}
+    - target: {fileID: 4502702017865918610, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
+      propertyPath: StartTargeting.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
+      value: 5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -555,6 +559,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4354422905351916128, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
+      propertyPath: StartTargeting.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
+      value: 5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -733,6 +741,10 @@ PrefabInstance:
     - target: {fileID: 3959593897940877384, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
       propertyPath: m_Name
       value: NoteCube3 (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4502702017865918610, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
+      propertyPath: StartTargeting.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1034,6 +1046,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4354422905351916128, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
+      propertyPath: StartTargeting.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
+      value: 5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1267,6 +1283,10 @@ PrefabInstance:
     - target: {fileID: 3959593897940877384, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
       propertyPath: m_Name
       value: NoteCube3 (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4502702017865918610, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
+      propertyPath: StartTargeting.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -1520,6 +1540,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 536741273}
     m_Modifications:
+    - target: {fileID: 1670023019393207235, guid: 47a7e6e90440ec343975fe8fa1dda8ec, type: 3}
+      propertyPath: StartTargeting.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 8056033522393964428, guid: 47a7e6e90440ec343975fe8fa1dda8ec, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.44264382
@@ -1908,6 +1932,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4354422905351916128, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
+      propertyPath: StartTargeting.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
+      value: 5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2098,6 +2126,7 @@ GameObject:
   - component: {fileID: 459399261}
   - component: {fileID: 459399260}
   - component: {fileID: 459399263}
+  - component: {fileID: 459399264}
   m_Layer: 0
   m_Name: Timeline
   m_TagString: Untagged
@@ -2164,7 +2193,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 194828b0872057740bc38abce2638fb6, type: 2}
+  - {fileID: 2100000, guid: 6a39d370fbaf7004482ed3a251e57427, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -2214,6 +2243,69 @@ MonoBehaviour:
   gizmoColor: {r: 1, g: 0, b: 0, a: 1}
   speed: 0
   loopMode: 0
+--- !u!114 &459399264
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 459399258}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7a03f96830e296145a21c32db2a90a95, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  TransitionDuration: 1
+  ActivationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  DeactivationCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  MinAlpha: 0.1
+  MaxAlpha: 1
 --- !u!136 &488566305
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -3871,6 +3963,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: NoteCube3 (5)
       objectReference: {fileID: 0}
+    - target: {fileID: 4502702017865918610, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
+      propertyPath: StartTargeting.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
+      value: 5
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -3932,6 +4028,10 @@ PrefabInstance:
     - target: {fileID: 2771495147278983642, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4354422905351916128, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
+      propertyPath: StartTargeting.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4329,6 +4429,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 536741273}
     m_Modifications:
+    - target: {fileID: 1670023019393207235, guid: 47a7e6e90440ec343975fe8fa1dda8ec, type: 3}
+      propertyPath: StartTargeting.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 8056033522393964428, guid: 47a7e6e90440ec343975fe8fa1dda8ec, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.24264365
@@ -4488,6 +4592,10 @@ PrefabInstance:
     - target: {fileID: 2771495147278983642, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4354422905351916128, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
+      propertyPath: StartTargeting.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -4906,6 +5014,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 536741273}
     m_Modifications:
+    - target: {fileID: 1670023019393207235, guid: 47a7e6e90440ec343975fe8fa1dda8ec, type: 3}
+      propertyPath: StartTargeting.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 8056033522393964428, guid: 47a7e6e90440ec343975fe8fa1dda8ec, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.5426437
@@ -7000,6 +7112,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 536741273}
     m_Modifications:
+    - target: {fileID: 1670023019393207235, guid: 47a7e6e90440ec343975fe8fa1dda8ec, type: 3}
+      propertyPath: StartTargeting.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 8056033522393964428, guid: 47a7e6e90440ec343975fe8fa1dda8ec, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.34264368
@@ -7105,6 +7221,10 @@ PrefabInstance:
     - target: {fileID: 2771495147278983642, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4354422905351916128, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
+      propertyPath: StartTargeting.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -7882,7 +8002,7 @@ MonoBehaviour:
   zOffset: 0.005
   lineAnimationDuration: 1
   lineAnimationDelay: 0.05
-  cellInstantiationDelay: 0.1
+  cellInstantiationDelay: 0.05
   objectList: []
   octaveMappings:
   - zValue: 0
@@ -7925,6 +8045,7 @@ MonoBehaviour:
     noteName: 15
   - yValue: 16
     noteName: 16
+  generateOnStart: 1
 --- !u!4 &1576117718
 Transform:
   m_ObjectHideFlags: 0
@@ -8014,6 +8135,10 @@ PrefabInstance:
     - target: {fileID: 3959593897940877384, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
       propertyPath: m_Name
       value: NoteCube3 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4502702017865918610, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
+      propertyPath: StartTargeting.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -8646,6 +8771,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 536741273}
     m_Modifications:
+    - target: {fileID: 1670023019393207235, guid: 47a7e6e90440ec343975fe8fa1dda8ec, type: 3}
+      propertyPath: StartTargeting.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 8056033522393964428, guid: 47a7e6e90440ec343975fe8fa1dda8ec, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.64264375
@@ -8816,6 +8945,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 536741273}
     m_Modifications:
+    - target: {fileID: 1670023019393207235, guid: 47a7e6e90440ec343975fe8fa1dda8ec, type: 3}
+      propertyPath: StartTargeting.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 8056033522393964428, guid: 47a7e6e90440ec343975fe8fa1dda8ec, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.14264363
@@ -8921,6 +9054,10 @@ PrefabInstance:
     - target: {fileID: 3959593897940877384, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
       propertyPath: m_Name
       value: NoteCube3 (6)
+      objectReference: {fileID: 0}
+    - target: {fileID: 4502702017865918610, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
+      propertyPath: StartTargeting.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

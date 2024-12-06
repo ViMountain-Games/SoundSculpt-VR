@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-[RequireComponent(typeof(SphereCollider))]
 public class GravityToCenter : MonoBehaviour
 {
     [Header("Settings")]
@@ -20,15 +19,6 @@ public class GravityToCenter : MonoBehaviour
     // Set per tenere traccia degli oggetti considerati all'interno della zona sicura
     private HashSet<Rigidbody> insideSet = new HashSet<Rigidbody>();
 
-    private SphereCollider triggerCollider;
-
-    private void Awake()
-    {
-        // Assicuriamoci che il collider sia un trigger e che abbia il radius = sphereRadius
-        triggerCollider = GetComponent<SphereCollider>();
-        triggerCollider.isTrigger = true;
-        triggerCollider.radius = sphereRadius;
-    }
 
     private void OnDrawGizmos()
     {

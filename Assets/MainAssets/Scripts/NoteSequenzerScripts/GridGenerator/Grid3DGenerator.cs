@@ -346,7 +346,6 @@ public class Grid3DGenerator : MonoBehaviour
             Vector3 barLineScale = barLineInstance.transform.localScale;
             barLineScale.y = gridSizeY * cellSize.value + yOffset;
             barLineScale.z = gridSizeZ * cellSize.value + zOffset;
-            barLineScale.x = barLineScale.x; // Mantiene lo spessore originale o lo regola se necessario
             barLineInstance.transform.localScale = barLineScale;
         }
     }

@@ -204,6 +204,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: NoteCube3 (4)
       objectReference: {fileID: 0}
+    - target: {fileID: 3959593897940877384, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4502702017865918610, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
       propertyPath: StartTargeting.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
       value: 5
@@ -519,6 +523,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: NoteCube (3)
       objectReference: {fileID: 0}
+    - target: {fileID: 1335621963648836805, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2771495147278983642, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.34264362
@@ -741,6 +749,10 @@ PrefabInstance:
     - target: {fileID: 3959593897940877384, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
       propertyPath: m_Name
       value: NoteCube3 (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3959593897940877384, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4502702017865918610, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
       propertyPath: StartTargeting.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
@@ -1005,6 +1017,10 @@ PrefabInstance:
     - target: {fileID: 1335621963648836805, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
       propertyPath: m_Name
       value: NoteCube (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1335621963648836805, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2771495147278983642, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
       propertyPath: m_LocalPosition.x
@@ -1283,6 +1299,10 @@ PrefabInstance:
     - target: {fileID: 3959593897940877384, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
       propertyPath: m_Name
       value: NoteCube3 (3)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3959593897940877384, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4502702017865918610, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
       propertyPath: StartTargeting.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
@@ -1588,6 +1608,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: NoteCube2 (4)
       objectReference: {fileID: 0}
+    - target: {fileID: 8742807131743710515, guid: 47a7e6e90440ec343975fe8fa1dda8ec, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1704,7 +1728,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7380761035279303118, guid: 9b33a0962b32a13448b8017d7892eed8, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.0896436
+      value: -1.0896435
       objectReference: {fileID: 0}
     - target: {fileID: 7380761035279303118, guid: 9b33a0962b32a13448b8017d7892eed8, type: 3}
       propertyPath: m_LocalPosition.y
@@ -1891,6 +1915,10 @@ PrefabInstance:
     - target: {fileID: 1335621963648836805, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
       propertyPath: m_Name
       value: NoteCube (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1335621963648836805, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2771495147278983642, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
       propertyPath: m_LocalPosition.x
@@ -3963,6 +3991,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: NoteCube3 (5)
       objectReference: {fileID: 0}
+    - target: {fileID: 3959593897940877384, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4502702017865918610, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
       propertyPath: StartTargeting.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
       value: 5
@@ -3988,6 +4020,10 @@ PrefabInstance:
     - target: {fileID: 1335621963648836805, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
       propertyPath: m_Name
       value: NoteCube (4)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1335621963648836805, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2771495147278983642, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
       propertyPath: m_LocalPosition.x
@@ -4477,6 +4513,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: NoteCube2 (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 8742807131743710515, guid: 47a7e6e90440ec343975fe8fa1dda8ec, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -4552,6 +4592,10 @@ PrefabInstance:
     - target: {fileID: 1335621963648836805, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
       propertyPath: m_Name
       value: NoteCube (6)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1335621963648836805, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2771495147278983642, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
       propertyPath: m_LocalPosition.x
@@ -4762,7 +4806,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7380761035279303118, guid: 9b33a0962b32a13448b8017d7892eed8, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.949
+      value: -0.94899994
       objectReference: {fileID: 0}
     - target: {fileID: 7380761035279303118, guid: 9b33a0962b32a13448b8017d7892eed8, type: 3}
       propertyPath: m_LocalPosition.y
@@ -5061,6 +5105,10 @@ PrefabInstance:
     - target: {fileID: 8742807131743710515, guid: 47a7e6e90440ec343975fe8fa1dda8ec, type: 3}
       propertyPath: m_Name
       value: NoteCube2 (5)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8742807131743710515, guid: 47a7e6e90440ec343975fe8fa1dda8ec, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -7160,6 +7208,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: NoteCube2 (3)
       objectReference: {fileID: 0}
+    - target: {fileID: 8742807131743710515, guid: 47a7e6e90440ec343975fe8fa1dda8ec, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -7181,6 +7233,10 @@ PrefabInstance:
     - target: {fileID: 1335621963648836805, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
       propertyPath: m_Name
       value: NoteCube (5)
+      objectReference: {fileID: 0}
+    - target: {fileID: 1335621963648836805, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2771495147278983642, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
       propertyPath: m_LocalPosition.x
@@ -8045,7 +8101,7 @@ MonoBehaviour:
     noteName: 15
   - yValue: 16
     noteName: 16
-  generateOnStart: 1
+  generateOnStart: 0
 --- !u!4 &1576117718
 Transform:
   m_ObjectHideFlags: 0
@@ -8135,6 +8191,10 @@ PrefabInstance:
     - target: {fileID: 3959593897940877384, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
       propertyPath: m_Name
       value: NoteCube3 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 3959593897940877384, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4502702017865918610, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
       propertyPath: StartTargeting.m_PersistentCalls.m_Calls.Array.data[0].m_Arguments.m_FloatArgument
@@ -8819,6 +8879,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: NoteCube2 (6)
       objectReference: {fileID: 0}
+    - target: {fileID: 8742807131743710515, guid: 47a7e6e90440ec343975fe8fa1dda8ec, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -8992,6 +9056,10 @@ PrefabInstance:
     - target: {fileID: 8742807131743710515, guid: 47a7e6e90440ec343975fe8fa1dda8ec, type: 3}
       propertyPath: m_Name
       value: NoteCube2 (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 8742807131743710515, guid: 47a7e6e90440ec343975fe8fa1dda8ec, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -9561,6 +9629,22 @@ PrefabInstance:
       propertyPath: m_Name
       value: NoteCube3
       objectReference: {fileID: 0}
+    - target: {fileID: 3959593897940877384, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8217838015474467643, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
+      propertyPath: precomputeOutline
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8217838015474467643, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
+      propertyPath: bakeKeys.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8217838015474467643, guid: 53415a59cf06e744eb573031243e27ab, type: 3}
+      propertyPath: bakeValues.Array.size
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -9577,6 +9661,10 @@ PrefabInstance:
     - target: {fileID: 1335621963648836805, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
       propertyPath: m_Name
       value: NoteCube
+      objectReference: {fileID: 0}
+    - target: {fileID: 1335621963648836805, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2771495147278983642, guid: 1f0e10b3f4d26714a8885622440674b7, type: 3}
       propertyPath: m_LocalPosition.x
@@ -9684,6 +9772,10 @@ PrefabInstance:
     - target: {fileID: 8742807131743710515, guid: 47a7e6e90440ec343975fe8fa1dda8ec, type: 3}
       propertyPath: m_Name
       value: NoteCube2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8742807131743710515, guid: 47a7e6e90440ec343975fe8fa1dda8ec, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

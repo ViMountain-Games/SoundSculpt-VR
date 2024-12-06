@@ -3,23 +3,26 @@ using UnityEditor;
 #endif
 using UnityEngine;
 
-#if UNITY_EDITOR
-[CustomEditor(typeof(TimelineMover))]
-public class TimelineMoverEditor : Editor
+namespace GridGen
 {
-    public override void OnInspectorGUI()
+#if UNITY_EDITOR
+    [CustomEditor(typeof(TimelineMover))]
+    public class TimelineMoverEditor : Editor
     {
-        // Disegna l'Inspector di base
-        DrawDefaultInspector();
-
-        // Ottieni il riferimento allo script
-        TimelineMover mover = (TimelineMover)target;
-
-        // Aggiungi il pulsante
-        if (GUILayout.Button("Start Movement"))
+        public override void OnInspectorGUI()
         {
-            mover.StartMovement();
+            // Disegna l'Inspector di base
+            DrawDefaultInspector();
+
+            // Ottieni il riferimento allo script
+            TimelineMover mover = (TimelineMover)target;
+
+            // Aggiungi il pulsante
+            if (GUILayout.Button("Start Movement"))
+            {
+                mover.StartMovement();
+            }
         }
     }
-}
 #endif
+}

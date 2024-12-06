@@ -4,105 +4,108 @@ using UnityEditor;
 using UnityEngine;
 using CustomInspector;
 
-#if UNITY_EDITOR
-[CustomEditor(typeof(Grid3DGenerator))]
-public class Grid3DGeneratorEditor : Editor
+namespace GridGen
 {
-    private const float CellSize = 20f;
-
-    public override void OnInspectorGUI()
+#if UNITY_EDITOR
+    [CustomEditor(typeof(Grid3DGenerator))]
+    public class Grid3DGeneratorEditor : Editor
     {
-        Grid3DGenerator gridGenerator = (Grid3DGenerator)target;
+        private const float CellSize = 20f;
 
-        DrawDefaultInspector();
-
-        EditorGUILayout.Space();
-
-        EditorGUILayout.BeginHorizontal();
-        if (GUILayout.Button("Generate Grid")) gridGenerator.GenerateGrid();
-        if (GUILayout.Button("Clear Grid")) gridGenerator.ClearGrid();
-        EditorGUILayout.EndHorizontal();
-
-        if (gridGenerator.gridMatrix != null)
+        public override void OnInspectorGUI()
         {
-            EditorGUILayout.LabelField("Grid Matrix Visualization", EditorStyles.boldLabel);
+            Grid3DGenerator gridGenerator = (Grid3DGenerator)target;
 
-            for (int x = 0; x < gridGenerator.gridMatrix.GetLength(0); x++)
+            DrawDefaultInspector();
+
+            EditorGUILayout.Space();
+
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("Generate Grid")) gridGenerator.GenerateGrid();
+            if (GUILayout.Button("Clear Grid")) gridGenerator.ClearGrid();
+            EditorGUILayout.EndHorizontal();
+
+            if (gridGenerator.gridMatrix != null)
             {
-                // Aggiungi una linea di separazione per separare i layer
-                if (x > 0)
+                EditorGUILayout.LabelField("Grid Matrix Visualization", EditorStyles.boldLabel);
+
+                for (int x = 0; x < gridGenerator.gridMatrix.GetLength(0); x++)
                 {
-                    EditorGUILayout.Space();
-                    GUILayout.Box("", GUILayout.ExpandWidth(true), GUILayout.Height(2)); // Linea di separazione
-                    EditorGUILayout.Space();
-                }
-
-                EditorGUILayout.BeginHorizontal();
-
-                for (int z = 0; z < gridGenerator.gridMatrix.GetLength(2); z++)
-                {
-                    EditorGUILayout.BeginVertical();
-
-                    // Inverti il loop su y per visualizzare le righe in ordine inverso
-                    for (int y = gridGenerator.gridMatrix.GetLength(1) - 1; y >= 0; y--)
+                    // Aggiungi una linea di separazione per separare i layer
+                    if (x > 0)
                     {
-                        GameObject cell = gridGenerator.gridMatrix[x, y, z];
-                        Color cellColor = gridGenerator.emptyCellColor;
+                        EditorGUILayout.Space();
+                        GUILayout.Box("", GUILayout.ExpandWidth(true), GUILayout.Height(2)); // Linea di separazione
+                        EditorGUILayout.Space();
+                    }
 
-                        if (cell != null)
+                    EditorGUILayout.BeginHorizontal();
+
+                    for (int z = 0; z < gridGenerator.gridMatrix.GetLength(2); z++)
+                    {
+                        EditorGUILayout.BeginVertical();
+
+                        // Inverti il loop su y per visualizzare le righe in ordine inverso
+                        for (int y = gridGenerator.gridMatrix.GetLength(1) - 1; y >= 0; y--)
                         {
-                            Note noteComponent = cell.GetComponent<Note>();
-                            if (noteComponent != null && noteComponent.noteData != null)
+                            GameObject cell = gridGenerator.gridMatrix[x, y, z];
+                            Color cellColor = gridGenerator.emptyCellColor;
+
+                            if (cell != null)
                             {
-                                cellColor = noteComponent.noteData.color;
+                                Note noteComponent = cell.GetComponent<Note>();
+                                if (noteComponent != null && noteComponent.noteData != null)
+                                {
+                                    cellColor = noteComponent.noteData.color;
+                                }
+                                else
+                                {
+                                    cellColor = Color.white;
+                                }
                             }
                             else
                             {
-                                cellColor = Color.white;
+                                cellColor = gridGenerator.emptyCellColor;
                             }
-                        }
-                        else
-                        {
-                            cellColor = gridGenerator.emptyCellColor;
-                        }
 
-                        GUIStyle cellStyle = new GUIStyle(GUI.skin.box)
-                        {
-                            normal =
+                            GUIStyle cellStyle = new GUIStyle(GUI.skin.box)
+                            {
+                                normal =
                             {
                                 background = MakeTex(1, 1, cellColor)
                             },
-                            fixedWidth = CellSize,
-                            fixedHeight = CellSize
-                        };
+                                fixedWidth = CellSize,
+                                fixedHeight = CellSize
+                            };
 
-                        GUILayout.Box("", cellStyle);
+                            GUILayout.Box("", cellStyle);
+                        }
+
+                        EditorGUILayout.EndVertical();
                     }
 
-                    EditorGUILayout.EndVertical();
+                    EditorGUILayout.EndHorizontal();
                 }
-
-                EditorGUILayout.EndHorizontal();
+            }
+            else
+            {
+                EditorGUILayout.HelpBox("Generate the grid to visualize the matrix.", MessageType.Info);
             }
         }
-        else
+
+        private Texture2D MakeTex(int width, int height, Color col)
         {
-            EditorGUILayout.HelpBox("Generate the grid to visualize the matrix.", MessageType.Info);
+            Color[] pix = new Color[width * height];
+            for (int i = 0; i < pix.Length; i++)
+            {
+                pix[i] = col;
+            }
+
+            Texture2D result = new Texture2D(width, height);
+            result.SetPixels(pix);
+            result.Apply();
+            return result;
         }
     }
-
-    private Texture2D MakeTex(int width, int height, Color col)
-    {
-        Color[] pix = new Color[width * height];
-        for (int i = 0; i < pix.Length; i++)
-        {
-            pix[i] = col;
-        }
-
-        Texture2D result = new Texture2D(width, height);
-        result.SetPixels(pix);
-        result.Apply();
-        return result;
-    }
-}
 #endif
+}

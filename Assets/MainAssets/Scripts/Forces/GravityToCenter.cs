@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using CustomInspector;
 
 public class GravityToCenter : MonoBehaviour
 {
@@ -16,9 +17,11 @@ public class GravityToCenter : MonoBehaviour
     [Tooltip("Velocità massima degli oggetti.")]
     public float maxSpeed = 5f;
 
+    [Tooltip("Tag degli oggetti che possono essere attratti.")]
+    [Tag] public string targetTag = "Note";
+
     // Set per tenere traccia degli oggetti considerati all'interno della zona sicura
     private HashSet<Rigidbody> insideSet = new HashSet<Rigidbody>();
-
 
     private void OnDrawGizmos()
     {
@@ -33,6 +36,10 @@ public class GravityToCenter : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        // Verifica se l'oggetto ha il tag specificato
+        if (!other.CompareTag(targetTag))
+            return;
+
         Rigidbody rb = other.attachedRigidbody;
         if (rb != null && !rb.isKinematic)
         {
@@ -43,6 +50,10 @@ public class GravityToCenter : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
+        // Verifica se l'oggetto ha il tag specificato
+        if (!other.CompareTag(targetTag))
+            return;
+
         Rigidbody rb = other.attachedRigidbody;
         if (rb != null && insideSet.Contains(rb))
         {
@@ -57,6 +68,10 @@ public class GravityToCenter : MonoBehaviour
         Collider[] colliders = Physics.OverlapSphere(transform.position, checkRadius);
         foreach (var col in colliders)
         {
+            // Verifica se l'oggetto ha il tag specificato
+            if (!col.CompareTag(targetTag))
+                continue;
+
             Rigidbody rb = col.attachedRigidbody;
             if (rb != null && !rb.isKinematic)
             {

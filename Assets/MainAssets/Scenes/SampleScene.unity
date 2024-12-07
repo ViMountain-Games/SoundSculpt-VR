@@ -7152,6 +7152,7 @@ MonoBehaviour:
   checkRadius: 10
   attractionForce: 10
   maxSpeed: 5
+  targetTag: Note
 --- !u!1001 &1311382272
 PrefabInstance:
   m_ObjectHideFlags: 0

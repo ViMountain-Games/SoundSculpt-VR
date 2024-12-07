@@ -1163,7 +1163,7 @@ MonoBehaviour:
       myInt: 5
       rc: 0
       ability: 3
-      FreezePosition: 0
+      FreezePosition: 7
     maxAttributeExamples:
       _int: 10
       vector3: {x: 0, y: 0, z: 0}

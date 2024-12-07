@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 [CreateAssetMenu(fileName = "NoteData", menuName = "Notes/NoteData", order = 1)]
 public class NoteData : ScriptableObject
@@ -13,6 +14,16 @@ public class NoteData : ScriptableObject
     [Tooltip("Tempo di fade-out in secondi")]
     [Range(0f, 2f)]
     public float fadeOutTime = 0.5f;
+
+    [Tooltip("Lista configurabile dei tipi di note disponibili")]
+    public List<string> noteTypes = new List<string> { "Melody", "Harmony", "Percussion", "FX" };
+
+    [Tooltip("Indice del tipo selezionato dalla lista")]
+    public int selectedNoteTypeIndex;
+
+    public string SelectedNoteType => noteTypes != null && selectedNoteTypeIndex >= 0 && selectedNoteTypeIndex < noteTypes.Count
+        ? noteTypes[selectedNoteTypeIndex]
+        : "Nessuna Selezione";
 
     public enum NoteDuration
     {

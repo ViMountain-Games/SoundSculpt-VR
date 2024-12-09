@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 using CustomInspector;
-using TMPro; // Per TextMeshPro 
+using TMPro; // Per TextMeshPro
 #if UNITY_EDITOR
 using UnityEditor;
 #endif
+using UnityEngine.Events;
 
 namespace GridGen
 {
-    [DefaultExecutionOrder(-100)] // Assicura che questo script venga eseguito prima degli altri
+    [DefaultExecutionOrder(-100)]
     public class Grid3DGenerator : MonoBehaviour
     {
         public static Grid3DGenerator Instance { get; private set; }
@@ -23,16 +24,16 @@ namespace GridGen
             Sol,
             La,
             Si,
-            DoSharp,   // Do♯
-            ReSharp,   // Re♯
-            FaSharp,   // Fa♯
-            SolSharp,  // Sol♯
-            LaSharp,   // La♯
-            ReFlat,    // Re♭
-            MiFlat,    // Mib
-            SolFlat,   // Solb
-            LaFlat,    // Lab
-            SiFlat     // Sib
+            DoSharp,
+            ReSharp,
+            FaSharp,
+            SolSharp,
+            LaSharp,
+            ReFlat,
+            MiFlat,
+            SolFlat,
+            LaFlat,
+            SiFlat
         }
 
         [System.Serializable]
@@ -95,14 +96,14 @@ namespace GridGen
         [HorizontalLine("Bar Line Settings", 2)]
         [Min(1)] public int cellsPerBar = 4;
         [ForceFill] public GameObject barLinePrefab;
-        public float yOffset = 0f; // Offset per l'altezza della bar line
-        public float zOffset = 0f; // Offset per la profondità della bar line
+        public float yOffset = 0f;
+        public float zOffset = 0f;
 
         [HorizontalLine("Animation Settings", 2)]
         [Header("Animation Settings")]
-        public float lineAnimationDuration = 0.5f; // Durata dell'animazione di ogni linea
-        public float lineAnimationDelay = 0.05f; // Ritardo tra l'inizio dell'animazione di ogni linea
-        public float cellInstantiationDelay = 0.1f; // Ritardo tra l'instanziazione di ogni cella
+        public float lineAnimationDuration = 0.5f;
+        public float lineAnimationDelay = 0.05f;
+        public float cellInstantiationDelay = 0.1f;
 
         [HorizontalLine("Grid Matrix", 2)]
         [ReadOnly] public GameObject[,,] gridMatrix;
@@ -124,9 +125,16 @@ namespace GridGen
         [Header("Auto Generate Settings")]
         public bool generateOnStart = false;
 
-        private GameObject labelsParent;
+        [Title("Solution Grid Configuration (NoteData)")]
+        [Tooltip("Array monodimensionale per gestire la solution grid")]
+        [SerializeField]
+        private NoteData[] solutionCells; // Lunghezza = gridSizeX * gridSizeY * gridSizeZ
 
-        // Lista delle linee da animare
+        [HorizontalLine("Combination Events", 2)]
+        public UnityEvent OnCorrectCombination;
+        public UnityEvent OnIncorrectCombination;
+
+        private GameObject labelsParent;
         private List<LineData> lineDataList = new List<LineData>();
 
         private void Awake()
@@ -154,16 +162,44 @@ namespace GridGen
             }
         }
 
+        private void OnValidate()
+        {
+            EnsureSolutionArraySize();
+        }
+
+        private void EnsureSolutionArraySize()
+        {
+            int neededSize = gridSizeX * gridSizeY * gridSizeZ;
+            if (solutionCells == null || solutionCells.Length != neededSize)
+            {
+                NoteData[] newArray = new NoteData[neededSize];
+
+                if (solutionCells != null)
+                {
+                    int minSize = Mathf.Min(neededSize, solutionCells.Length);
+                    for (int i = 0; i < minSize; i++)
+                    {
+                        newArray[i] = solutionCells[i];
+                    }
+                }
+
+                solutionCells = newArray;
+#if UNITY_EDITOR
+                EditorUtility.SetDirty(this);
+#endif
+            }
+        }
+
         public void GenerateGrid()
         {
             ClearGrid();
 
             gridMatrix = new GameObject[gridSizeX, gridSizeY, gridSizeZ];
+
             GameObject gridParent = new GameObject("3DGrid") { transform = { parent = this.transform } };
             labelsParent = new GameObject("Labels") { transform = { parent = this.transform } };
             Vector3 origin = transform.position;
 
-            // Genera le etichette a sinistra della griglia
             float gridDepth = gridSizeZ * cellSize.value;
 
             for (int y = 0; y < gridSizeY; y++)
@@ -191,13 +227,8 @@ namespace GridGen
                 }
             }
 
-            // Genera le linee della griglia e le memorizza per l'animazione
             CreateGridLines(origin, gridParent);
-
-            // Inizia l'animazione delle linee e l'instanziazione delle celle
             StartCoroutine(AnimateGridLinesAndInstantiateCells());
-
-            // Genera le bar line
             GenerateBarLines(origin);
 
 #if UNITY_EDITOR
@@ -231,9 +262,6 @@ namespace GridGen
 
         private void CreateGridLines(Vector3 origin, GameObject parent)
         {
-            // Creiamo linee per ogni asse e le aggiungiamo alla lista lineDataList
-
-            // Asse X
             for (int x = 0; x <= gridSizeX; x++)
             {
                 for (int y = 0; y <= gridSizeY; y++)
@@ -245,7 +273,6 @@ namespace GridGen
                 }
             }
 
-            // Asse Y
             for (int y = 0; y <= gridSizeY; y++)
             {
                 for (int z = 0; z <= gridSizeZ; z++)
@@ -257,7 +284,6 @@ namespace GridGen
                 }
             }
 
-            // Asse Z
             for (int x = 0; x <= gridSizeX; x++)
             {
                 for (int z = 0; z <= gridSizeZ; z++)
@@ -282,10 +308,8 @@ namespace GridGen
                 yield return new WaitForSeconds(lineAnimationDelay);
             }
 
-            // Attendi che tutte le animazioni delle linee siano completate
             yield return new WaitForSeconds(lineAnimationDuration);
 
-            // Iniziamo l'instanziazione delle celle
             yield return StartCoroutine(InstantiateCells());
         }
 
@@ -322,7 +346,7 @@ namespace GridGen
                         );
 
                         Instantiate(cellPrefab, cellCenter, Quaternion.identity, transform);
-                        gridMatrix[x, y, z] = null; // Default a vuoto
+                        gridMatrix[x, y, z] = null;
 
                         yield return new WaitForSeconds(cellInstantiationDelay);
                     }
@@ -407,13 +431,13 @@ namespace GridGen
         {
             if (gridMatrix == null)
             {
-                Debug.LogError("GridMatrix non è inizializzata. Assicurati di chiamare GenerateGrid prima di aggiornare la matrice.");
+                Debug.LogError("GridMatrix non è inizializzata.");
                 return;
             }
 
             if (x < 0 || x >= gridSizeX || y < 0 || y >= gridSizeY || z < 0 || z >= gridSizeZ)
             {
-                Debug.LogError($"Indici non validi: ({x}, {y}, {z}). Assicurati che siano all'interno dei limiti della griglia.");
+                Debug.LogError($"Indici non validi: ({x}, {y}, {z}).");
                 return;
             }
 
@@ -431,13 +455,11 @@ namespace GridGen
                 int checkX = x + i;
                 if (checkX < 0 || checkX >= gridSizeX || y < 0 || y >= gridSizeY || z < 0 || z >= gridSizeZ)
                 {
-                    // Fuori dai limiti
                     return false;
                 }
 
                 if (gridMatrix[checkX, y, z] != null)
                 {
-                    // Già occupato o bloccato
                     return false;
                 }
             }
@@ -474,7 +496,91 @@ namespace GridGen
             }
         }
 
-        // Classe per memorizzare i dati delle linee
+        public void CheckCombination()
+        {
+            if (gridMatrix == null || solutionCells == null)
+            {
+                Debug.LogError("Impossibile controllare la combinazione: griglia o solutionCells null.");
+                return;
+            }
+
+            bool isCorrect = true;
+
+            for (int x = 0; x < gridSizeX && isCorrect; x++)
+            {
+                for (int y = 0; y < gridSizeY && isCorrect; y++)
+                {
+                    for (int z = 0; z < gridSizeZ && isCorrect; z++)
+                    {
+                        int index = GetIndex(x, y, z);
+                        NoteData expectedNote = solutionCells[index];
+                        GameObject placedObj = gridMatrix[x, y, z];
+
+                        if (expectedNote == null)
+                        {
+                            if (placedObj != null)
+                            {
+                                isCorrect = false;
+                            }
+                        }
+                        else
+                        {
+                            if (placedObj == null)
+                            {
+                                isCorrect = false;
+                            }
+                            else
+                            {
+                                Note placedNote = placedObj.GetComponent<Note>();
+                                if (placedNote == null || placedNote.noteData == null)
+                                {
+                                    isCorrect = false;
+                                }
+                                else
+                                {
+                                    if (placedNote.noteData != expectedNote)
+                                    {
+                                        isCorrect = false;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (isCorrect)
+            {
+                Debug.Log("The combination is correct!");
+                OnCorrectCombination?.Invoke();
+            }
+            else
+            {
+                Debug.Log("The combination is incorrect!");
+                OnIncorrectCombination?.Invoke();
+            }
+        }
+
+        public int GetIndex(int x, int y, int z)
+        {
+            return x + gridSizeX * (y + gridSizeY * z);
+        }
+
+        public void SetSolutionCell(int x, int y, int z, NoteData note)
+        {
+            int index = GetIndex(x, y, z);
+            solutionCells[index] = note;
+#if UNITY_EDITOR
+            EditorUtility.SetDirty(this);
+#endif
+        }
+
+        public NoteData GetSolutionCell(int x, int y, int z)
+        {
+            int index = GetIndex(x, y, z);
+            return solutionCells[index];
+        }
+
         private class LineData
         {
             public Vector3 start;
@@ -497,7 +603,7 @@ namespace GridGen
                 lineRenderer.endWidth = width;
                 lineRenderer.positionCount = 2;
                 lineRenderer.SetPosition(0, start);
-                lineRenderer.SetPosition(1, start); // Inizialmente la linea è di lunghezza zero
+                lineRenderer.SetPosition(1, start);
                 lineRenderer.enabled = false;
             }
         }

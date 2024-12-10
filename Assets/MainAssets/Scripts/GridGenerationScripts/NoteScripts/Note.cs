@@ -3,6 +3,7 @@ using NaughtyAttributes;
 
 namespace GridGen
 {
+    [RequireComponent(typeof(MusicScaleGenerator))]
     public class Note : MonoBehaviour
     {
         [Expandable]
@@ -13,12 +14,9 @@ namespace GridGen
 
         private void Awake()
         {
+            // Il MusicScaleGenerator è già presente sul GameObject, niente AddComponent.
+            // Si limita a recuperare il riferimento, senza operazioni costose.
             musicScaleGenerator = GetComponent<MusicScaleGenerator>();
-            if (musicScaleGenerator == null)
-            {
-                // Se MusicScaleGenerator non è presente, lo aggiungiamo
-                musicScaleGenerator = gameObject.AddComponent<MusicScaleGenerator>();
-            }
         }
 
         public void SetGridPosition(int x, int y, int z)
@@ -30,11 +28,11 @@ namespace GridGen
 
         public void PlayNote()
         {
-            if (musicScaleGenerator != null)
+            if (musicScaleGenerator != null && noteData != null)
             {
+                // Nessuna operazione costosa, la nota è già in cache.
                 musicScaleGenerator.PlayNoteByPosition(gridX, gridY, gridZ, noteData.duration, noteData.fadeOutTime);
             }
         }
     }
-
 }

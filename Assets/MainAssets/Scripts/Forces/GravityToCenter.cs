@@ -23,7 +23,8 @@ public class GravityToCenter : MonoBehaviour
     // Set per tenere traccia degli oggetti considerati all'interno della zona sicura
     private HashSet<Rigidbody> insideSet = new HashSet<Rigidbody>();
 
-    private void OnDrawGizmos()
+
+    private void OnDrawGizmosSelected()
     {
         // Disegna la sfera del range "sicuro"
         Gizmos.color = Color.green;

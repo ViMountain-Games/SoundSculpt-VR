@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Events;
 
 namespace GridGen
 {
@@ -14,6 +15,9 @@ namespace GridGen
         [Header("Octave Settings")]
         public int minOctave = 2;
         public int maxOctave = 4;
+
+        [Header("Events")]
+        public UnityEvent onNotePlayed;
 
         // Statici per evitare rigenerazioni continue
         private static bool notesPreGenerated = false;
@@ -49,18 +53,21 @@ namespace GridGen
         {
             audioSource = GetComponent<AudioSource>();
 
-            // Tenta di reperire la Grid una sola volta (se necessario)
             if (Grid3DGenerator.Instance != null)
                 gridGenerator = Grid3DGenerator.Instance;
 
-            // Se non abbiamo ancora fatto il pre-caricamento, lo facciamo ora.
             if (!notesPreGenerated)
             {
                 PreInitializeBaseNote();
                 PreGenerateNotes();
                 notesPreGenerated = true;
             }
+
+            // Inizializza l'evento se non è assegnato
+            if (onNotePlayed == null)
+                onNotePlayed = new UnityEvent();
         }
+
 
         private void PreInitializeBaseNote()
         {
@@ -129,6 +136,9 @@ namespace GridGen
                 audioSource.volume = 1.0f; // Assicurarsi che il volume sia pieno all'inizio
                 audioSource.Play();
 
+                // Invoca l'evento quando la nota viene suonata
+                onNotePlayed?.Invoke();
+
                 StartCoroutine(StopNoteWithFadeOut(duration, fadeOutTime));
             }
             else
@@ -136,6 +146,7 @@ namespace GridGen
                 Debug.LogError($"Note {noteName} in octave {octave} not found in cache.");
             }
         }
+
 
         private IEnumerator StopNoteWithFadeOut(NoteData.NoteDuration duration, float fadeOutTime)
         {

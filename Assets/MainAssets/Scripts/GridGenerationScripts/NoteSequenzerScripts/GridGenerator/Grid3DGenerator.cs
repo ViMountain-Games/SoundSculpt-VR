@@ -381,7 +381,7 @@ namespace GridGen
             }
         }
 
-        private string FormatNoteName(NoteName noteName)
+        public string FormatNoteName(NoteName noteName)
         {
             return noteName switch
             {

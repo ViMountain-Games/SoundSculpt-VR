@@ -12,44 +12,56 @@ public class Grid3DGeneratorEditor : Editor
 {
     private const float CellSize = 20f;
     private bool showSolutionGrid = true; // Foldout per la solution grid
-
     private static NoteData[] allNotes;
 
     public override void OnInspectorGUI()
     {
+        EditorGUI.indentLevel = 0; // Nessun rientro
         Grid3DGenerator gridGenerator = (Grid3DGenerator)target;
 
         DrawDefaultInspector();
-
-        EditorGUILayout.Space();
 
         EditorGUILayout.BeginHorizontal();
         if (GUILayout.Button("Generate Grid")) gridGenerator.GenerateGrid();
         if (GUILayout.Button("Clear Grid")) gridGenerator.ClearGrid();
         EditorGUILayout.EndHorizontal();
 
-        // Visualizzazione GridMatrix
+        // Visualizzazione GridMatrix (posizione attuale delle note)
+        // Adesso la rendiamo coerente con la visualizzazione della solution grid.
+        // Ciò significa che raggruppiamo anche la gridMatrix per ottave (Z).
+        // Per ogni Z (ottava), una tabella:
+        // - Riga di header: cella vuota + X in orizzontale
+        // - Righe: per ogni Y, la nota a sinistra + celle per ogni X
+
         if (gridGenerator.gridMatrix != null)
         {
-            EditorGUILayout.LabelField("Grid Matrix Visualization", EditorStyles.boldLabel);
+            EditorGUILayout.LabelField("Grid Matrix Visualization (Grouped by Octave)", EditorStyles.boldLabel);
 
-            for (int x = 0; x < gridGenerator.gridMatrix.GetLength(0); x++)
+            for (int z = 0; z < gridGenerator.gridSizeZ; z++)
             {
-                if (x > 0)
-                {
-                    EditorGUILayout.Space();
-                    DrawLine(Color.gray, 2);
-                    EditorGUILayout.Space();
-                }
+                int octave = gridGenerator.GetOctaveFromZ(z);
+                EditorGUILayout.LabelField("Ottava: O" + octave, EditorStyles.boldLabel);
 
-                EditorGUILayout.LabelField("X = " + x, EditorStyles.boldLabel);
-
+                // Header per l'asse X
                 EditorGUILayout.BeginHorizontal();
-                for (int z = 0; z < gridGenerator.gridMatrix.GetLength(2); z++)
+                DrawLeftAlignedLabel("", CellSize); // cella vuota a sinistra
+                for (int x = 0; x < gridGenerator.gridSizeX; x++)
                 {
-                    EditorGUILayout.BeginVertical();
-                    for (int y = gridGenerator.gridMatrix.GetLength(1) - 1; y >= 0; y--)
+                    DrawLeftAlignedLabel("X" + x, CellSize);
+                }
+                EditorGUILayout.EndHorizontal();
+
+                // Righe per le note (Y in verticale)
+                for (int y = gridGenerator.gridSizeY - 1; y >= 0; y--)
+                {
+                    EditorGUILayout.BeginHorizontal();
+
+                    var noteName = gridGenerator.GetNoteNameFromY(y);
+                    DrawLeftAlignedLabel(gridGenerator.FormatNoteName(noteName), CellSize);
+
+                    for (int x = 0; x < gridGenerator.gridSizeX; x++)
                     {
+                        // Colore della cella in base all'oggetto presente nella gridMatrix
                         GameObject cell = gridGenerator.gridMatrix[x, y, z];
                         Color cellColor = gridGenerator.emptyCellColor;
 
@@ -62,35 +74,31 @@ public class Grid3DGeneratorEditor : Editor
                             }
                             else
                             {
+                                // Presenza di un oggetto non riconosciuto come nota
                                 cellColor = Color.white;
                             }
-                        }
-                        else
-                        {
-                            cellColor = gridGenerator.emptyCellColor;
                         }
 
                         DrawColoredBox(cellColor);
                     }
-                    EditorGUILayout.EndVertical();
-                }
-                EditorGUILayout.EndHorizontal();
-            }
 
-            EditorGUILayout.Space();
+                    EditorGUILayout.EndHorizontal();
+                }
+
+                EditorGUILayout.Space();
+            }
         }
         else
         {
             EditorGUILayout.HelpBox("Generate the grid to visualize the matrix.", MessageType.Info);
         }
 
-        // Sezione Solution Grid Configuration
         EditorGUILayout.Space();
         EditorGUILayout.Space();
 
-        EditorGUILayout.LabelField("Solution Grid Configuration", EditorStyles.boldLabel);
-        EditorGUILayout.HelpBox("Qui puoi configurare la combinazione corretta di NoteData per la griglia.\n" +
-                                "Se una nota occupa più celle (Half=2, Whole=4), quando la selezioni verranno riempite le celle successive. Rimuovendo la nota dal primo segmento, verranno rimossi anche i segmenti successivi.",
+        // Sezione Solution Grid Configuration (Grouped by Octave)
+        EditorGUILayout.LabelField("Solution Grid Configuration (Grouped by Octave)", EditorStyles.boldLabel);
+        EditorGUILayout.HelpBox("Le ottave (Z) formano tabelle separate, con note (Y) verticali e X orizzontale, come nella grid matrix.",
                                 MessageType.Info);
 
         showSolutionGrid = EditorGUILayout.Foldout(showSolutionGrid, "Apri/Chiudi Solution Grid", true);
@@ -99,28 +107,35 @@ public class Grid3DGeneratorEditor : Editor
         {
             LoadAllNoteDataIfNeeded();
 
-            for (int x = 0; x < gridGenerator.gridSizeX; x++)
+            for (int z = 0; z < gridGenerator.gridSizeZ; z++)
             {
-                if (x > 0)
-                {
-                    DrawLine(Color.yellow, 1);
-                    EditorGUILayout.Space();
-                }
+                int octave = gridGenerator.GetOctaveFromZ(z);
+                EditorGUILayout.LabelField("Ottava: O" + octave, EditorStyles.boldLabel);
 
-                EditorGUILayout.LabelField("X = " + x + " (Solution Grid)", EditorStyles.boldLabel);
-
+                // Riga di header per X
                 EditorGUILayout.BeginHorizontal();
-                for (int z = 0; z < gridGenerator.gridSizeZ; z++)
+                DrawLeftAlignedLabel("", CellSize);
+                for (int x = 0; x < gridGenerator.gridSizeX; x++)
                 {
-                    EditorGUILayout.BeginVertical();
-                    for (int y = gridGenerator.gridSizeY - 1; y >= 0; y--)
+                    DrawLeftAlignedLabel("X" + x, CellSize);
+                }
+                EditorGUILayout.EndHorizontal();
+
+                // Righe per le note (Y)
+                for (int y = gridGenerator.gridSizeY - 1; y >= 0; y--)
+                {
+                    EditorGUILayout.BeginHorizontal();
+
+                    var noteName = gridGenerator.GetNoteNameFromY(y);
+                    DrawLeftAlignedLabel(gridGenerator.FormatNoteName(noteName), CellSize);
+
+                    for (int x = 0; x < gridGenerator.gridSizeX; x++)
                     {
                         NoteData current = gridGenerator.GetSolutionCell(x, y, z);
                         Color cellColor = current != null ? current.color : Color.gray;
 
                         Rect cellRect = DrawColoredBox(cellColor);
 
-                        // Controlla il click sulla cella
                         if (Event.current.type == EventType.MouseDown && Event.current.button == 0)
                         {
                             if (cellRect.Contains(Event.current.mousePosition))
@@ -130,9 +145,11 @@ public class Grid3DGeneratorEditor : Editor
                             }
                         }
                     }
-                    EditorGUILayout.EndVertical();
+
+                    EditorGUILayout.EndHorizontal();
                 }
-                EditorGUILayout.EndHorizontal();
+
+                EditorGUILayout.Space();
             }
         }
         else if (showSolutionGrid)
@@ -145,7 +162,6 @@ public class Grid3DGeneratorEditor : Editor
     {
         if (allNotes == null || allNotes.Length == 0)
         {
-            // Carica tutte le NoteData dal progetto
             allNotes = Resources.FindObjectsOfTypeAll<NoteData>()
                                  .OrderBy(n => n.name).ToArray();
         }
@@ -168,20 +184,17 @@ public class Grid3DGeneratorEditor : Editor
             }
         }
 
-        // Mostra il menu in corrispondenza della cella
         Rect screenRect = EditorGUIUtility.GUIToScreenRect(cellRect);
         menu.DropDown(screenRect);
     }
 
     private void SetNoteData(Grid3DGenerator grid, int x, int y, int z, NoteData newNote)
     {
-        NoteData oldNote = grid.GetSolutionCell(x, y, z); // nota precedente
+        NoteData oldNote = grid.GetSolutionCell(x, y, z);
         Undo.RecordObject(grid, "Change Solution Grid NoteData");
         grid.SetSolutionCell(x, y, z, newNote);
         EditorUtility.SetDirty(grid);
 
-        // Se stiamo rimuovendo una nota (impostandola a null) e la vecchia nota era Half o Whole,
-        // rimuoviamo anche le successive celle che erano state riempite.
         if (newNote == null && oldNote != null && oldNote.duration != NoteData.NoteDuration.Quarter)
         {
             int length = oldNote.duration == NoteData.NoteDuration.Half ? 2 : 4;
@@ -191,7 +204,6 @@ public class Grid3DGeneratorEditor : Editor
                 if (fillX < grid.gridSizeX)
                 {
                     NoteData cellNote = grid.GetSolutionCell(fillX, y, z);
-                    // Rimuoviamo solo se la cella ha la stessa nota, per evitare di cancellare note diverse inserite manualmente
                     if (cellNote == oldNote)
                     {
                         grid.SetSolutionCell(fillX, y, z, null);
@@ -201,7 +213,6 @@ public class Grid3DGeneratorEditor : Editor
             EditorUtility.SetDirty(grid);
         }
 
-        // Se stiamo aggiungendo una nota Half o Whole, riempiamo le celle successive
         if (newNote != null && newNote.duration != NoteData.NoteDuration.Quarter)
         {
             int length = (newNote.duration == NoteData.NoteDuration.Half) ? 2 :
@@ -223,10 +234,7 @@ public class Grid3DGeneratorEditor : Editor
     {
         GUIStyle cellStyle = new GUIStyle(GUI.skin.box)
         {
-            normal =
-            {
-                background = MakeTex(1, 1, cellColor)
-            },
+            normal = { background = MakeTex(1, 1, cellColor) },
             fixedWidth = CellSize,
             fixedHeight = CellSize
         };
@@ -236,6 +244,17 @@ public class Grid3DGeneratorEditor : Editor
         GUI.Box(rect, GUIContent.none, cellStyle);
 
         return rect;
+    }
+
+    private void DrawLeftAlignedLabel(string text, float width)
+    {
+        GUILayoutOption[] options = { GUILayout.Width(width), GUILayout.Height(CellSize) };
+        var style = new GUIStyle(GUI.skin.label)
+        {
+            alignment = TextAnchor.MiddleLeft,
+            wordWrap = false
+        };
+        EditorGUILayout.LabelField(text, style, options);
     }
 
     private Texture2D MakeTex(int width, int height, Color col)
@@ -250,12 +269,6 @@ public class Grid3DGeneratorEditor : Editor
         result.SetPixels(pix);
         result.Apply();
         return result;
-    }
-
-    private void DrawLine(Color color, float thickness = 1)
-    {
-        var rect = EditorGUILayout.GetControlRect(false, thickness);
-        EditorGUI.DrawRect(rect, color);
     }
 }
 #endif

@@ -36,6 +36,9 @@ namespace GridGen
         public UnityEvent OnMovementStarted;
         public UnityEvent OnMovementFinished;
 
+        public bool IsMoving { get { return isMoving; } }
+        public float MaxDistance { get { return maxDistance; } }
+
         void Start()
         {
             gridGenerator = Grid3DGenerator.Instance;
@@ -55,12 +58,10 @@ namespace GridGen
             transform.localScale = newScale;
 
             Vector3 gridOrigin = gridGenerator.transform.position;
+            float gridCenterY = gridOrigin.y + gridHeight / 2f;
+            float gridCenterZ = gridOrigin.z + gridDepth / 2f;
 
-            float gridCenterY = gridOrigin.y + gridHeight / 2;
-            float gridCenterZ = gridOrigin.z + gridDepth / 2;
-
-            float halfTimelineWidth = transform.localScale.x / 2;
-
+            float halfTimelineWidth = transform.localScale.x * 0.5f;
             startPosition = new Vector3(
                 gridOrigin.x - halfTimelineWidth,
                 gridCenterY,
@@ -69,7 +70,8 @@ namespace GridGen
 
             transform.position = startPosition;
 
-            maxDistance = gridWidth + halfTimelineWidth * 2;
+            // Distanza totale che la timeline compie
+            maxDistance = gridWidth + halfTimelineWidth * 2f;
 
             CalculateSpeed();
         }
@@ -89,8 +91,7 @@ namespace GridGen
             {
                 isMoving = true;
                 transform.position = startPosition;
-                Debug.Log("Movement started.");
-                OnMovementStarted?.Invoke(); // Invoca l'evento di inizio movimento
+                OnMovementStarted?.Invoke();
             }
         }
 
@@ -100,15 +101,8 @@ namespace GridGen
             if (isMoving)
             {
                 isMoving = false;
-                Debug.Log("Movement stopped.");
-
-                // Quando il movimento si ferma, controlliamo la combinazione
-                if (Grid3DGenerator.Instance != null)
-                {
-                    Grid3DGenerator.Instance.CheckCombination();
-                }
-
-                OnMovementFinished?.Invoke(); // Invoca l'evento di movimento terminato
+                Grid3DGenerator.Instance?.CheckCombination();
+                OnMovementFinished?.Invoke();
             }
         }
 
@@ -116,14 +110,12 @@ namespace GridGen
         public void ToggleLoopMode()
         {
             loopMode = !loopMode;
-            Debug.Log("Loop mode toggled. Current state: " + (loopMode ? "Enabled" : "Disabled"));
         }
 
         [ContextMenu("Calculate Speed")]
         private void CalculateSpeed()
         {
             speed = (bpm / 60f) * speedScale * timeScale;
-            Debug.Log("Speed recalculated: " + speed);
         }
 
         private void MoveTimeline()
@@ -134,33 +126,16 @@ namespace GridGen
             {
                 if (loopMode)
                 {
-                    // La timeline ritorna alla posizione iniziale
                     transform.position = startPosition;
-
-                    Debug.Log("Timeline looped.");
-
-                    // Invoca l'evento di inizio movimento per il loop
                     OnMovementStarted?.Invoke();
-
-                    if (Grid3DGenerator.Instance != null)
-                    {
-                        Grid3DGenerator.Instance.CheckCombination();
-                    }
+                    Grid3DGenerator.Instance?.CheckCombination();
                 }
                 else
                 {
-                    // Se non è in loop, il movimento finisce qui
                     StopMovement();
                     ReturnToStartPosition();
                 }
             }
-        }
-
-        private void ReturnToStartPosition()
-        {
-            transform.position = startPosition;
-            Debug.Log("Returned to start position.");
-            OnMovementFinished?.Invoke(); // Invoca l'evento quando si ritorna alla posizione iniziale
         }
 
         private void OnTriggerEnter(Collider other)
@@ -179,13 +154,17 @@ namespace GridGen
             }
         }
 
+        private void ReturnToStartPosition()
+        {
+            transform.position = startPosition;
+            OnMovementFinished?.Invoke();
+        }
+
         private void OnDrawGizmos()
         {
             Gizmos.color = gizmoColor;
-
             Vector3 currentStartPosition = Application.isPlaying ? startPosition : transform.position;
-
-            float sphereRadius = ((transform.localScale.y + transform.localScale.z) / 2f) / 50;
+            float sphereRadius = ((transform.localScale.y + transform.localScale.z) / 2f) / 50f;
 
             Gizmos.DrawLine(currentStartPosition, currentStartPosition + direction.normalized * maxDistance);
             Gizmos.DrawWireSphere(currentStartPosition + direction.normalized * maxDistance, sphereRadius);

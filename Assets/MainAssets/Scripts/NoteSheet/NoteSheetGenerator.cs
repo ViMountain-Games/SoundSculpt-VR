@@ -1,6 +1,7 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 using GridGen;
+using CustomInspector;
 
 public class ScoreGenerator : MonoBehaviour
 {
@@ -24,7 +25,8 @@ public class ScoreGenerator : MonoBehaviour
     public Material lineMaterial;          // Materiale per le linee
     public float lengthMultiplier = 1.0f;  // Moltiplicatore per la lunghezza dello spartito
 
-    private float lineLength;
+    [ReadOnly]
+    public float lineLength;
     private Transform pentagramParent;
     private Transform noteParent;
 
@@ -81,7 +83,7 @@ public class ScoreGenerator : MonoBehaviour
             pentagramParent.localPosition = Vector3.zero;
         }
 
-        // Se non � assegnato un materiale, usiamo un default
+        // Se non è assegnato un materiale, usiamo un default
         Material usedLineMaterial = lineMaterial != null ? lineMaterial : new Material(Shader.Find("Sprites/Default"));
 
         // Genera le linee del pentagramma

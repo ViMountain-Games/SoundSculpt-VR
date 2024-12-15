@@ -130,7 +130,7 @@ namespace GridGen
                     OnMovementStarted?.Invoke();
                     Grid3DGenerator.Instance?.CheckCombination();
                 }
-                else 
+                else
                 {
                     StopMovement();
                     ReturnToStartPosition();

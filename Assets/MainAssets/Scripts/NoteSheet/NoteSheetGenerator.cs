@@ -19,10 +19,13 @@ public class ScoreGenerator : MonoBehaviour
 
     [Header("Pentagram Settings")]
     public int numberOfLines = 5;           // Numero di linee del pentagramma
-    public float lineSpacing = 0.5f;        // Spaziatura tra le linee del pentagramma
-    public float lineWidth = 0.1f;          // Spessore delle linee del pentagramma
-    public Color lineColor = Color.black;   // Colore delle linee
-    public Material lineMaterial;           // Materiale per le linee
+    public float lineSpacing = 0.5f;        // Spaziatura verticale tra le linee del pentagramma
+    public float lineWidth = 0.1f;          // Spessore (altezza) di ogni linea prefab
+    public Color lineColor = Color.black;   // Colore delle linee (se il prefab supporta un colore/mesh renderer)
+    public Material lineMaterial;           // (Opzionale) Materiale da assegnare al prefab della linea
+
+    [Header("Staff Line Prefab")]
+    public GameObject staffLinePrefab;      // **Prefab** da usare al posto dei LineRenderer per ciascuna riga del pentagramma
 
     [Header("Staff Length Settings")]
     public float lengthMultiplier = 1.0f;   // (Legacy) Moltiplicatore per la lunghezza di base
@@ -86,30 +89,50 @@ public class ScoreGenerator : MonoBehaviour
             pentagramParent.localPosition = Vector3.zero;
         }
 
-        // Se non è assegnato un materiale, usiamo un default
-        Material usedLineMaterial = lineMaterial != null ? lineMaterial : new Material(Shader.Find("Sprites/Default"));
+        // Se non esiste alcun prefab, usciamo
+        if (staffLinePrefab == null)
+        {
+            Debug.LogError("Staff Line Prefab non assegnato! Impossibile generare il pentagramma.");
+            return;
+        }
 
-        // Genera le linee del pentagramma
+        // Genera le linee del pentagramma usando il prefab anziché il LineRenderer
         for (int i = 0; i < numberOfLines; i++)
         {
-            GameObject line = new GameObject("PentagramLine");
-            line.transform.SetParent(pentagramParent);
-
-            LineRenderer lineRenderer = line.AddComponent<LineRenderer>();
-            lineRenderer.startWidth = lineWidth;
-            lineRenderer.endWidth = lineWidth;
-            lineRenderer.positionCount = 2;
-            lineRenderer.material = usedLineMaterial;
-            lineRenderer.startColor = lineColor;
-            lineRenderer.endColor = lineColor;
-
             float yPos = i * lineSpacing;
 
-            Vector3 startPos = new Vector3(transform.position.x, transform.position.y + yPos, transform.position.z);
-            Vector3 endPos = new Vector3(transform.position.x + lineLength, transform.position.y + yPos, transform.position.z);
+            // Istanziamo il prefab della linea
+            GameObject lineObject = Instantiate(staffLinePrefab, pentagramParent);
+            lineObject.name = $"PentagramLine_{i}";
 
-            lineRenderer.SetPosition(0, startPos);
-            lineRenderer.SetPosition(1, endPos);
+            // Posizioniamo la linea in modo che inizi e finisca dove serve
+            // Per comodità, la ancoriamo dal centro (dipende da come è configurato il prefab),
+            // quindi il "center" sarà a metà della linea
+            // => Se vogliamo che la linea parta esattamente da transform.position.x,
+            //    il center dev'essere shiftato a metà della lunghezza
+            float lineCenterX = transform.position.x + lineLength * 0.5f;
+            float lineCenterY = transform.position.y + yPos;
+            float lineCenterZ = transform.position.z;
+
+            lineObject.transform.position = new Vector3(lineCenterX, lineCenterY, lineCenterZ);
+
+            // Ridimensioniamo la linea in base alla lunghezza calcolata
+            Vector3 localScale = lineObject.transform.localScale;
+            localScale.x = lineLength;  // L'asse X rappresenta la lunghezza orizzontale
+            localScale.y = lineWidth;   // Lo spessore della linea (asse Y), se il prefab è orientato correttamente
+            // Manteniamo localScale.z inalterato oppure lo settiamo a 1f se serve
+            lineObject.transform.localScale = localScale;
+
+            // Se vogliamo assegnare un materiale o un colore specifico al prefab
+            // (dipende da come è fatto il prefab: MeshRenderer, SpriteRenderer, ecc.)
+            MeshRenderer meshRenderer = lineObject.GetComponentInChildren<MeshRenderer>();
+            if (meshRenderer != null && lineMaterial != null)
+            {
+                meshRenderer.material = lineMaterial;
+            }
+            // Se il prefab supporta un colore (es. MeshRenderer con un materiale standard),
+            // si potrebbe tentare di cambiare il colore di emissione o albedo:
+            // meshRenderer.material.color = lineColor;
         }
     }
 
@@ -219,6 +242,15 @@ public class ScoreGenerator : MonoBehaviour
         if (noteParent != null)
         {
             foreach (Transform child in noteParent)
+            {
+                Destroy(child.gameObject);
+            }
+        }
+
+        // Rimuove eventuali linee già disegnate
+        if (pentagramParent != null)
+        {
+            foreach (Transform child in pentagramParent)
             {
                 Destroy(child.gameObject);
             }

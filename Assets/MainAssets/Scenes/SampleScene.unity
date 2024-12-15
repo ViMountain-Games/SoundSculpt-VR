@@ -2133,7 +2133,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5c83bebce35dcb4bb3b8b0d44549c9e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bpm: 120
+  bpm: 60
   direction: {x: 1, y: 0, z: 0}
   speedScale: 0.1
   timeScale: 1
@@ -5085,7 +5085,7 @@ MonoBehaviour:
   quarterNotePrefab: {fileID: 5395940850570762825, guid: a001540b334878247b3502d601b50b41, type: 3}
   halfNotePrefab: {fileID: 8544466603859764327, guid: 05eddc98f4157464a9c4f6de896e85ec, type: 3}
   wholeNotePrefab: {fileID: 8700335262392156210, guid: 4f89219f23be2dd41afe52e14d4936e8, type: 3}
-  horizontalSpacing: 0.125
+  horizontalSpacing: 0.1
   verticalOffset: 0.5
   noteZIncrement: 0
   noteXOffset: 0.03
@@ -5095,6 +5095,7 @@ MonoBehaviour:
   lineWidth: 0.01
   lineColor: {r: 0, g: 0, b: 0, a: 1}
   lineMaterial: {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  staffLinePrefab: {fileID: 2343052463273391732, guid: 868a352aabd90c04e8104690ff40c9f5, type: 3}
   lengthMultiplier: 1.1
   staffExtraLength: 0
   lineLength: 0

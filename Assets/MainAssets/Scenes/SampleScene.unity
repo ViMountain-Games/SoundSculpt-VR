@@ -2147,6 +2147,7 @@ MonoBehaviour:
   OnMovementFinished:
     m_PersistentCalls:
       m_Calls: []
+  additionalLength: 0
 --- !u!114 &459399264
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5096,8 +5097,8 @@ MonoBehaviour:
   lineColor: {r: 0, g: 0, b: 0, a: 1}
   lineMaterial: {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
   staffLinePrefab: {fileID: 2343052463273391732, guid: 868a352aabd90c04e8104690ff40c9f5, type: 3}
-  lengthMultiplier: 1.1
-  staffExtraLength: 0
+  lengthMultiplier: 1
+  staffExtraLength: 0.03
   lineLength: 0
   gridGenerator: {fileID: 1576117717}
 --- !u!136 &960429637
@@ -10031,6 +10032,7 @@ MonoBehaviour:
   scoreGenerator: {fileID: 914004001}
   staffLength: 1.68
   heightMultiplyer: 1.5
+  staffAdditionalLength: 0
 --- !u!23 &1977409345
 MeshRenderer:
   m_ObjectHideFlags: 0

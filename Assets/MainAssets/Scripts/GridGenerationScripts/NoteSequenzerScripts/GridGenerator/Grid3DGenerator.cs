@@ -442,7 +442,7 @@ namespace GridGen
             }
 
             gridMatrix[x, y, z] = newObject;
-            Debug.Log($"Aggiornata la griglia in ({x}, {y}, {z}) con l'oggetto: {newObject?.name}");
+            //Debug.Log($"Aggiornata la griglia in ({x}, {y}, {z}) con l'oggetto: {newObject?.name}");
         }
 
         public bool CanPlaceNote(int x, int y, int z, NoteData.NoteDuration duration)
@@ -551,12 +551,12 @@ namespace GridGen
 
             if (isCorrect)
             {
-                Debug.Log("The combination is correct!");
+                //Debug.Log("The combination is correct!");
                 OnCorrectCombination?.Invoke();
             }
             else
             {
-                Debug.Log("The combination is incorrect!");
+                //Debug.Log("The combination is incorrect!");
                 OnIncorrectCombination?.Invoke();
             }
         }

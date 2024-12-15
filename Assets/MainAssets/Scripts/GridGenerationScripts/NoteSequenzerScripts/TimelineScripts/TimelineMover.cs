@@ -39,6 +39,10 @@ namespace GridGen
         public bool IsMoving { get { return isMoving; } }
         public float MaxDistance { get { return maxDistance; } }
 
+        // **Nuova Variabile**: Aggiunge una lunghezza extra (non moltiplicata) alla timeline.
+        [Header("Extra Length (Additive)")]
+        public float additionalLength = 0f;
+
         void Start()
         {
             gridGenerator = Grid3DGenerator.Instance;
@@ -70,8 +74,11 @@ namespace GridGen
 
             transform.position = startPosition;
 
-            // Distanza totale che la timeline compie
+            // Distanza totale base che la timeline deve percorrere
             maxDistance = gridWidth + halfTimelineWidth * 2f;
+
+            // Aggiungiamo la distanza extra (additiva)
+            maxDistance += additionalLength;
 
             CalculateSpeed();
         }
@@ -150,7 +157,7 @@ namespace GridGen
             }
             else
             {
-                Debug.Log("Timeline is not moving. Note will not play.");
+                //Debug.Log("Timeline is not moving. Note will not play.");
             }
         }
 
@@ -166,6 +173,7 @@ namespace GridGen
             Vector3 currentStartPosition = Application.isPlaying ? startPosition : transform.position;
             float sphereRadius = ((transform.localScale.y + transform.localScale.z) / 2f) / 50f;
 
+            // Disegna la linea e la sfera che segnalano la fine del percorso
             Gizmos.DrawLine(currentStartPosition, currentStartPosition + direction.normalized * maxDistance);
             Gizmos.DrawWireSphere(currentStartPosition + direction.normalized * maxDistance, sphereRadius);
         }

@@ -17,6 +17,10 @@ public class ScoreTimelineMover : MonoBehaviour
     private bool loopMode;
     private Vector3 movementDirection;
 
+    // **Nuova Variabile**: Aggiunta alla lunghezza dello spartito (timeline musicale)
+    [Header("Extra Staff Length (Additive)")]
+    public float staffAdditionalLength = 0f;
+
     void OnEnable()
     {
         if (mainTimelineMover != null)
@@ -43,7 +47,7 @@ public class ScoreTimelineMover : MonoBehaviour
             return;
         }
 
-        // Prendiamo la lunghezza calcolata nello ScoreGenerator
+        // Prendiamo la lunghezza calcolata dallo ScoreGenerator
         staffLength = scoreGenerator.lineLength;
 
         float pentagramHeight = (scoreGenerator.numberOfLines - 1) * scoreGenerator.lineSpacing;
@@ -61,7 +65,8 @@ public class ScoreTimelineMover : MonoBehaviour
         startPosition = new Vector3(staffLeftX, centerY, centerZ);
         transform.position = startPosition;
 
-        maxStaffDistance = staffLength; // La timeline copre tutta la lunghezza dello spartito
+        // La timeline copre tutta la lunghezza dello spartito più l'additivo
+        maxStaffDistance = staffLength + staffAdditionalLength;
 
         UpdateLocalParams();
         CalculateScoreboardSpeed();
@@ -107,7 +112,9 @@ public class ScoreTimelineMover : MonoBehaviour
         // Evita divisioni per zero
         if (mainMaxDistance > 0)
         {
-            scoreboardSpeed = mainSpeed * (staffLength / mainMaxDistance);
+            // Adattiamo la velocità in base al rapporto tra la lunghezza "staffLength + staffAdditionalLength"
+            // e la lunghezza percorsa dalla timeline principale.
+            scoreboardSpeed = mainSpeed * ((staffLength + staffAdditionalLength) / mainMaxDistance);
         }
         else
         {
@@ -141,8 +148,8 @@ public class ScoreTimelineMover : MonoBehaviour
         Vector3 currentStart = Application.isPlaying ? startPosition : transform.position;
         float sphereRadius = transform.localScale.y * 0.5f / 50f;
 
-        // Disegna linea pari a staffLength
-        Vector3 endPos = currentStart + (movementDirection * staffLength);
+        // Disegna linea pari a (staffLength + staffAdditionalLength)
+        Vector3 endPos = currentStart + (movementDirection * (staffLength + staffAdditionalLength));
         Gizmos.DrawLine(currentStart, endPos);
         Gizmos.DrawWireSphere(endPos, sphereRadius);
     }

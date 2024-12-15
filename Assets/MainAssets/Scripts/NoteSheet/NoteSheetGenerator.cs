@@ -105,11 +105,7 @@ public class ScoreGenerator : MonoBehaviour
             GameObject lineObject = Instantiate(staffLinePrefab, pentagramParent);
             lineObject.name = $"PentagramLine_{i}";
 
-            // Posizioniamo la linea in modo che inizi e finisca dove serve
-            // Per comodità, la ancoriamo dal centro (dipende da come è configurato il prefab),
-            // quindi il "center" sarà a metà della linea
-            // => Se vogliamo che la linea parta esattamente da transform.position.x,
-            //    il center dev'essere shiftato a metà della lunghezza
+            // Calcoliamo la posizione del centro della linea
             float lineCenterX = transform.position.x + lineLength * 0.5f;
             float lineCenterY = transform.position.y + yPos;
             float lineCenterZ = transform.position.z;
@@ -119,20 +115,17 @@ public class ScoreGenerator : MonoBehaviour
             // Ridimensioniamo la linea in base alla lunghezza calcolata
             Vector3 localScale = lineObject.transform.localScale;
             localScale.x = lineLength;  // L'asse X rappresenta la lunghezza orizzontale
-            localScale.y = lineWidth;   // Lo spessore della linea (asse Y), se il prefab è orientato correttamente
+            localScale.y = lineWidth;   // Lo spessore della linea (asse Y)
             // Manteniamo localScale.z inalterato oppure lo settiamo a 1f se serve
             lineObject.transform.localScale = localScale;
 
             // Se vogliamo assegnare un materiale o un colore specifico al prefab
-            // (dipende da come è fatto il prefab: MeshRenderer, SpriteRenderer, ecc.)
             MeshRenderer meshRenderer = lineObject.GetComponentInChildren<MeshRenderer>();
             if (meshRenderer != null && lineMaterial != null)
             {
                 meshRenderer.material = lineMaterial;
             }
-            // Se il prefab supporta un colore (es. MeshRenderer con un materiale standard),
-            // si potrebbe tentare di cambiare il colore di emissione o albedo:
-            // meshRenderer.material.color = lineColor;
+            // meshRenderer.material.color = lineColor; // Se vuoi forzare il colore
         }
     }
 

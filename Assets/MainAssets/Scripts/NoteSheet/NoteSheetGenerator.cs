@@ -18,15 +18,19 @@ public class ScoreGenerator : MonoBehaviour
     public float noteZBaseOffset = -0.1f;   // Offset di base sull'asse Z per portare le note davanti al pentagramma
 
     [Header("Pentagram Settings")]
-    public int numberOfLines = 5;    // Numero di linee del pentagramma
-    public float lineSpacing = 0.5f; // Spaziatura tra le linee del pentagramma
-    public float lineWidth = 0.1f;   // Spessore delle linee del pentagramma
+    public int numberOfLines = 5;           // Numero di linee del pentagramma
+    public float lineSpacing = 0.5f;        // Spaziatura tra le linee del pentagramma
+    public float lineWidth = 0.1f;          // Spessore delle linee del pentagramma
     public Color lineColor = Color.black;   // Colore delle linee
-    public Material lineMaterial;          // Materiale per le linee
-    public float lengthMultiplier = 1.0f;  // Moltiplicatore per la lunghezza dello spartito
+    public Material lineMaterial;           // Materiale per le linee
+
+    [Header("Staff Length Settings")]
+    public float lengthMultiplier = 1.0f;   // (Legacy) Moltiplicatore per la lunghezza di base
+    public float staffExtraLength = 1.0f;   // Offset extra per non far terminare lo spartito esattamente sull'ultima nota
 
     [ReadOnly]
     public float lineLength;
+
     private Transform pentagramParent;
     private Transform noteParent;
 
@@ -67,11 +71,10 @@ public class ScoreGenerator : MonoBehaviour
             return;
         }
 
-        // Imposta la lunghezza dello spartito in base alla grandezza della griglia e al moltiplicatore
-        lineLength = gridGenerator.gridSizeX * horizontalSpacing * lengthMultiplier;
-
-        InitializePentagram();
+        // Prima generiamo le note per calcolare la lunghezza massima dello spartito
         GenerateScore();
+        // Poi disegniamo il pentagramma in base alla nuova lunghezza
+        InitializePentagram();
     }
 
     private void InitializePentagram()
@@ -122,6 +125,8 @@ public class ScoreGenerator : MonoBehaviour
             noteParent.localPosition = Vector3.zero;
         }
 
+        float maxNoteX = 0f;  // Per tracciare la nota più a destra
+
         // Scorre la configurazione della griglia di soluzione
         for (int x = 0; x < gridGenerator.gridSizeX; x++)
         {
@@ -135,20 +140,32 @@ public class ScoreGenerator : MonoBehaviour
                     {
                         string noteName = gridGenerator.GetNoteNameFromY(y).ToString();
 
-                        // Per le note di durata Half e Whole creiamo solo la prima istanza orizzontale
-                        if (noteData.duration == NoteData.NoteDuration.Half || noteData.duration == NoteData.NoteDuration.Whole)
-                        {
-                            if (x > 0) continue;
-                        }
+                        // Per le note di durata Half e Whole, creiamo solo la prima istanza orizzontale (x == 0)
+                        if ((noteData.duration == NoteData.NoteDuration.Half || noteData.duration == NoteData.NoteDuration.Whole) && x > 0)
+                            continue;
 
-                        CreateNote(noteData, noteName, x, octave);
+                        // Istanzia la nota e aggiorna maxNoteX
+                        float actualXPos = CreateNote(noteData, noteName, x, octave);
+                        if (actualXPos > maxNoteX) maxNoteX = actualXPos;
                     }
                 }
             }
         }
+
+        // Calcola la lunghezza del pentagramma fino all'ultima nota + offset extra
+        // (Se non esistono note, fallback a gridGenerator.gridSizeX * horizontalSpacing * lengthMultiplier)
+        if (maxNoteX > 0f)
+        {
+            float staffStartX = transform.position.x;
+            lineLength = (maxNoteX - staffStartX) + staffExtraLength;
+        }
+        else
+        {
+            lineLength = gridGenerator.gridSizeX * horizontalSpacing * lengthMultiplier;
+        }
     }
 
-    private void CreateNote(NoteData noteData, string noteName, int x, int octave)
+    private float CreateNote(NoteData noteData, string noteName, int x, int octave)
     {
         GameObject notePrefab = null;
         switch (noteData.duration)
@@ -167,7 +184,7 @@ public class ScoreGenerator : MonoBehaviour
         if (notePrefab == null)
         {
             Debug.LogError("Nessun prefab assegnato per la durata nota: " + noteData.duration);
-            return;
+            return 0f;
         }
 
         float xPos = transform.position.x + (x * horizontalSpacing) + noteXOffset;
@@ -193,6 +210,8 @@ public class ScoreGenerator : MonoBehaviour
         {
             Debug.LogError("SpriteRenderer non trovato nel child del prefab della nota!");
         }
+
+        return xPos;
     }
 
     private void ClearScore()

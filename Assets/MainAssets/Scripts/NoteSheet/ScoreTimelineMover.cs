@@ -9,6 +9,7 @@ public class ScoreTimelineMover : MonoBehaviour
 
     private Vector3 startPosition;
     public float staffLength;
+    public float heightMultiplyer;
     private float maxStaffDistance;
     private float scoreboardSpeed;
 
@@ -42,18 +43,17 @@ public class ScoreTimelineMover : MonoBehaviour
             return;
         }
 
-        // Ora staffLength è pubblico in ScoreGenerator (o esposto con una proprietà)
-        //staffLength = scoreGenerator.lineLength;
+        // Prendiamo la lunghezza calcolata nello ScoreGenerator
+        staffLength = scoreGenerator.lineLength;
 
         float pentagramHeight = (scoreGenerator.numberOfLines - 1) * scoreGenerator.lineSpacing;
         Vector3 newScale = transform.localScale;
         newScale.x = 0.01f;
-        newScale.y = pentagramHeight;
+        newScale.y = pentagramHeight * heightMultiplyer;
         newScale.z = 0.01f;
         transform.localScale = newScale;
 
         // Allineare la timeline esattamente dove inizia lo spartito
-        // Supponiamo che lo spartito cominci a scoreGenerator.transform.position.x
         float staffLeftX = scoreGenerator.transform.position.x;
         float centerY = scoreGenerator.transform.position.y + pentagramHeight * 0.5f;
         float centerZ = scoreGenerator.transform.position.z;
@@ -61,7 +61,7 @@ public class ScoreTimelineMover : MonoBehaviour
         startPosition = new Vector3(staffLeftX, centerY, centerZ);
         transform.position = startPosition;
 
-        maxStaffDistance = staffLength;   // La timeline copre tutta la lunghezza dello spartito
+        maxStaffDistance = staffLength; // La timeline copre tutta la lunghezza dello spartito
 
         UpdateLocalParams();
         CalculateScoreboardSpeed();

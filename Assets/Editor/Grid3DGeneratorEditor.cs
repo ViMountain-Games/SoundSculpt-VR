@@ -10,7 +10,10 @@ using System.Linq;
 [CustomEditor(typeof(Grid3DGenerator))]
 public class Grid3DGeneratorEditor : Editor
 {
+    // **Modifica: Aggiunta una costante per allargare la larghezza della colonna con i nomi delle note**
     private const float CellSize = 20f;
+    private const float NoteNameLabelWidth = 80f; // Prima era uguale a CellSize, ora la aumentiamo per vedere meglio i nomi delle note.
+
     private bool showSolutionGrid = true; // Foldout per la solution grid
     private static NoteData[] allNotes;
 
@@ -25,13 +28,6 @@ public class Grid3DGeneratorEditor : Editor
         if (GUILayout.Button("Generate Grid")) gridGenerator.GenerateGrid();
         if (GUILayout.Button("Clear Grid")) gridGenerator.ClearGrid();
         EditorGUILayout.EndHorizontal();
-
-        // Visualizzazione GridMatrix (posizione attuale delle note)
-        // Adesso la rendiamo coerente con la visualizzazione della solution grid.
-        // Ciò significa che raggruppiamo anche la gridMatrix per ottave (Z).
-        // Per ogni Z (ottava), una tabella:
-        // - Riga di header: cella vuota + X in orizzontale
-        // - Righe: per ogni Y, la nota a sinistra + celle per ogni X
 
         if (gridGenerator.gridMatrix != null)
         {
@@ -57,7 +53,8 @@ public class Grid3DGeneratorEditor : Editor
                     EditorGUILayout.BeginHorizontal();
 
                     var noteName = gridGenerator.GetNoteNameFromY(y);
-                    DrawLeftAlignedLabel(gridGenerator.FormatNoteName(noteName), CellSize);
+                    // **Modifica: Usiamo NoteNameLabelWidth per la colonna delle note invece di CellSize**
+                    DrawLeftAlignedLabel(gridGenerator.FormatNoteName(noteName), NoteNameLabelWidth);
 
                     for (int x = 0; x < gridGenerator.gridSizeX; x++)
                     {
@@ -96,7 +93,6 @@ public class Grid3DGeneratorEditor : Editor
         EditorGUILayout.Space();
         EditorGUILayout.Space();
 
-        // Sezione Solution Grid Configuration (Grouped by Octave)
         EditorGUILayout.LabelField("Solution Grid Configuration (Grouped by Octave)", EditorStyles.boldLabel);
         EditorGUILayout.HelpBox("Le ottave (Z) formano tabelle separate, con note (Y) verticali e X orizzontale, come nella grid matrix.",
                                 MessageType.Info);
@@ -114,7 +110,7 @@ public class Grid3DGeneratorEditor : Editor
 
                 // Riga di header per X
                 EditorGUILayout.BeginHorizontal();
-                DrawLeftAlignedLabel("", CellSize);
+                DrawLeftAlignedLabel("", NoteNameLabelWidth); // **Modifica anche qui per coerenza, così si vede bene la nota**
                 for (int x = 0; x < gridGenerator.gridSizeX; x++)
                 {
                     DrawLeftAlignedLabel("X" + x, CellSize);
@@ -127,7 +123,8 @@ public class Grid3DGeneratorEditor : Editor
                     EditorGUILayout.BeginHorizontal();
 
                     var noteName = gridGenerator.GetNoteNameFromY(y);
-                    DrawLeftAlignedLabel(gridGenerator.FormatNoteName(noteName), CellSize);
+                    // **Modifica: Anche qui usiamo NoteNameLabelWidth**
+                    DrawLeftAlignedLabel(gridGenerator.FormatNoteName(noteName), NoteNameLabelWidth);
 
                     for (int x = 0; x < gridGenerator.gridSizeX; x++)
                     {
@@ -246,6 +243,7 @@ public class Grid3DGeneratorEditor : Editor
         return rect;
     }
 
+    // **Nessuna modifica all'interno del metodo, ma usiamo NoteNameLabelWidth per le note invece di CellSize**
     private void DrawLeftAlignedLabel(string text, float width)
     {
         GUILayoutOption[] options = { GUILayout.Width(width), GUILayout.Height(CellSize) };

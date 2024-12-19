@@ -56,28 +56,50 @@ public class ScoreGenerator : MonoBehaviour
 
     private float baseLineSpacing = 0.5f; // Spacing di riferimento originale
 
+    // **Modifica: Aggiunta mapping per note diesis e bemolli, stessa posizione delle note naturali**
     // Mappatura note -> posizione verticale
     private Dictionary<string, float> notePositionMapping = new Dictionary<string, float>
     {
-        { "Do", -0.50f },
-        { "Re", -0.25f },
-        { "Mi",  0.00f },
-        { "Fa",  0.25f },
-        { "Sol", 0.50f },
-        { "La",  0.75f },
-        { "Si",  1.00f }
+        { "Do",      -0.50f },
+        { "DoSharp", -0.50f },
+        { "ReFlat",  -0.25f },
+        { "Re",      -0.25f },
+        { "ReSharp", -0.25f },
+        { "MiFlat",   0.00f },
+        { "Mi",       0.00f },
+        { "Fa",       0.25f },
+        { "FaSharp",  0.25f },
+        { "SolFlat",  0.50f },
+        { "Sol",      0.50f },
+        { "SolSharp", 0.50f },
+        { "LaFlat",   0.75f },
+        { "La",       0.75f },
+        { "LaSharp",  0.75f },
+        { "SiFlat",   1.00f },
+        { "Si",       1.00f }
     };
 
+    // **Modifica: Aggiunta mapping per Z index delle note diesis e bemolli, stesso indice delle note naturali**
     // Mappatura note -> indice per l'incremento sulla Z
     private Dictionary<string, int> noteZIndex = new Dictionary<string, int>
     {
-        { "Do", 0 },
-        { "Re", 1 },
-        { "Mi", 2 },
-        { "Fa", 3 },
-        { "Sol",4 },
-        { "La", 5 },
-        { "Si", 6 }
+        { "Do",       0 },
+        { "DoSharp",  0 },
+        { "ReFlat",   1 },
+        { "Re",       1 },
+        { "ReSharp",  1 },
+        { "MiFlat",   2 },
+        { "Mi",       2 },
+        { "Fa",       3 },
+        { "FaSharp",  3 },
+        { "SolFlat",  4 },
+        { "Sol",      4 },
+        { "SolSharp", 4 },
+        { "LaFlat",   5 },
+        { "La",       5 },
+        { "LaSharp",  5 },
+        { "SiFlat",   6 },
+        { "Si",       6 }
     };
 
     void Start()
@@ -200,6 +222,9 @@ public class ScoreGenerator : MonoBehaviour
                     {
                         string noteName = gridGenerator.GetNoteNameFromY(y).ToString();
 
+                        // **Modifica: Controlliamo se la nota è # o b per assegnare la stringa corretta a noteName**
+                        // E' già ottenuto dal GetNoteNameFromY, che restituisce anche diesis/bemolle. Quindi noteName può essere ad es. "FaSharp" o "MiFlat".
+
                         // Per le note di durata Half e Whole, creiamo solo la prima istanza orizzontale (x == 0)
                         if ((noteData.duration == NoteData.NoteDuration.Half || noteData.duration == NoteData.NoteDuration.Whole) && x > 0)
                             continue;
@@ -256,10 +281,23 @@ public class ScoreGenerator : MonoBehaviour
 
         float xPos = transform.position.x + (x * horizontalSpacing) + noteXOffset;
 
+        // Calcolo della posizione Y in base al mapping modificato
+        if (!notePositionMapping.ContainsKey(noteName))
+        {
+            Debug.LogError("Nota non trovata nella mappatura: " + noteName);
+            return 0f;
+        }
+
         float spacingScale = lineSpacing / baseLineSpacing;
         float yPos = transform.position.y
                      + (notePositionMapping[noteName] * spacingScale)
                      + (octave - 3) * 3.5f * verticalOffset * spacingScale;
+
+        if (!noteZIndex.ContainsKey(noteName))
+        {
+            Debug.LogError("Nota non trovata nella mappatura Z: " + noteName);
+            return 0f;
+        }
 
         int zIndex = noteZIndex[noteName];
         float zPos = transform.position.z + noteZBaseOffset + (zIndex * noteZIncrement);
@@ -276,6 +314,34 @@ public class ScoreGenerator : MonoBehaviour
         else
         {
             Debug.LogError("SpriteRenderer non trovato nel child del prefab della nota!");
+        }
+
+        // **Modifica: Attivazione simboli diesis/bemolle**
+        // Troviamo i gameobject "Diesis" e "Bemolle" come figli di "NoteModel"
+        Transform noteModel = noteInstance.transform.Find("NoteModel");
+        if (noteModel != null)
+        {
+            Transform diesisObj = noteModel.Find("Diesis");
+            Transform bemolleObj = noteModel.Find("Bemolle");
+
+            if (diesisObj != null) diesisObj.gameObject.SetActive(false);
+            if (bemolleObj != null) bemolleObj.gameObject.SetActive(false);
+
+            // Se la nota è diesis (controlliamo se il nome contiene 'Sharp')
+            if (noteName.Contains("Sharp") && diesisObj != null)
+            {
+                diesisObj.gameObject.SetActive(true);
+            }
+
+            // Se la nota è bemolle (controlliamo se il nome contiene 'Flat')
+            if (noteName.Contains("Flat") && bemolleObj != null)
+            {
+                bemolleObj.gameObject.SetActive(true);
+            }
+        }
+        else
+        {
+            Debug.LogWarning("NoteModel non trovato all'interno del prefab della nota. Impossibile attivare Diesis/Bemolle.");
         }
 
         return xPos;

@@ -50,8 +50,9 @@ public class PulseToMusic : MonoBehaviour
     [ReadOnly, SelfFill]
     public Transform objectTransform;
 
+    // Riduci il numero di campioni a 64, tanto ne usiamo solo 16.
     [SerializeField, HideField]
-    private float[] spectrumData = new float[1024];
+    private float[] spectrumData = new float[64];
 
     private Vector3 baseScale;
     private float currentScaleMultiplier = 1.0f;
@@ -60,8 +61,11 @@ public class PulseToMusic : MonoBehaviour
     {
         // Ottiene automaticamente la scala corrente come base.
         baseScale = transform.localScale;
+
         if (!audioSource)
+        {
             Debug.LogWarning("AudioSource non assegnato! Assegna un AudioSource valido.", this);
+        }
 
         // Randomizza i valori solo se il bool è attivato
         if (randomizeAtStart)
@@ -69,31 +73,36 @@ public class PulseToMusic : MonoBehaviour
             pulseStrength = Random.Range(pulseStrengthMin, pulseStrengthMax);
             damping = Random.Range(dampingMin, dampingMax);
             sensitivityThreshold = Random.Range(sensitivityThresholdMin, sensitivityThresholdMax);
-
-            Debug.Log($"Parametri Randomizzati: pulseStrength={pulseStrength}, damping={damping}, sensitivityThreshold={sensitivityThreshold}", this);
         }
+
+        // Memorizza il riferimento al transform se necessario
+        if (!objectTransform)
+            objectTransform = transform;
     }
 
     private void Update()
     {
-        if (!audioSource || !audioSource.isPlaying)
+        // Se non c'è audio o non sta suonando, esci
+        if (audioSource == null || !audioSource.isPlaying)
             return;
 
         // Campiona lo spettro audio
         audioSource.GetSpectrumData(spectrumData, 0, FFTWindow.BlackmanHarris);
 
-        // Calcola energia nelle basse frequenze
+        // Calcola energia nelle basse frequenze (primi 16 campioni)
         float bassEnergy = 0f;
-        for (int i = 0; i < 16; i++) // Solo le prime 16 frequenze (basse frequenze)
+        for (int i = 0; i < 16; i++)
         {
             bassEnergy += spectrumData[i];
         }
 
         // Filtra i valori bassi in base alla soglia
-        bassEnergy = Mathf.Max(0, bassEnergy - sensitivityThreshold);
+        float effectiveEnergy = bassEnergy - sensitivityThreshold;
+        if (effectiveEnergy < 0f)
+            effectiveEnergy = 0f;
 
         // Mappa l'energia ai valori di scala
-        float targetScale = 1.0f + bassEnergy * pulseStrength;
+        float targetScale = 1.0f + effectiveEnergy * pulseStrength;
 
         // Applica smorzamento
         currentScaleMultiplier = Mathf.Lerp(currentScaleMultiplier, targetScale, Time.deltaTime * damping);

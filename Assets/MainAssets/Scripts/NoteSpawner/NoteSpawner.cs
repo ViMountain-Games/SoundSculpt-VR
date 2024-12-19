@@ -44,6 +44,9 @@ public class NoteSpawner : MonoBehaviour
     [Tooltip("Initial size of the pool for each prefab.")]
     public int initialPoolSize = 10;
 
+    [Button(nameof(SpawnNote),
+                label = "Spawn Note")]
+
     private List<Queue<GameObject>> objectPools; // Un pool (coda) per ciascun prefab
 
     private void Awake()
@@ -123,6 +126,7 @@ public class NoteSpawner : MonoBehaviour
         objectPools[prefabIndex].Enqueue(obj);
     }
 
+    
     public void SpawnNote()
     {
         // Validazione dei parametri

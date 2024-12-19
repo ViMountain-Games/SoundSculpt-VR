@@ -1,35 +1,49 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using GridGen;
-using CustomInspector;
+using CustomInspector; // Non so se necessario, ma lo mantengo dal tuo codice originale.
 
 public class ScoreGenerator : MonoBehaviour
 {
-    [Header("Note Prefabs")]
-    public GameObject quarterNotePrefab; // 1/4
-    public GameObject halfNotePrefab;    // 1/2
-    public GameObject wholeNotePrefab;   // 4/4
+    [Header("Note Type & Duration Prefabs")]
+    [Tooltip("Riferimento al NoteData per estrarre dinamicamente i tipi di nota disponibili.")]
+    public NoteData referenceNoteData;
+
+    [System.Serializable]
+    public class NoteTypePrefabs
+    {
+        public string noteType;
+        [Tooltip("Prefab della nota da 1/4 per questo tipo")]
+        public GameObject quarterNotePrefab;
+        [Tooltip("Prefab della nota da 2/4 per questo tipo")]
+        public GameObject halfNotePrefab;
+        [Tooltip("Prefab della nota da 4/4 per questo tipo")]
+        public GameObject wholeNotePrefab;
+    }
+
+    [Tooltip("Lista dinamica dei prefab per ciascun tipo di nota. Questa lista viene sincronizzata con i tipi presenti in NoteData.")]
+    public List<NoteTypePrefabs> noteTypePrefabsList = new List<NoteTypePrefabs>();
 
     [Header("Note Spacing Settings")]
-    public float horizontalSpacing = 1.0f;  // Spaziatura tra le note sull'asse X
-    public float verticalOffset = 0.5f;     // Distanza verticale base (usata per le ottave)
-    public float noteZIncrement = 0.05f;    // Incremento sull'asse Z dal basso verso l'alto
-    public float noteXOffset = 0.5f;        // Offset orizzontale per spostare le note a destra
-    public float noteZBaseOffset = -0.1f;   // Offset di base sull'asse Z per portare le note davanti al pentagramma
+    public float horizontalSpacing = 1.0f;
+    public float verticalOffset = 0.5f;
+    public float noteZIncrement = 0.05f;
+    public float noteXOffset = 0.5f;
+    public float noteZBaseOffset = -0.1f;
 
     [Header("Pentagram Settings")]
-    public int numberOfLines = 5;           // Numero di linee del pentagramma
-    public float lineSpacing = 0.5f;        // Spaziatura verticale tra le linee del pentagramma
-    public float lineWidth = 0.1f;          // Spessore (altezza) di ogni linea prefab
-    public Color lineColor = Color.black;   // Colore delle linee (se il prefab supporta un colore/mesh renderer)
-    public Material lineMaterial;           // (Opzionale) Materiale da assegnare al prefab della linea
+    public int numberOfLines = 5;
+    public float lineSpacing = 0.5f;
+    public float lineWidth = 0.1f;
+    public Color lineColor = Color.black;
+    public Material lineMaterial;
 
     [Header("Staff Line Prefab")]
-    public GameObject staffLinePrefab;      // **Prefab** da usare al posto dei LineRenderer per ciascuna riga del pentagramma
+    public GameObject staffLinePrefab;
 
     [Header("Staff Length Settings")]
-    public float lengthMultiplier = 1.0f;   // (Legacy) Moltiplicatore per la lunghezza di base
-    public float staffExtraLength = 1.0f;   // Offset extra per non far terminare lo spartito esattamente sull'ultima nota
+    public float lengthMultiplier = 1.0f;
+    public float staffExtraLength = 1.0f;
 
     [ReadOnly]
     public float lineLength;
@@ -80,6 +94,39 @@ public class ScoreGenerator : MonoBehaviour
         InitializePentagram();
     }
 
+    /// <summary>
+    /// Sincronizza i tipi di nota da NoteData con la lista di prefab.
+    /// Questo metodo viene chiamato in OnValidate() per avere sempre l'inspector aggiornato.
+    /// </summary>
+    private void SyncNoteTypes()
+    {
+        if (referenceNoteData == null) return;
+
+        // Creiamo una lista temporanea per gli attuali tipi di nota
+        List<string> currentNoteTypes = referenceNoteData.noteTypes;
+
+        // Rimuoviamo gli elementi che non esistono più
+        noteTypePrefabsList.RemoveAll(ntp => !currentNoteTypes.Contains(ntp.noteType));
+
+        // Aggiungiamo gli elementi nuovi
+        foreach (string newType in currentNoteTypes)
+        {
+            if (!noteTypePrefabsList.Exists(ntp => ntp.noteType == newType))
+            {
+                NoteTypePrefabs newEntry = new NoteTypePrefabs();
+                newEntry.noteType = newType;
+                noteTypePrefabsList.Add(newEntry);
+            }
+        }
+    }
+
+#if UNITY_EDITOR
+    private void OnValidate()
+    {
+        SyncNoteTypes();
+    }
+#endif
+
     private void InitializePentagram()
     {
         if (pentagramParent == null)
@@ -89,14 +136,14 @@ public class ScoreGenerator : MonoBehaviour
             pentagramParent.localPosition = Vector3.zero;
         }
 
-        // Se non esiste alcun prefab, usciamo
+        // Se non esiste alcun prefab per la linea del pentagramma, usciamo
         if (staffLinePrefab == null)
         {
             Debug.LogError("Staff Line Prefab non assegnato! Impossibile generare il pentagramma.");
             return;
         }
 
-        // Genera le linee del pentagramma usando il prefab anziché il LineRenderer
+        // Genera le linee del pentagramma usando il prefab
         for (int i = 0; i < numberOfLines; i++)
         {
             float yPos = i * lineSpacing;
@@ -105,7 +152,6 @@ public class ScoreGenerator : MonoBehaviour
             GameObject lineObject = Instantiate(staffLinePrefab, pentagramParent);
             lineObject.name = $"PentagramLine_{i}";
 
-            // Calcoliamo la posizione del centro della linea
             float lineCenterX = transform.position.x + lineLength * 0.5f;
             float lineCenterY = transform.position.y + yPos;
             float lineCenterZ = transform.position.z;
@@ -116,7 +162,6 @@ public class ScoreGenerator : MonoBehaviour
             Vector3 localScale = lineObject.transform.localScale;
             localScale.x = lineLength;  // L'asse X rappresenta la lunghezza orizzontale
             localScale.y = lineWidth;   // Lo spessore della linea (asse Y)
-            // Manteniamo localScale.z inalterato oppure lo settiamo a 1f se serve
             lineObject.transform.localScale = localScale;
 
             // Se vogliamo assegnare un materiale o un colore specifico al prefab
@@ -125,7 +170,6 @@ public class ScoreGenerator : MonoBehaviour
             {
                 meshRenderer.material = lineMaterial;
             }
-            // meshRenderer.material.color = lineColor; // Se vuoi forzare il colore
         }
     }
 
@@ -168,8 +212,7 @@ public class ScoreGenerator : MonoBehaviour
             }
         }
 
-        // Calcola la lunghezza del pentagramma fino all'ultima nota + offset extra
-        // (Se non esistono note, fallback a gridGenerator.gridSizeX * horizontalSpacing * lengthMultiplier)
+        // Calcola la lunghezza del pentagramma
         if (maxNoteX > 0f)
         {
             float staffStartX = transform.position.x;
@@ -183,23 +226,31 @@ public class ScoreGenerator : MonoBehaviour
 
     private float CreateNote(NoteData noteData, string noteName, int x, int octave)
     {
+        // Troviamo il set di prefab per il tipo di nota selezionato in noteData
+        NoteTypePrefabs chosenTypePrefabs = noteTypePrefabsList.Find(ntp => ntp.noteType == noteData.SelectedNoteType);
+        if (chosenTypePrefabs == null)
+        {
+            Debug.LogError("Nessun prefab configurato per il tipo di nota: " + noteData.SelectedNoteType);
+            return 0f;
+        }
+
         GameObject notePrefab = null;
         switch (noteData.duration)
         {
             case NoteData.NoteDuration.Quarter:
-                notePrefab = quarterNotePrefab;
+                notePrefab = chosenTypePrefabs.quarterNotePrefab;
                 break;
             case NoteData.NoteDuration.Half:
-                notePrefab = halfNotePrefab;
+                notePrefab = chosenTypePrefabs.halfNotePrefab;
                 break;
             case NoteData.NoteDuration.Whole:
-                notePrefab = wholeNotePrefab;
+                notePrefab = chosenTypePrefabs.wholeNotePrefab;
                 break;
         }
 
         if (notePrefab == null)
         {
-            Debug.LogError("Nessun prefab assegnato per la durata nota: " + noteData.duration);
+            Debug.LogError("Nessun prefab assegnato per la durata: " + noteData.duration + " del tipo di nota: " + noteData.SelectedNoteType);
             return 0f;
         }
 

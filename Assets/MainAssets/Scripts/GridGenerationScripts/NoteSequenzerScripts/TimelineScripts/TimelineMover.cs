@@ -2,6 +2,7 @@ using UnityEngine;
 using CustomInspector;
 using GridGen;
 using UnityEngine.Events;
+using System.Collections;
 
 namespace GridGen
 {
@@ -16,6 +17,10 @@ namespace GridGen
         [Range(0.1f, 2f)]
         public float timeScale = 1f;
         public Vector3 positionOffset = Vector3.zero;
+
+        [Header("Start Delay")]
+        [Tooltip("Ritardo in secondi prima che la timeline inizi a muoversi.")]
+        public float startDelay = 0f; // Nuova variabile per il ritardo
 
         [Header("Debug Settings")]
         public Color gizmoColor = Color.red;
@@ -96,10 +101,29 @@ namespace GridGen
         {
             if (!isMoving)
             {
-                isMoving = true;
-                transform.position = startPosition;
-                OnMovementStarted?.Invoke();
+                // Se c'è un ritardo definito, avvia una Coroutine
+                if (startDelay > 0f)
+                {
+                    StartCoroutine(DelayedStartMovement());
+                }
+                else
+                {
+                    BeginMovement();
+                }
             }
+        }
+
+        private IEnumerator DelayedStartMovement()
+        {
+            yield return new WaitForSeconds(startDelay);
+            BeginMovement();
+        }
+
+        private void BeginMovement()
+        {
+            isMoving = true;
+            transform.position = startPosition;
+            OnMovementStarted?.Invoke();
         }
 
         [ContextMenu("Stop Movement")]
@@ -154,10 +178,6 @@ namespace GridGen
                 {
                     note.PlayNote();
                 }
-            }
-            else
-            {
-                //Debug.Log("Timeline is not moving. Note will not play.");
             }
         }
 

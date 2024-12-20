@@ -30,6 +30,7 @@ public class ScoreGenerator : MonoBehaviour
     public float noteZIncrement = 0.05f;
     public float noteXOffset = 0.5f;
     public float noteZBaseOffset = -0.1f;
+    public float spaceNoteOffset = 0.2f;
 
     [Header("Pentagram Settings")]
     public int numberOfLines = 5;
@@ -56,7 +57,6 @@ public class ScoreGenerator : MonoBehaviour
 
     private float baseLineSpacing = 0.5f; // Spacing di riferimento originale
 
-    // **Modifica: Aggiunta mapping per note diesis e bemolli, stessa posizione delle note naturali**
     // Mappatura note -> posizione verticale
     private Dictionary<string, float> notePositionMapping = new Dictionary<string, float>
     {
@@ -79,7 +79,6 @@ public class ScoreGenerator : MonoBehaviour
         { "Si",       1.00f }
     };
 
-    // **Modifica: Aggiunta mapping per Z index delle note diesis e bemolli, stesso indice delle note naturali**
     // Mappatura note -> indice per l'incremento sulla Z
     private Dictionary<string, int> noteZIndex = new Dictionary<string, int>
     {
@@ -124,13 +123,10 @@ public class ScoreGenerator : MonoBehaviour
     {
         if (referenceNoteData == null) return;
 
-        // Creiamo una lista temporanea per gli attuali tipi di nota
         List<string> currentNoteTypes = referenceNoteData.noteTypes;
 
-        // Rimuoviamo gli elementi che non esistono più
         noteTypePrefabsList.RemoveAll(ntp => !currentNoteTypes.Contains(ntp.noteType));
 
-        // Aggiungiamo gli elementi nuovi
         foreach (string newType in currentNoteTypes)
         {
             if (!noteTypePrefabsList.Exists(ntp => ntp.noteType == newType))
@@ -158,19 +154,15 @@ public class ScoreGenerator : MonoBehaviour
             pentagramParent.localPosition = Vector3.zero;
         }
 
-        // Se non esiste alcun prefab per la linea del pentagramma, usciamo
         if (staffLinePrefab == null)
         {
             Debug.LogError("Staff Line Prefab non assegnato! Impossibile generare il pentagramma.");
             return;
         }
 
-        // Genera le linee del pentagramma usando il prefab
         for (int i = 0; i < numberOfLines; i++)
         {
             float yPos = i * lineSpacing;
-
-            // Istanziamo il prefab della linea
             GameObject lineObject = Instantiate(staffLinePrefab, pentagramParent);
             lineObject.name = $"PentagramLine_{i}";
 
@@ -180,13 +172,11 @@ public class ScoreGenerator : MonoBehaviour
 
             lineObject.transform.position = new Vector3(lineCenterX, lineCenterY, lineCenterZ);
 
-            // Ridimensioniamo la linea in base alla lunghezza calcolata
             Vector3 localScale = lineObject.transform.localScale;
-            localScale.x = lineLength;  // L'asse X rappresenta la lunghezza orizzontale
-            localScale.y = lineWidth;   // Lo spessore della linea (asse Y)
+            localScale.x = lineLength;
+            localScale.y = lineWidth;
             lineObject.transform.localScale = localScale;
 
-            // Se vogliamo assegnare un materiale o un colore specifico al prefab
             MeshRenderer meshRenderer = lineObject.GetComponentInChildren<MeshRenderer>();
             if (meshRenderer != null && lineMaterial != null)
             {
@@ -199,7 +189,6 @@ public class ScoreGenerator : MonoBehaviour
     {
         ClearScore();
 
-        // Crea un parent per le note
         if (noteParent == null)
         {
             noteParent = new GameObject("Notes").transform;
@@ -207,13 +196,16 @@ public class ScoreGenerator : MonoBehaviour
             noteParent.localPosition = Vector3.zero;
         }
 
-        float maxNoteX = 0f;  // Per tracciare la nota più a destra
+        float maxNoteX = 0f;
 
-        // Scorre la configurazione della griglia di soluzione
+        // Struttura di supporto per note alla stessa (x,z)
+        // Per ogni (x,z) raccogliamo le note e poi applichiamo offset
         for (int x = 0; x < gridGenerator.gridSizeX; x++)
         {
             for (int z = 0; z < gridGenerator.gridSizeZ; z++)
             {
+                List<NoteInfo> notesAtPosition = new List<NoteInfo>();
+
                 int octave = gridGenerator.GetOctaveFromZ(z);
                 for (int y = 0; y < gridGenerator.gridSizeY; y++)
                 {
@@ -222,22 +214,35 @@ public class ScoreGenerator : MonoBehaviour
                     {
                         string noteName = gridGenerator.GetNoteNameFromY(y).ToString();
 
-                        // **Modifica: Controlliamo se la nota è # o b per assegnare la stringa corretta a noteName**
-                        // E' già ottenuto dal GetNoteNameFromY, che restituisce anche diesis/bemolle. Quindi noteName può essere ad es. "FaSharp" o "MiFlat".
-
-                        // Per le note di durata Half e Whole, creiamo solo la prima istanza orizzontale (x == 0)
+                        // Per note Half e Whole, solo la prima colonna
                         if ((noteData.duration == NoteData.NoteDuration.Half || noteData.duration == NoteData.NoteDuration.Whole) && x > 0)
                             continue;
 
-                        // Istanzia la nota e aggiorna maxNoteX
-                        float actualXPos = CreateNote(noteData, noteName, x, octave);
+                        float actualXPos, actualYPos, actualZPos;
+                        GameObject noteInstance = CreateNote(noteData, noteName, x, octave, out actualXPos, out actualYPos, out actualZPos);
+
+                        notesAtPosition.Add(new NoteInfo(noteInstance, actualXPos, actualYPos, actualZPos));
+
                         if (actualXPos > maxNoteX) maxNoteX = actualXPos;
+                    }
+                }
+
+                // Se ci sono più note sovrapposte (accordi verticali), offset per quelle negli spazi
+                if (notesAtPosition.Count > 1)
+                {
+                    foreach (var noteInfo in notesAtPosition)
+                    {
+                        if (IsSpaceNote(noteInfo.yPos))
+                        {
+                            Vector3 pos = noteInfo.note.transform.position;
+                            pos.x += spaceNoteOffset;
+                            noteInfo.note.transform.position = pos;
+                        }
                     }
                 }
             }
         }
 
-        // Calcola la lunghezza del pentagramma
         if (maxNoteX > 0f)
         {
             float staffStartX = transform.position.x;
@@ -249,14 +254,15 @@ public class ScoreGenerator : MonoBehaviour
         }
     }
 
-    private float CreateNote(NoteData noteData, string noteName, int x, int octave)
+    private GameObject CreateNote(NoteData noteData, string noteName, int x, int octave, out float finalX, out float finalY, out float finalZ)
     {
-        // Troviamo il set di prefab per il tipo di nota selezionato in noteData
+        // Troviamo il prefab adatto
         NoteTypePrefabs chosenTypePrefabs = noteTypePrefabsList.Find(ntp => ntp.noteType == noteData.SelectedNoteType);
         if (chosenTypePrefabs == null)
         {
             Debug.LogError("Nessun prefab configurato per il tipo di nota: " + noteData.SelectedNoteType);
-            return 0f;
+            finalX = finalY = finalZ = 0f;
+            return null;
         }
 
         GameObject notePrefab = null;
@@ -276,16 +282,17 @@ public class ScoreGenerator : MonoBehaviour
         if (notePrefab == null)
         {
             Debug.LogError("Nessun prefab assegnato per la durata: " + noteData.duration + " del tipo di nota: " + noteData.SelectedNoteType);
-            return 0f;
+            finalX = finalY = finalZ = 0f;
+            return null;
         }
 
         float xPos = transform.position.x + (x * horizontalSpacing) + noteXOffset;
 
-        // Calcolo della posizione Y in base al mapping modificato
         if (!notePositionMapping.ContainsKey(noteName))
         {
             Debug.LogError("Nota non trovata nella mappatura: " + noteName);
-            return 0f;
+            finalX = finalY = finalZ = 0f;
+            return null;
         }
 
         float spacingScale = lineSpacing / baseLineSpacing;
@@ -296,15 +303,14 @@ public class ScoreGenerator : MonoBehaviour
         if (!noteZIndex.ContainsKey(noteName))
         {
             Debug.LogError("Nota non trovata nella mappatura Z: " + noteName);
-            return 0f;
+            finalX = finalY = finalZ = 0f;
+            return null;
         }
 
         int zIndex = noteZIndex[noteName];
         float zPos = transform.position.z + noteZBaseOffset + (zIndex * noteZIncrement);
 
-        Vector3 notePosition = new Vector3(xPos, yPos, zPos);
-
-        GameObject noteInstance = Instantiate(notePrefab, notePosition, Quaternion.identity, noteParent);
+        GameObject noteInstance = Instantiate(notePrefab, new Vector3(xPos, yPos, zPos), Quaternion.identity, noteParent);
 
         SpriteRenderer spriteRenderer = noteInstance.GetComponentInChildren<SpriteRenderer>();
         if (spriteRenderer != null)
@@ -316,8 +322,6 @@ public class ScoreGenerator : MonoBehaviour
             Debug.LogError("SpriteRenderer non trovato nel child del prefab della nota!");
         }
 
-        // **Modifica: Attivazione simboli diesis/bemolle**
-        // Troviamo i gameobject "Diesis" e "Bemolle" come figli di "NoteModel"
         Transform noteModel = noteInstance.transform.Find("NoteModel");
         if (noteModel != null)
         {
@@ -327,13 +331,11 @@ public class ScoreGenerator : MonoBehaviour
             if (diesisObj != null) diesisObj.gameObject.SetActive(false);
             if (bemolleObj != null) bemolleObj.gameObject.SetActive(false);
 
-            // Se la nota è diesis (controlliamo se il nome contiene 'Sharp')
             if (noteName.Contains("Sharp") && diesisObj != null)
             {
                 diesisObj.gameObject.SetActive(true);
             }
 
-            // Se la nota è bemolle (controlliamo se il nome contiene 'Flat')
             if (noteName.Contains("Flat") && bemolleObj != null)
             {
                 bemolleObj.gameObject.SetActive(true);
@@ -344,7 +346,11 @@ public class ScoreGenerator : MonoBehaviour
             Debug.LogWarning("NoteModel non trovato all'interno del prefab della nota. Impossibile attivare Diesis/Bemolle.");
         }
 
-        return xPos;
+        finalX = xPos;
+        finalY = yPos;
+        finalZ = zPos;
+
+        return noteInstance;
     }
 
     private void ClearScore()
@@ -357,7 +363,6 @@ public class ScoreGenerator : MonoBehaviour
             }
         }
 
-        // Rimuove eventuali linee già disegnate
         if (pentagramParent != null)
         {
             foreach (Transform child in pentagramParent)
@@ -365,5 +370,37 @@ public class ScoreGenerator : MonoBehaviour
                 Destroy(child.gameObject);
             }
         }
+    }
+
+    // Classe di appoggio per salvare info sulle note create
+    private class NoteInfo
+    {
+        public GameObject note;
+        public float xPos;
+        public float yPos;
+        public float zPos;
+        public NoteInfo(GameObject note, float x, float y, float z)
+        {
+            this.note = note;
+            this.xPos = x;
+            this.yPos = y;
+            this.zPos = z;
+        }
+    }
+
+    // Determina se la nota è in uno spazio o su una linea
+    // Se (yPos - baseY) / lineSpacing è vicino ad un intero => linea, altrimenti spazio
+    private bool IsSpaceNote(float yPos)
+    {
+        float baseY = transform.position.y;
+        float normalized = (yPos - baseY) / lineSpacing;
+
+        // Controlliamo la vicinanza all'intero
+        float nearestInt = Mathf.Round(normalized);
+        float diff = Mathf.Abs(normalized - nearestInt);
+
+        // Se differenza è molto piccola (es < 0.01), consideriamo che sia su linea
+        // Altrimenti è uno spazio
+        return diff > 0.01f;
     }
 }

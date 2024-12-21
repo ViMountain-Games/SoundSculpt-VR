@@ -125,6 +125,10 @@ namespace GridGen
         [Header("Auto Generate Settings")]
         public bool generateOnStart = false;
 
+        [SerializeField]
+        private MeshRendererActivatorManager meshActivatorManager;
+
+
         [Title("Solution Grid Configuration (NoteData)")]
         [Tooltip("Array monodimensionale per gestire la solution grid")]
         [SerializeField]
@@ -147,6 +151,9 @@ namespace GridGen
             {
                 Debug.LogError("Un'altra istanza di Grid3DGenerator esiste già!");
             }
+
+            if (MeshRendererActivatorManager.Instance != null)
+                meshActivatorManager = MeshRendererActivatorManager.Instance;
 
             if (generateOnStart)
             {
@@ -345,7 +352,14 @@ namespace GridGen
                             z * cellSize.value + cellSize.value / 2
                         );
 
-                        Instantiate(cellPrefab, cellCenter, Quaternion.identity, transform);
+                        GameObject newCell = Instantiate(cellPrefab, cellCenter, Quaternion.identity, transform);
+
+                        // >>> REGISTRAZIONE AL MANAGER <<<
+                        if (meshActivatorManager != null)
+                        {
+                            meshActivatorManager.RegisterCell(newCell);
+                        }
+
                         gridMatrix[x, y, z] = null;
 
                         yield return new WaitForSeconds(cellInstantiationDelay);
@@ -353,6 +367,7 @@ namespace GridGen
                 }
             }
         }
+
 
         private void GenerateBarLines(Vector3 origin)
         {

@@ -509,6 +509,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Note1_4
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: fd993ff36446c1a4d9187a7b0481627d, type: 3}
+      propertyPath: m_TagString
+      value: Note
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

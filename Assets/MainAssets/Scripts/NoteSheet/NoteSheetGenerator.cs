@@ -1,28 +1,28 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using GridGen;
-using CustomInspector; // Non so se necessario, ma lo mantengo dal tuo codice originale.
+using CustomInspector; // Se nel tuo progetto serve, altrimenti rimuovi.
 
 public class ScoreGenerator : MonoBehaviour
 {
-    [Header("Note Type & Duration Prefabs")]
-    [Tooltip("Riferimento al NoteData per estrarre dinamicamente i tipi di nota disponibili.")]
+    [Header("Note Data")]
     public NoteData referenceNoteData;
 
     [System.Serializable]
     public class NoteTypePrefabs
     {
         public string noteType;
-        [Tooltip("Prefab della nota da 1/4 per questo tipo")]
         public GameObject quarterNotePrefab;
-        [Tooltip("Prefab della nota da 2/4 per questo tipo")]
         public GameObject halfNotePrefab;
-        [Tooltip("Prefab della nota da 4/4 per questo tipo")]
         public GameObject wholeNotePrefab;
     }
 
-    [Tooltip("Lista dinamica dei prefab per ciascun tipo di nota. Questa lista viene sincronizzata con i tipi presenti in NoteData.")]
     public List<NoteTypePrefabs> noteTypePrefabsList = new List<NoteTypePrefabs>();
+
+    [Header("Rest Prefabs (Pause)")]
+    public GameObject quarterRestPrefab; // gialla => 1/4
+    public GameObject halfRestPrefab;    // arancione => 2/4
+    public GameObject wholeRestPrefab;   // rossa => 4/4
 
     [Header("Note Spacing Settings")]
     public float horizontalSpacing = 1.0f;
@@ -38,8 +38,6 @@ public class ScoreGenerator : MonoBehaviour
     public float lineWidth = 0.1f;
     public Color lineColor = Color.black;
     public Material lineMaterial;
-
-    [Header("Staff Line Prefab")]
     public GameObject staffLinePrefab;
 
     [Header("Staff Length Settings")]
@@ -55,9 +53,15 @@ public class ScoreGenerator : MonoBehaviour
     [Header("Grid Settings")]
     public Grid3DGenerator gridGenerator;
 
-    private float baseLineSpacing = 0.5f; // Spacing di riferimento originale
+    // ==========================
+    //   BAR LINE (prefab)
+    // ==========================
+    [Header("Bar Line Settings")]
+    public GameObject barLinePrefab;  // Il prefab della bar line
 
-    // Mappatura note -> posizione verticale
+    private float baseLineSpacing = 0.5f; // Spacing di riferimento
+
+    // Mappa delle note -> offset verticale
     private Dictionary<string, float> notePositionMapping = new Dictionary<string, float>
     {
         { "Do",      -0.50f },
@@ -79,7 +83,7 @@ public class ScoreGenerator : MonoBehaviour
         { "Si",       1.00f }
     };
 
-    // Mappatura note -> indice per l'incremento sulla Z
+    // Mappa delle note -> indice per lo spostamento sulla Z
     private Dictionary<string, int> noteZIndex = new Dictionary<string, int>
     {
         { "Do",       0 },
@@ -101,6 +105,12 @@ public class ScoreGenerator : MonoBehaviour
         { "Si",       6 }
     };
 
+    // Occupato [z, x]
+    private bool[,] occupied;
+
+    // Lista delle posizioni di bar line (colonne) calcolata da gridGenerator.cellsPerBar
+    private List<int> barColumns = new List<int>();
+
     void Start()
     {
         if (gridGenerator == null)
@@ -109,33 +119,13 @@ public class ScoreGenerator : MonoBehaviour
             return;
         }
 
-        // Prima generiamo le note per calcolare la lunghezza massima dello spartito
+        occupied = new bool[gridGenerator.gridSizeZ, gridGenerator.gridSizeX];
+
+        // Calcoliamo tutte le bar line in base a cellsPerBar
+        ComputeBarColumns();
+
         GenerateScore();
-        // Poi disegniamo il pentagramma in base alla nuova lunghezza
         InitializePentagram();
-    }
-
-    /// <summary>
-    /// Sincronizza i tipi di nota da NoteData con la lista di prefab.
-    /// Questo metodo viene chiamato in OnValidate() per avere sempre l'inspector aggiornato.
-    /// </summary>
-    private void SyncNoteTypes()
-    {
-        if (referenceNoteData == null) return;
-
-        List<string> currentNoteTypes = referenceNoteData.noteTypes;
-
-        noteTypePrefabsList.RemoveAll(ntp => !currentNoteTypes.Contains(ntp.noteType));
-
-        foreach (string newType in currentNoteTypes)
-        {
-            if (!noteTypePrefabsList.Exists(ntp => ntp.noteType == newType))
-            {
-                NoteTypePrefabs newEntry = new NoteTypePrefabs();
-                newEntry.noteType = newType;
-                noteTypePrefabsList.Add(newEntry);
-            }
-        }
     }
 
 #if UNITY_EDITOR
@@ -145,6 +135,221 @@ public class ScoreGenerator : MonoBehaviour
     }
 #endif
 
+    private void SyncNoteTypes()
+    {
+        if (referenceNoteData == null) return;
+        List<string> currentNoteTypes = referenceNoteData.noteTypes;
+
+        // Rimuove tipi non più presenti
+        noteTypePrefabsList.RemoveAll(ntp => !currentNoteTypes.Contains(ntp.noteType));
+
+        // Aggiunge quelli nuovi
+        foreach (string newType in currentNoteTypes)
+        {
+            if (!noteTypePrefabsList.Exists(ntp => ntp.noteType == newType))
+            {
+                noteTypePrefabsList.Add(new NoteTypePrefabs { noteType = newType });
+            }
+        }
+    }
+
+    /// <summary>
+    /// Prepara la lista barColumns, ossia le colonne (x) dove cade una bar line.
+    /// Esempio: se cellsPerBar=4 e gridSizeX=12, avremo barColumns = [4,8].
+    /// </summary>
+    private void ComputeBarColumns()
+    {
+        barColumns.Clear();
+        int step = gridGenerator.cellsPerBar;
+        if (step < 1) step = 4; // fallback
+
+        for (int x = step; x < gridGenerator.gridSizeX; x += step)
+        {
+            barColumns.Add(x);
+        }
+    }
+
+    private void GenerateScore()
+    {
+        ClearScore();
+
+        noteParent = new GameObject("Notes").transform;
+        noteParent.SetParent(transform);
+        noteParent.localPosition = Vector3.zero;
+
+        // STEP 1: posizioniamo le NOTE
+        for (int x = 0; x < gridGenerator.gridSizeX; x++)
+        {
+            for (int z = 0; z < gridGenerator.gridSizeZ; z++)
+            {
+                List<NoteInfo> notesAtPosition = new List<NoteInfo>();
+                int octave = gridGenerator.GetOctaveFromZ(z);
+
+                for (int y = 0; y < gridGenerator.gridSizeY; y++)
+                {
+                    NoteData nd = gridGenerator.GetSolutionCell(x, y, z);
+                    if (nd == null) continue;
+
+                    string noteName = gridGenerator.GetNoteNameFromY(y).ToString();
+                    int neededCols = GetNeededCols(nd.duration);
+
+                    if (x + neededCols - 1 >= gridGenerator.gridSizeX)
+                        continue; // sfora la griglia
+
+                    // Se [x.. x+neededCols-1] è libero, piazza la nota
+                    if (IsFree(x, z, neededCols))
+                    {
+                        float xPos, yPos, zPos;
+                        GameObject noteInstance = CreateNote(nd, noteName, x, octave, out xPos, out yPos, out zPos);
+                        if (noteInstance != null)
+                        {
+                            notesAtPosition.Add(new NoteInfo(noteInstance, xPos, yPos, zPos));
+                            MarkColumnsOccupied(x, z, neededCols);
+                        }
+                    }
+                }
+
+                // Se ci sono più note in (x,z), spostiamo quelle in "space"
+                if (notesAtPosition.Count > 1)
+                {
+                    foreach (var noteInfo in notesAtPosition)
+                    {
+                        if (IsSpaceNote(noteInfo.yPos))
+                        {
+                            Vector3 pos = noteInfo.note.transform.position;
+                            pos.x += spaceNoteOffset;
+                            noteInfo.note.transform.position = pos;
+                        }
+                    }
+                }
+            }
+        }
+
+        // STEP 2: posizioniamo le PAUSE
+        for (int z = 0; z < gridGenerator.gridSizeZ; z++)
+        {
+            FillRestsForRow(z);
+        }
+
+        // STEP 3: Calcolo lunghezza staff
+        lineLength = (gridGenerator.gridSizeX * horizontalSpacing) * lengthMultiplier + staffExtraLength;
+    }
+
+    /// <summary>
+    /// Riempie le colonne libere in riga z con pause.
+    /// Se la pausa andrebbe oltre una bar line, la interrompiamo.
+    /// </summary>
+    private void FillRestsForRow(int z)
+    {
+        int totalCols = gridGenerator.gridSizeX;
+        int c = 0;
+
+        while (c < totalCols)
+        {
+            if (occupied[z, c])
+            {
+                c++;
+                continue;
+            }
+
+            // Trovato uno spazio libero => calcoliamo la lunghezza di questo "gap"
+            int start = c;
+            int length = 0;
+            while (c < totalCols && !occupied[z, c])
+            {
+                c++;
+                length++;
+            }
+            int end = start + length - 1;
+
+            // Suddividiamo [start..end] in base alle bar line e riempiamo con FillRestsInRange
+            SplitByBarLinesAndFill(z, start, end);
+        }
+    }
+
+    /// <summary>
+    /// Prende il gap [startCol..endCol] e lo spezza in sub-range se c’è una bar line in mezzo.
+    /// Esempio: se bar line è a 8 e [start..end] = [5..10], facciamo [5..7] e [8..10].
+    /// </summary>
+    private void SplitByBarLinesAndFill(int z, int startCol, int endCol)
+    {
+        // Può esserci più di una bar line dentro [startCol..endCol].
+        int currentStart = startCol;
+
+        foreach (int barCol in barColumns)
+        {
+            // Se la bar line cade entro l'intervallo
+            if (barCol > currentStart && barCol <= endCol)
+            {
+                // Prima sub-range [currentStart..(barCol-1)]
+                int subEnd = barCol - 1;
+                if (subEnd >= currentStart)
+                {
+                    FillRestsInRange(z, currentStart, subEnd);
+                }
+                // poi spostiamo lo start dopo la bar line
+                currentStart = barCol;
+            }
+        }
+
+        // Alla fine, ci resta [currentStart..endCol]
+        if (currentStart <= endCol)
+        {
+            FillRestsInRange(z, currentStart, endCol);
+        }
+    }
+
+    /// <summary>
+    /// Riempi l’intervallo [startCol..endCol] con pause (4/4, 2/4, 1/4),
+    /// tenendo conto che qui NON ci sono bar line in mezzo.
+    /// </summary>
+    private void FillRestsInRange(int z, int startCol, int endCol)
+    {
+        int gap = (endCol - startCol) + 1;
+        int offset = 0;
+
+        while (offset < gap)
+        {
+            int remain = gap - offset;
+
+            // Se c’è spazio per 4 e hai wholeRestPrefab
+            if (remain >= 4 && wholeRestPrefab != null)
+            {
+                int col = startCol + offset;
+                CreateRest(wholeRestPrefab, col, z);
+                MarkColumnsOccupied(col, z, 4);
+                offset += 4;
+            }
+            // Se c’è spazio per 2 e hai halfRestPrefab
+            else if (remain >= 2 && halfRestPrefab != null)
+            {
+                int col = startCol + offset;
+                CreateRest(halfRestPrefab, col, z);
+                MarkColumnsOccupied(col, z, 2);
+                offset += 2;
+            }
+            else
+            {
+                // Piazziamo 1/4
+                if (quarterRestPrefab != null)
+                {
+                    int col = startCol + offset;
+                    CreateRest(quarterRestPrefab, col, z);
+                    MarkColumnsOccupied(col, z, 1);
+                    offset += 1;
+                }
+                else
+                {
+                    Debug.LogWarning("Manca quarterRestPrefab!");
+                    break;
+                }
+            }
+        }
+    }
+
+    // ============================
+    //   BAR LINE VISUAL
+    // ============================
     private void InitializePentagram()
     {
         if (pentagramParent == null)
@@ -156,10 +361,11 @@ public class ScoreGenerator : MonoBehaviour
 
         if (staffLinePrefab == null)
         {
-            Debug.LogError("Staff Line Prefab non assegnato! Impossibile generare il pentagramma.");
+            Debug.LogError("Staff Line Prefab non assegnato!");
             return;
         }
 
+        // Disegno le 5 linee
         for (int i = 0; i < numberOfLines; i++)
         {
             float yPos = i * lineSpacing;
@@ -177,112 +383,122 @@ public class ScoreGenerator : MonoBehaviour
             localScale.y = lineWidth;
             lineObject.transform.localScale = localScale;
 
-            MeshRenderer meshRenderer = lineObject.GetComponentInChildren<MeshRenderer>();
+            var meshRenderer = lineObject.GetComponentInChildren<MeshRenderer>();
             if (meshRenderer != null && lineMaterial != null)
             {
                 meshRenderer.material = lineMaterial;
             }
         }
+
+        // Bar lines
+        InitializeBarLines();
     }
 
-    private void GenerateScore()
+    /// <summary>
+    /// Disegna le bar line visuali (verticali) ogni cellsPerBar colonne
+    /// </summary>
+    private void InitializeBarLines()
     {
-        ClearScore();
+        if (barLinePrefab == null) return;
 
-        if (noteParent == null)
+        Transform barLinesParent = new GameObject("BarLines").transform;
+        barLinesParent.SetParent(transform);
+        barLinesParent.localPosition = Vector3.zero;
+
+        // Altezza totale: dalla prima riga (0) all’ultima riga (numberOfLines-1)
+        float totalHeight = (numberOfLines - 1) * lineSpacing;
+
+        foreach (int barCol in barColumns)
         {
-            noteParent = new GameObject("Notes").transform;
-            noteParent.SetParent(transform);
-            noteParent.localPosition = Vector3.zero;
-        }
+            float xPos = transform.position.x + (barCol * horizontalSpacing);
+            float centerY = transform.position.y + (totalHeight / 2f);
+            float zPos = transform.position.z;
 
-        float maxNoteX = 0f;
+            GameObject barLineObj = Instantiate(barLinePrefab, new Vector3(xPos, centerY, zPos), Quaternion.identity, barLinesParent);
+            barLineObj.name = $"BarLine_{barCol}";
 
-        // Struttura di supporto per note alla stessa (x,z)
-        // Per ogni (x,z) raccogliamo le note e poi applichiamo offset
-        for (int x = 0; x < gridGenerator.gridSizeX; x++)
-        {
-            for (int z = 0; z < gridGenerator.gridSizeZ; z++)
-            {
-                List<NoteInfo> notesAtPosition = new List<NoteInfo>();
-
-                int octave = gridGenerator.GetOctaveFromZ(z);
-                for (int y = 0; y < gridGenerator.gridSizeY; y++)
-                {
-                    NoteData noteData = gridGenerator.GetSolutionCell(x, y, z);
-                    if (noteData != null)
-                    {
-                        string noteName = gridGenerator.GetNoteNameFromY(y).ToString();
-
-                        // Per note Half e Whole, solo la prima colonna
-                        if ((noteData.duration == NoteData.NoteDuration.Half || noteData.duration == NoteData.NoteDuration.Whole) && x > 0)
-                            continue;
-
-                        float actualXPos, actualYPos, actualZPos;
-                        GameObject noteInstance = CreateNote(noteData, noteName, x, octave, out actualXPos, out actualYPos, out actualZPos);
-
-                        notesAtPosition.Add(new NoteInfo(noteInstance, actualXPos, actualYPos, actualZPos));
-
-                        if (actualXPos > maxNoteX) maxNoteX = actualXPos;
-                    }
-                }
-
-                // Se ci sono più note sovrapposte (accordi verticali), offset per quelle negli spazi
-                if (notesAtPosition.Count > 1)
-                {
-                    foreach (var noteInfo in notesAtPosition)
-                    {
-                        if (IsSpaceNote(noteInfo.yPos))
-                        {
-                            Vector3 pos = noteInfo.note.transform.position;
-                            pos.x += spaceNoteOffset;
-                            noteInfo.note.transform.position = pos;
-                        }
-                    }
-                }
-            }
-        }
-
-        if (maxNoteX > 0f)
-        {
-            float staffStartX = transform.position.x;
-            lineLength = (maxNoteX - staffStartX) + staffExtraLength;
-        }
-        else
-        {
-            lineLength = gridGenerator.gridSizeX * horizontalSpacing * lengthMultiplier;
+            Vector3 scale = barLineObj.transform.localScale;
+            scale.x = lineWidth;   // spessore
+            scale.y = totalHeight; // altezza
+            barLineObj.transform.localScale = scale;
         }
     }
 
-    private GameObject CreateNote(NoteData noteData, string noteName, int x, int octave, out float finalX, out float finalY, out float finalZ)
+    // -----------------------------------------------------
+    //       Metodi di supporto per occupazione e note
+    // -----------------------------------------------------
+    private bool IsFree(int x, int z, int neededCols)
     {
-        // Troviamo il prefab adatto
-        NoteTypePrefabs chosenTypePrefabs = noteTypePrefabsList.Find(ntp => ntp.noteType == noteData.SelectedNoteType);
-        if (chosenTypePrefabs == null)
+        for (int col = x; col < x + neededCols; col++)
         {
-            Debug.LogError("Nessun prefab configurato per il tipo di nota: " + noteData.SelectedNoteType);
-            finalX = finalY = finalZ = 0f;
+            if (occupied[z, col]) return false;
+        }
+        return true;
+    }
+
+    private void MarkColumnsOccupied(int x, int z, int count)
+    {
+        int max = Mathf.Min(x + count, gridGenerator.gridSizeX);
+        for (int col = x; col < max; col++)
+        {
+            occupied[z, col] = true;
+        }
+    }
+
+    private int GetNeededCols(NoteData.NoteDuration duration)
+    {
+        switch (duration)
+        {
+            case NoteData.NoteDuration.Quarter: return 1; // gialla
+            case NoteData.NoteDuration.Half: return 2; // arancione
+            case NoteData.NoteDuration.Whole: return 4; // rossa
+        }
+        return 1;
+    }
+
+    private GameObject CreateRest(GameObject restPrefab, int x, int z)
+    {
+        if (restPrefab == null) return null;
+        int middleLine = numberOfLines / 2;
+        float yPos = transform.position.y + (middleLine * lineSpacing);
+        float xPos = transform.position.x + (x * horizontalSpacing) + noteXOffset;
+        float zPos = transform.position.z + noteZBaseOffset + (z * 0.01f);
+
+        GameObject rest = Instantiate(restPrefab, new Vector3(xPos, yPos, zPos), Quaternion.identity, noteParent);
+        rest.name = $"Rest_{x}_{z}";
+        return rest;
+    }
+
+    private GameObject CreateNote(NoteData nd, string noteName, int x, int octave,
+                                  out float finalX, out float finalY, out float finalZ)
+    {
+        finalX = finalY = finalZ = 0f;
+        if (nd == null) return null;
+
+        NoteTypePrefabs chosen = noteTypePrefabsList.Find(ntp => ntp.noteType == nd.SelectedNoteType);
+        if (chosen == null)
+        {
+            Debug.LogWarning("Manca il prefab per la nota: " + nd.SelectedNoteType);
             return null;
         }
 
         GameObject notePrefab = null;
-        switch (noteData.duration)
+        switch (nd.duration)
         {
             case NoteData.NoteDuration.Quarter:
-                notePrefab = chosenTypePrefabs.quarterNotePrefab;
+                notePrefab = chosen.quarterNotePrefab;
                 break;
             case NoteData.NoteDuration.Half:
-                notePrefab = chosenTypePrefabs.halfNotePrefab;
+                notePrefab = chosen.halfNotePrefab;
                 break;
             case NoteData.NoteDuration.Whole:
-                notePrefab = chosenTypePrefabs.wholeNotePrefab;
+                notePrefab = chosen.wholeNotePrefab;
                 break;
         }
 
         if (notePrefab == null)
         {
-            Debug.LogError("Nessun prefab assegnato per la durata: " + noteData.duration + " del tipo di nota: " + noteData.SelectedNoteType);
-            finalX = finalY = finalZ = 0f;
+            Debug.LogWarning($"Prefab non trovato per {nd.SelectedNoteType} - {nd.duration}");
             return null;
         }
 
@@ -290,39 +506,28 @@ public class ScoreGenerator : MonoBehaviour
 
         if (!notePositionMapping.ContainsKey(noteName))
         {
-            Debug.LogError("Nota non trovata nella mappatura: " + noteName);
-            finalX = finalY = finalZ = 0f;
+            Debug.LogWarning("Nota non trovata: " + noteName);
             return null;
         }
-
         float spacingScale = lineSpacing / baseLineSpacing;
         float yPos = transform.position.y
                      + (notePositionMapping[noteName] * spacingScale)
-                     + (octave - 3) * 3.5f * verticalOffset * spacingScale;
+                     + ((octave - 3) * 3.5f * verticalOffset * spacingScale);
 
         if (!noteZIndex.ContainsKey(noteName))
         {
-            Debug.LogError("Nota non trovata nella mappatura Z: " + noteName);
-            finalX = finalY = finalZ = 0f;
+            Debug.LogWarning("Nota ZIndex mancante: " + noteName);
             return null;
         }
-
         int zIndex = noteZIndex[noteName];
         float zPos = transform.position.z + noteZBaseOffset + (zIndex * noteZIncrement);
 
-        GameObject noteInstance = Instantiate(notePrefab, new Vector3(xPos, yPos, zPos), Quaternion.identity, noteParent);
+        GameObject instance = Instantiate(notePrefab, new Vector3(xPos, yPos, zPos), Quaternion.identity, noteParent);
 
-        SpriteRenderer spriteRenderer = noteInstance.GetComponentInChildren<SpriteRenderer>();
-        if (spriteRenderer != null)
-        {
-            spriteRenderer.color = noteData.color;
-        }
-        else
-        {
-            Debug.LogError("SpriteRenderer non trovato nel child del prefab della nota!");
-        }
+        SpriteRenderer sr = instance.GetComponentInChildren<SpriteRenderer>();
+        if (sr != null) sr.color = nd.color;
 
-        Transform noteModel = noteInstance.transform.Find("NoteModel");
+        Transform noteModel = instance.transform.Find("NoteModel");
         if (noteModel != null)
         {
             Transform diesisObj = noteModel.Find("Diesis");
@@ -331,54 +536,45 @@ public class ScoreGenerator : MonoBehaviour
             if (diesisObj != null) diesisObj.gameObject.SetActive(false);
             if (bemolleObj != null) bemolleObj.gameObject.SetActive(false);
 
-            if (noteName.Contains("Sharp") && diesisObj != null)
-            {
-                diesisObj.gameObject.SetActive(true);
-            }
-
-            if (noteName.Contains("Flat") && bemolleObj != null)
-            {
-                bemolleObj.gameObject.SetActive(true);
-            }
-        }
-        else
-        {
-            Debug.LogWarning("NoteModel non trovato all'interno del prefab della nota. Impossibile attivare Diesis/Bemolle.");
+            if (noteName.Contains("Sharp") && diesisObj != null) diesisObj.gameObject.SetActive(true);
+            if (noteName.Contains("Flat") && bemolleObj != null) bemolleObj.gameObject.SetActive(true);
         }
 
         finalX = xPos;
         finalY = yPos;
         finalZ = zPos;
+        return instance;
+    }
 
-        return noteInstance;
+    private bool IsSpaceNote(float yPos)
+    {
+        float baseY = transform.position.y;
+        float normalized = (yPos - baseY) / lineSpacing;
+        float nearest = Mathf.Round(normalized);
+        return (Mathf.Abs(normalized - nearest) > 0.01f);
     }
 
     private void ClearScore()
     {
-        if (noteParent != null)
-        {
-            foreach (Transform child in noteParent)
-            {
-                Destroy(child.gameObject);
-            }
-        }
+        if (noteParent != null) DestroyImmediate(noteParent.gameObject);
+        if (pentagramParent != null) DestroyImmediate(pentagramParent.gameObject);
 
-        if (pentagramParent != null)
+        for (int z = 0; z < gridGenerator.gridSizeZ; z++)
         {
-            foreach (Transform child in pentagramParent)
+            for (int x = 0; x < gridGenerator.gridSizeX; x++)
             {
-                Destroy(child.gameObject);
+                occupied[z, x] = false;
             }
         }
     }
 
-    // Classe di appoggio per salvare info sulle note create
     private class NoteInfo
     {
         public GameObject note;
         public float xPos;
         public float yPos;
         public float zPos;
+
         public NoteInfo(GameObject note, float x, float y, float z)
         {
             this.note = note;
@@ -386,21 +582,5 @@ public class ScoreGenerator : MonoBehaviour
             this.yPos = y;
             this.zPos = z;
         }
-    }
-
-    // Determina se la nota è in uno spazio o su una linea
-    // Se (yPos - baseY) / lineSpacing è vicino ad un intero => linea, altrimenti spazio
-    private bool IsSpaceNote(float yPos)
-    {
-        float baseY = transform.position.y;
-        float normalized = (yPos - baseY) / lineSpacing;
-
-        // Controlliamo la vicinanza all'intero
-        float nearestInt = Mathf.Round(normalized);
-        float diff = Mathf.Abs(normalized - nearestInt);
-
-        // Se differenza è molto piccola (es < 0.01), consideriamo che sia su linea
-        // Altrimenti è uno spazio
-        return diff > 0.01f;
     }
 }

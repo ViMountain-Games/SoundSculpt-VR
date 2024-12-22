@@ -50542,7 +50542,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5aed5dc072ed96c499f3959f26ba5077, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  activationRange: 0.1
+  activationRange: 0.2
   targetTag: Note
   updateInterval: 0.25
 --- !u!1 &725058812
@@ -61740,7 +61740,7 @@ Transform:
   m_GameObject: {fileID: 914003999}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.296, y: -0.221, z: 2.149}
+  m_LocalPosition: {x: -0.707, y: -0.221, z: 2.149}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -61777,11 +61777,14 @@ MonoBehaviour:
     quarterNotePrefab: {fileID: 0}
     halfNotePrefab: {fileID: 0}
     wholeNotePrefab: {fileID: 0}
+  quarterRestPrefab: {fileID: 5395940850570762825, guid: 069bad6538e885245b6160ab1e110935, type: 3}
+  halfRestPrefab: {fileID: 5395940850570762825, guid: 3007cc5dd1dbc9b48b8c926dd8231a9b, type: 3}
+  wholeRestPrefab: {fileID: 5395940850570762825, guid: fd825752b3cb4b5449d162d7acc5ba9a, type: 3}
   horizontalSpacing: 0.15
   verticalOffset: 0.5
   noteZIncrement: 0
   noteXOffset: 0.03
-  noteZBaseOffset: -0.025
+  noteZBaseOffset: -0.0125
   spaceNoteOffset: 0.045
   numberOfLines: 5
   lineSpacing: 0.05
@@ -61793,6 +61796,7 @@ MonoBehaviour:
   staffExtraLength: 0.03
   lineLength: 0
   gridGenerator: {fileID: 1576117717}
+  barLinePrefab: {fileID: 2343052463273391732, guid: 868a352aabd90c04e8104690ff40c9f5, type: 3}
 --- !u!1 &914484754
 GameObject:
   m_ObjectHideFlags: 0
@@ -122388,6 +122392,7 @@ MonoBehaviour:
   generateOnStart: 0
   meshActivatorManager: {fileID: 724790690}
   solutionCells:
+  - {fileID: 11400000, guid: 029f972909e6b5e42b3cede0e3818c8f, type: 2}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
@@ -122399,8 +122404,10 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  - {fileID: 11400000, guid: 029f972909e6b5e42b3cede0e3818c8f, type: 2}
   - {fileID: 0}
   - {fileID: 0}
+  - {fileID: 11400000, guid: 029f972909e6b5e42b3cede0e3818c8f, type: 2}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
@@ -122410,9 +122417,12 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  - {fileID: 11400000, guid: 029f972909e6b5e42b3cede0e3818c8f, type: 2}
   - {fileID: 0}
+  - {fileID: 11400000, guid: 029f972909e6b5e42b3cede0e3818c8f, type: 2}
   - {fileID: 0}
   - {fileID: 0}
+  - {fileID: 11400000, guid: 029f972909e6b5e42b3cede0e3818c8f, type: 2}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
@@ -122420,17 +122430,20 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  - {fileID: 11400000, guid: 029f972909e6b5e42b3cede0e3818c8f, type: 2}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  - {fileID: 11400000, guid: 029f972909e6b5e42b3cede0e3818c8f, type: 2}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  - {fileID: 11400000, guid: 029f972909e6b5e42b3cede0e3818c8f, type: 2}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
@@ -122439,9 +122452,11 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  - {fileID: 11400000, guid: 029f972909e6b5e42b3cede0e3818c8f, type: 2}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  - {fileID: 11400000, guid: 029f972909e6b5e42b3cede0e3818c8f, type: 2}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
@@ -122452,7 +122467,9 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
+  - {fileID: 11400000, guid: 029f972909e6b5e42b3cede0e3818c8f, type: 2}
   - {fileID: 0}
+  - {fileID: 11400000, guid: 029f972909e6b5e42b3cede0e3818c8f, type: 2}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
@@ -122465,20 +122482,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
+  - {fileID: 11400000, guid: 029f972909e6b5e42b3cede0e3818c8f, type: 2}
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}

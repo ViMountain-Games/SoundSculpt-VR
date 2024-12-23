@@ -126,7 +126,22 @@ public class NoteSpawner : MonoBehaviour
         objectPools[prefabIndex].Enqueue(obj);
     }
 
-    
+    /// <summary>
+    /// Cambia l'indice del prefab selezionato.
+    /// </summary>
+    /// <param name="index">Nuovo indice del prefab.</param>
+    public void SetSelectedPrefabIndex(int index)
+    {
+        if (index < 0 || index >= prefabs.Length)
+        {
+            Debug.LogWarning("Invalid prefab index provided!");
+            return;
+        }
+
+        selectedPrefabIndex = index;
+        Debug.Log($"Selected prefab index set to: {index}");
+    }
+
     public void SpawnNote()
     {
         // Validazione dei parametri

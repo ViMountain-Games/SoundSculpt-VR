@@ -13,7 +13,13 @@ MonoBehaviour:
   m_Name: BasicNote3
   m_EditorClassIdentifier: 
   noteName: Basic3
-  audioClip: {fileID: 8300000, guid: ae1a07eee99c97746a03fcd07c5d5cd1, type: 3}
+  audioClip: {fileID: 8300000, guid: 6c93d84b5a2b4fb4a9fbda4365d5d759, type: 3}
   color: {r: 1, g: 0.16996826, b: 0, a: 1}
   duration: 4
   fadeOutTime: 0.5
+  noteTypes:
+  - Melody
+  - Harmony
+  - Percussion
+  - FX
+  selectedNoteTypeIndex: 0

@@ -105,6 +105,7 @@ MonoBehaviour:
   gridX: 0
   gridY: 0
   gridZ: 0
+  materialTarget: {fileID: 1971362007797469789}
 --- !u!82 &195695186631700235
 AudioSource:
   m_ObjectHideFlags: 0
@@ -375,6 +376,9 @@ MonoBehaviour:
   volumeAmp: 0.55
   velocityAmp: 0.5
   soundRepeatDelay: 0.4
+  onSoundPlayed:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &6061653003008273173
 MonoBehaviour:
   m_ObjectHideFlags: 0

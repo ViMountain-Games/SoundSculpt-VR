@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b63dce2c1b9151b498a0d3ec2922bc61, type: 3}
-  m_Name: BasicNote2
+  m_Name: BasicNote1_2
   m_EditorClassIdentifier: 
-  noteName: Basic2
-  audioClip: {fileID: 8300000, guid: 6c93d84b5a2b4fb4a9fbda4365d5d759, type: 3}
-  color: {r: 1, g: 0.6039734, b: 0, a: 1}
-  duration: 2
+  noteName: Basic
+  audioClip: {fileID: 8300000, guid: 8ad403f13bc6243c4aadcc0a8348e389, type: 3}
+  color: {r: 0.532125, g: 1, b: 0, a: 1}
+  duration: 1
   fadeOutTime: 0.5
   noteTypes:
   - Melody
@@ -23,4 +23,4 @@ MonoBehaviour:
   - Percussion
   - FX
   selectedNoteTypeIndex: 0
-  noteMaterial: {fileID: 2100000, guid: d78d6cd3137a8824699cde034b4270c0, type: 2}
+  noteMaterial: {fileID: 2100000, guid: 720ea100b5a5ea741a0e79cfb3ab65c6, type: 2}

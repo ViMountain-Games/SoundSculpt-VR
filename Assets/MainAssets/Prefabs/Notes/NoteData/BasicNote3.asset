@@ -23,3 +23,4 @@ MonoBehaviour:
   - Percussion
   - FX
   selectedNoteTypeIndex: 0
+  noteMaterial: {fileID: 2100000, guid: 6af20d21fdb3e9846be9fcc5368045e6, type: 2}

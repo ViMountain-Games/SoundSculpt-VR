@@ -21,6 +21,9 @@ public class NoteData : ScriptableObject
     [Tooltip("Indice del tipo selezionato dalla lista")]
     public int selectedNoteTypeIndex;
 
+    [Tooltip("Materiale associato alla nota")]
+    public Material noteMaterial;
+
     public string SelectedNoteType => noteTypes != null && selectedNoteTypeIndex >= 0 && selectedNoteTypeIndex < noteTypes.Count
         ? noteTypes[selectedNoteTypeIndex]
         : "Nessuna Selezione";

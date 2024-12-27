@@ -4,6 +4,7 @@
 //
 //  Created by Chris Nolet on 3/30/18.
 //  Modified by [Il Tuo Nome] on [Data].
+//
 
 using System;
 using System.Collections;
@@ -102,8 +103,10 @@ public class Outline : MonoBehaviour
 
     void Awake()
     {
-        // Cache dei renderer figli
-        renderers = GetComponentsInChildren<Renderer>();
+        // Cache dei renderer figli, escludendo i ParticleSystemRenderer
+        renderers = GetComponentsInChildren<Renderer>()
+            .Where(r => !(r is ParticleSystemRenderer))
+            .ToArray();
 
         // Instanzia i materiali di outline
         outlineMaskMaterial = Instantiate(Resources.Load<Material>(@"Materials/OutlineMask"));
@@ -255,7 +258,9 @@ public class Outline : MonoBehaviour
     List<Vector3> SmoothNormals(Mesh mesh)
     {
         // Raggruppa i vertici per posizione
-        var groups = mesh.vertices.Select((vertex, index) => new KeyValuePair<Vector3, int>(vertex, index)).GroupBy(pair => pair.Key);
+        var groups = mesh.vertices
+            .Select((vertex, index) => new KeyValuePair<Vector3, int>(vertex, index))
+            .GroupBy(pair => pair.Key);
 
         // Copia le normali in una nuova lista
         var smoothNormals = new List<Vector3>(mesh.normals);

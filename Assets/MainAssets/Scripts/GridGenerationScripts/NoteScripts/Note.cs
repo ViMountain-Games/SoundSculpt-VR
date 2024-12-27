@@ -13,6 +13,9 @@ namespace GridGen
         [Tooltip("Il GameObject figlio a cui assegnare il materiale")]
         public GameObject materialTarget;
 
+        [Tooltip("Controller del Particle System associato a questa nota")]
+        public ParticleSystemController particleSystemController;
+
         private MusicScaleGenerator musicScaleGenerator;
         private Renderer objectRenderer;
 
@@ -31,12 +34,15 @@ namespace GridGen
                     objectRenderer = materialTarget.AddComponent<Renderer>();
                 }
 
-                // Applica il NoteData iniziale (se impostato) e il materiale associato.
-                ApplyNoteDataAndMaterial(noteData);
+                // Se c'è già un NoteData, lo applichiamo
+                if (noteData != null)
+                {
+                    ApplyNoteDataAndMaterial(noteData);
+                }
             }
             else
             {
-                Debug.LogWarning("MaterialTarget non è impostato. Il materiale non sarà assegnato.");
+                Debug.LogWarning("[Note] MaterialTarget non è impostato. Il materiale non sarà assegnato.");
             }
         }
 
@@ -57,12 +63,19 @@ namespace GridGen
         }
 
         /// <summary>
-        /// Aggiorna il NoteData dell'oggetto e ri-applica il materiale associato.
+        /// Aggiorna il NoteData dell'oggetto e ri-applica il materiale associato,
+        /// inclusa l'applicazione del gradient al ParticleSystemController (se assegnato).
         /// </summary>
         public void ApplyNoteDataAndMaterial(NoteData newNoteData)
         {
             // Aggiorna il riferimento al NoteData
             noteData = newNoteData;
+
+            if (noteData == null)
+            {
+                Debug.LogWarning("[Note] Il nuovo NoteData è null, impossibile applicare materiale o gradient.");
+                return;
+            }
 
             // Se abbiamo un target per il materiale, assicuriamoci di avere anche un Renderer
             if (materialTarget != null)
@@ -77,10 +90,21 @@ namespace GridGen
                 }
 
                 // Applica il materiale se presente
-                if (noteData != null && noteData.noteMaterial != null)
+                if (noteData.noteMaterial != null)
                 {
                     objectRenderer.material = noteData.noteMaterial;
                 }
+            }
+
+            // Applica il Gradient del NoteData al ParticleSystemController (se esiste)
+            if (particleSystemController != null)
+            {
+                Debug.Log($"[Note] Applico il gradient '{noteData.colorGradient}' al ParticleSystemController.");
+                particleSystemController.ApplyStartColorGradient(noteData.colorGradient);
+            }
+            else
+            {
+                Debug.LogWarning("[Note] particleSystemController non assegnato, impossibile applicare il gradient.");
             }
         }
     }

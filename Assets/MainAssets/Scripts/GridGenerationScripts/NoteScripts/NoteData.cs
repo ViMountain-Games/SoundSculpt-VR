@@ -8,6 +8,9 @@ public class NoteData : ScriptableObject
     public AudioClip audioClip;
     public Color color;
 
+    [Tooltip("Gradient usato per il Particle System")]
+    public Gradient colorGradient;
+
     [Tooltip("Durata della nota (es: 1/4, 2/4, 4/4)")]
     public NoteDuration duration;
 
@@ -24,7 +27,9 @@ public class NoteData : ScriptableObject
     [Tooltip("Materiale associato alla nota")]
     public Material noteMaterial;
 
-    public string SelectedNoteType => noteTypes != null && selectedNoteTypeIndex >= 0 && selectedNoteTypeIndex < noteTypes.Count
+    public string SelectedNoteType => noteTypes != null
+        && selectedNoteTypeIndex >= 0
+        && selectedNoteTypeIndex < noteTypes.Count
         ? noteTypes[selectedNoteTypeIndex]
         : "Nessuna Selezione";
 

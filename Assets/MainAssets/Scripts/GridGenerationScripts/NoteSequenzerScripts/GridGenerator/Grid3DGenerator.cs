@@ -137,6 +137,8 @@ namespace GridGen
         [HorizontalLine("Combination Events", 2)]
         public UnityEvent OnCorrectCombination;
         public UnityEvent OnIncorrectCombination;
+        [ReadOnly]
+        public int attempts = 0;
 
         private GameObject labelsParent;
         private List<LineData> lineDataList = new List<LineData>();
@@ -508,6 +510,19 @@ namespace GridGen
                 {
                     gridMatrix[remX, y, z] = null;
                 }
+            }
+        }
+
+        public void IncreaseAttempts()
+        {
+            attempts += 1;
+        }
+
+        public void DecreaseAttempts()
+        {
+            if(attempts > 0)
+            {
+                attempts -= 1;
             }
         }
 

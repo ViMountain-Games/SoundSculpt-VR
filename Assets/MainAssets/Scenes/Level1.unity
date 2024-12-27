@@ -125471,7 +125471,7 @@ MonoBehaviour:
     min: 0.01
     max: 5
   cellPrefab: {fileID: 9207010278840529839, guid: 8afecae0636a3cf4d9e15f87b15ec761, type: 3}
-  lineMaterial: {fileID: 2100000, guid: 2ed5da7ffe0c1f1439cb06a962cb647d, type: 2}
+  lineMaterial: {fileID: 2100000, guid: 360857848a074e045a6fbbbf5ba0cfb7, type: 2}
   labelPrefab: {fileID: 3476761144244187499, guid: daf0e9ed479fa60408f309ce83b89744, type: 3}
   labelSettings:
     offsetX: -1.13
@@ -125661,6 +125661,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 1576117717}
+        m_TargetAssemblyTypeName: GridGen.Grid3DGenerator, GridGenAssembly
+        m_MethodName: DecreaseAttempts
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   OnIncorrectCombination:
     m_PersistentCalls:
       m_Calls:
@@ -125688,6 +125700,19 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 1
         m_CallState: 2
+      - m_Target: {fileID: 1576117717}
+        m_TargetAssemblyTypeName: GridGen.Grid3DGenerator, GridGenAssembly
+        m_MethodName: IncreaseAttempts
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+  attempts: 0
 --- !u!4 &1576117718
 Transform:
   m_ObjectHideFlags: 0

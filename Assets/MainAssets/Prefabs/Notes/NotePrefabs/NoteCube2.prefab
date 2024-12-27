@@ -18,6 +18,7 @@ GameObject:
   - component: {fileID: 1961483230335596494}
   - component: {fileID: 8517325404724405506}
   - component: {fileID: 7985412065951013988}
+  - component: {fileID: 8012351391190151307}
   m_Layer: 0
   m_Name: NoteCube2
   m_TagString: Note
@@ -441,6 +442,23 @@ MonoBehaviour:
   onNotePlayed:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &8012351391190151307
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8742807131743710515}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0cd2b995f6de28e4ba6c848634611eec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  vfxPrefab: {fileID: 5209829934623562052, guid: e3c660201a7dfa445b397ae18aae460b, type: 3}
+  destroyDelay: 2
+  vfxParent: {fileID: 0}
+  minCollisionSpeed: 1.79
+  vfxScale: 0.25
 --- !u!1001 &1636078654988993342
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -551,7 +569,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 0.5
+  m_Volume: 0.8
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -560,7 +578,7 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 0
-  MaxDistance: 20
+  MaxDistance: 50
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0

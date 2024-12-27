@@ -139,7 +139,7 @@ public class NoteSpawner : MonoBehaviour
         }
 
         selectedPrefabIndex = index;
-        Debug.Log($"Selected prefab index set to: {index}");
+        //Debug.Log($"Selected prefab index set to: {index}");
     }
 
     public void SpawnNote()

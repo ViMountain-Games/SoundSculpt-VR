@@ -118,7 +118,7 @@ public class ParticleSystemController : MonoBehaviour
             return;
         }
 
-        Debug.Log($"[ParticleSystemController] ApplyStartColorGradient({gradient}) eseguito correttamente.");
+        //Debug.Log($"[ParticleSystemController] ApplyStartColorGradient({gradient}) eseguito correttamente.");
 
         var mainModule = targetParticleSystem.main;
         mainModule.startColor = new ParticleSystem.MinMaxGradient(gradient);

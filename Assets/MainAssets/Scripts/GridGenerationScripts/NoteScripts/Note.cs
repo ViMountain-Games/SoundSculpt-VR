@@ -99,7 +99,7 @@ namespace GridGen
             // Applica il Gradient del NoteData al ParticleSystemController (se esiste)
             if (particleSystemController != null)
             {
-                Debug.Log($"[Note] Applico il gradient '{noteData.colorGradient}' al ParticleSystemController.");
+                //Debug.Log($"[Note] Applico il gradient '{noteData.colorGradient}' al ParticleSystemController.");
                 particleSystemController.ApplyStartColorGradient(noteData.colorGradient);
             }
             else

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Gley.AllPlatformsSave; // Namespace dell'asset
 using CustomInspector;
 
+
 /// <summary>
 /// Struttura dei dati da salvare e caricare.
 /// Puoi aggiungere al suo interno altri campi se vuoi salvare più informazioni.
@@ -54,7 +55,6 @@ public class LevelManager : MonoBehaviour
     [HideField]
     private SaveData currentSaveData;
 
-    
     private string FullPath => Application.persistentDataPath + "/" + fileName;
 
     [HorizontalLine("Opzioni di salvataggio", 2)]
@@ -305,8 +305,8 @@ public class LevelManager : MonoBehaviour
             Debug.Log($"LoadProgress -> caricati i dati, currentLevelIndex={currentLevelIndex}");
         }
 
-        // Se vuoi spostarti alla scena salvata, puoi farlo qui, ad esempio:
-        // StartCoroutine(LoadSceneWithDelay(sceneNames[currentLevelIndex]));
+        // Qui avviene la modifica principale: carichiamo automaticamente l'ultima scena salvata
+        StartCoroutine(LoadSceneWithDelay(sceneNames[currentLevelIndex]));
     }
 
     /// <summary>

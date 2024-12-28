@@ -5865,7 +5865,7 @@ MonoBehaviour:
   TargetAudioSource: {fileID: 925860417}
   MicrophoneID: 0
   SampleInterval: 0.02
-  SpectrumSamples: 1024
+  SpectrumSamples: 512
   Window: 0
   NumberOfBands: 8
   BufferSpeed: 2
@@ -57158,6 +57158,9 @@ MonoBehaviour:
   activationRange: 0.2
   targetTag: Note
   updateInterval: 0.25
+  targetRefreshInterval: 1
+  _allCellsRenderers: []
+  _targets: []
 --- !u!114 &724790691
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -95925,7 +95928,7 @@ MonoBehaviour:
   TargetAudioSource: {fileID: 925860417}
   MicrophoneID: 0
   SampleInterval: 0.02
-  SpectrumSamples: 1024
+  SpectrumSamples: 512
   Window: 0
   NumberOfBands: 8
   BufferSpeed: 2

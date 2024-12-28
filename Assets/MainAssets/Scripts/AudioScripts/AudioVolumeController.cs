@@ -23,29 +23,34 @@ public class AudioVolumeController : MonoBehaviour
         }
     }
 
-    // Funzione per aumentare il volume fino al valore massimo
-    public void IncreaseVolume()
+    // Funzione per aumentare il volume fino al valore massimo, con un delay opzionale
+    public void IncreaseVolume(float delay = 0f)
     {
         if (volumeCoroutine != null)
         {
             StopCoroutine(volumeCoroutine);
         }
-        volumeCoroutine = StartCoroutine(ChangeVolume(maxVolume));
+        volumeCoroutine = StartCoroutine(ChangeVolume(maxVolume, delay));
     }
 
-    // Funzione per diminuire il volume fino al valore minimo
-    public void DecreaseVolume()
+    // Funzione per diminuire il volume fino al valore minimo, con un delay opzionale
+    public void DecreaseVolume(float delay = 0f)
     {
         if (volumeCoroutine != null)
         {
             StopCoroutine(volumeCoroutine);
         }
-        volumeCoroutine = StartCoroutine(ChangeVolume(minVolume));
+        volumeCoroutine = StartCoroutine(ChangeVolume(minVolume, delay));
     }
 
-    // Coroutine per cambiare gradualmente il volume
-    private IEnumerator ChangeVolume(float targetVolume)
+    // Coroutine per cambiare gradualmente il volume con un delay opzionale
+    private IEnumerator ChangeVolume(float targetVolume, float delay)
     {
+        if (delay > 0f)
+        {
+            yield return new WaitForSeconds(delay);
+        }
+
         float startVolume = audioSource.volume;
         float elapsedTime = 0f;
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using GridGen;
 using CustomInspector;
 using MoreMountains.Feedbacks;
+using UnityEditor;
 
 // Assicurati di avere la classe NoteData, Note, etc. nel tuo progetto
 public class NoteDataTrigger : MonoBehaviour
@@ -143,4 +144,51 @@ public class NoteDataTrigger : MonoBehaviour
             Debug.LogWarning($"[NoteDataTrigger] Il GameObject '{obj.name}' non contiene un child di nome 'DropWaterFeed'.");
         }
     }
+
+    private void OnDrawGizmos()
+    {
+        // Salva il colore originale di Gizmos
+        Color originalColor = Gizmos.color;
+
+        // Imposta il colore per il gizmo (puoi modificarlo a piacimento)
+        Gizmos.color = enableSwap ? Color.green : Color.red;
+
+        // Disegna il collider come un gizmo (se esiste un Collider)
+        Collider collider = GetComponent<Collider>();
+        if (collider != null)
+        {
+            Gizmos.matrix = transform.localToWorldMatrix;
+
+            if (collider is BoxCollider boxCollider)
+            {
+                Gizmos.DrawWireCube(boxCollider.center, boxCollider.size);
+            }
+            else if (collider is SphereCollider sphereCollider)
+            {
+                Gizmos.DrawWireSphere(sphereCollider.center, sphereCollider.radius);
+            }
+            else if (collider is CapsuleCollider capsuleCollider)
+            {
+                float radius = capsuleCollider.radius;
+                float height = Mathf.Max(0, capsuleCollider.height - 2 * radius);
+
+                Vector3 center = capsuleCollider.center;
+                Vector3 up = Vector3.up * height * 0.5f;
+
+                // Disegna il cilindro centrale
+                Gizmos.DrawWireSphere(center + up, radius);
+                Gizmos.DrawWireSphere(center - up, radius);
+
+                // Connetti le due sfere con linee
+                Gizmos.DrawLine(center + up + Vector3.forward * radius, center - up + Vector3.forward * radius);
+                Gizmos.DrawLine(center + up + Vector3.back * radius, center - up + Vector3.back * radius);
+                Gizmos.DrawLine(center + up + Vector3.left * radius, center - up + Vector3.left * radius);
+                Gizmos.DrawLine(center + up + Vector3.right * radius, center - up + Vector3.right * radius);
+            }
+        }
+
+        // Ripristina il colore originale
+        Gizmos.color = originalColor;
+    }
+
 }

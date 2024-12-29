@@ -128,7 +128,6 @@ namespace GridGen
         [SerializeField]
         private MeshRendererActivatorManager meshActivatorManager;
 
-
         [Title("Solution Grid Configuration (NoteData)")]
         [Tooltip("Array monodimensionale per gestire la solution grid")]
         [SerializeField]
@@ -249,9 +248,21 @@ namespace GridGen
         {
             StopAllCoroutines();
 
+            // Miglioramento prestazionale: evitiamo DestroyImmediate a runtime
             foreach (Transform child in transform)
             {
-                DestroyImmediate(child.gameObject);
+#if UNITY_EDITOR
+                if (!Application.isPlaying)
+                {
+                    DestroyImmediate(child.gameObject);
+                }
+                else
+                {
+                    Destroy(child.gameObject);
+                }
+#else
+                Destroy(child.gameObject);
+#endif
             }
 
             gridMatrix = null;
@@ -260,7 +271,18 @@ namespace GridGen
 
             if (labelsParent != null)
             {
-                DestroyImmediate(labelsParent);
+#if UNITY_EDITOR
+                if (!Application.isPlaying)
+                {
+                    DestroyImmediate(labelsParent);
+                }
+                else
+                {
+                    Destroy(labelsParent);
+                }
+#else
+                Destroy(labelsParent);
+#endif
                 labelsParent = null;
             }
 
@@ -369,7 +391,6 @@ namespace GridGen
                 }
             }
         }
-
 
         private void GenerateBarLines(Vector3 origin)
         {
@@ -520,7 +541,7 @@ namespace GridGen
 
         public void DecreaseAttempts()
         {
-            if(attempts > 0)
+            if (attempts > 0)
             {
                 attempts -= 1;
             }
@@ -581,12 +602,10 @@ namespace GridGen
 
             if (isCorrect)
             {
-                //Debug.Log("The combination is correct!");
                 OnCorrectCombination?.Invoke();
             }
             else
             {
-                //Debug.Log("The combination is incorrect!");
                 OnIncorrectCombination?.Invoke();
             }
         }

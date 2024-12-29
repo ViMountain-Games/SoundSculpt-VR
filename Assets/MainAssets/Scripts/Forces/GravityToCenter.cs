@@ -23,6 +23,15 @@ public class GravityToCenter : MonoBehaviour
     // Set per tenere traccia degli oggetti considerati all'interno della zona sicura
     private HashSet<Rigidbody> insideSet = new HashSet<Rigidbody>();
 
+    private float sphereRadiusSqr;
+    private float checkRadiusSqr;
+
+    private void Start()
+    {
+        // Pre-calcoliamo i raggi al quadrato
+        sphereRadiusSqr = sphereRadius * sphereRadius;
+        checkRadiusSqr = checkRadius * checkRadius;
+    }
 
     private void OnDrawGizmosSelected()
     {
@@ -58,7 +67,7 @@ public class GravityToCenter : MonoBehaviour
         Rigidbody rb = other.attachedRigidbody;
         if (rb != null && insideSet.Contains(rb))
         {
-            // Oggetto uscito dalla zona sicura, ora potrà essere attratto se si trova fuori da sphereRadius
+            // Oggetto uscito dalla zona sicura
             insideSet.Remove(rb);
         }
     }
@@ -77,10 +86,10 @@ public class GravityToCenter : MonoBehaviour
             if (rb != null && !rb.isKinematic)
             {
                 Vector3 toCenter = transform.position - rb.position;
-                float distance = toCenter.magnitude;
+                float distSqr = toCenter.sqrMagnitude;
 
-                // Se l'oggetto è fuori dalla zona sicura (distance > sphereRadius) e non è dentro il set dei "sicuri"
-                if (distance > sphereRadius && !insideSet.Contains(rb))
+                // Se l'oggetto è fuori dalla zona sicura (distSqr > sphereRadiusSqr) e non è nel set
+                if (distSqr > sphereRadiusSqr && !insideSet.Contains(rb))
                 {
                     // Applica la forza di attrazione verso il centro
                     Vector3 attraction = toCenter.normalized * attractionForce;
@@ -92,7 +101,6 @@ public class GravityToCenter : MonoBehaviour
                         rb.linearVelocity = rb.linearVelocity.normalized * maxSpeed;
                     }
                 }
-                // Se l'oggetto è dentro la zona sicura (insideSet) o entro sphereRadius, non applichiamo forza.
             }
         }
     }

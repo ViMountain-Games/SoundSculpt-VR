@@ -23,6 +23,9 @@ public class MeshRendererActivatorManager : MonoBehaviour
 
     public static MeshRendererActivatorManager Instance { get; private set; }
 
+    // Valore al quadrato di activationRange
+    private float activationRangeSqr;
+
     private void Awake()
     {
         // Singleton semplice
@@ -40,6 +43,9 @@ public class MeshRendererActivatorManager : MonoBehaviour
 
     private void Start()
     {
+        // Pre-calcoliamo il range al quadrato per evitare di farlo ogni volta
+        activationRangeSqr = activationRange * activationRange;
+
         // Invoca la funzione di calcolo distanza a intervalli regolari
         InvokeRepeating(nameof(UpdateCellsActivation), 0f, updateInterval);
 
@@ -81,11 +87,26 @@ public class MeshRendererActivatorManager : MonoBehaviour
     }
 
     /// <summary>
-    /// Verifica la distanza di ogni Renderer di cella dai target.
+    /// Verifica la distanza (al quadrato) di ogni Renderer di cella dai target.
     /// Se un Renderer è entro activationRange da almeno un target, lo abilita, altrimenti lo disabilita.
     /// </summary>
     private void UpdateCellsActivation()
     {
+        // Se non ci sono target, tutti i renderers rimangono disabilitati (o abilitati? dipende dalla logica)
+        // Qui, per coerenza, evitiamo il loop: se vuoi un comportamento diverso, gestiscilo ad hoc.
+        if (_targets.Count == 0)
+        {
+            for (int i = 0; i < _allCellsRenderers.Count; i++)
+            {
+                Renderer rend = _allCellsRenderers[i];
+                if (rend != null && rend.enabled)
+                {
+                    rend.enabled = false;
+                }
+            }
+            return;
+        }
+
         for (int i = 0; i < _allCellsRenderers.Count; i++)
         {
             Renderer rend = _allCellsRenderers[i];
@@ -99,8 +120,9 @@ public class MeshRendererActivatorManager : MonoBehaviour
                 Transform target = _targets[t];
                 if (target == null) continue;
 
-                float dist = Vector3.Distance(cellPos, target.position);
-                if (dist <= activationRange)
+                // Usando sqrMagnitude per evitare radici quadrate ripetute
+                float distSqr = (cellPos - target.position).sqrMagnitude;
+                if (distSqr <= activationRangeSqr)
                 {
                     shouldBeActive = true;
                     break;

@@ -5,16 +5,16 @@ using CustomInspector;
 public class PulseToMusic : MonoBehaviour
 {
     [Title("Riferimenti Audio")]
-    [MessageBox("Trascina un componente AudioSource. Verrà campionato lo spettro audio per pulsare l'oggetto.", MessageBoxType.Info)]
+    [MessageBox("Trascina un componente AudioSource. Verr\u00e0 campionato lo spettro audio per pulsare l'oggetto.", MessageBoxType.Info)]
     [ForceFill]
     public AudioSource audioSource;
 
     [HorizontalLine("Parametri di Pulsazione", 2)]
-    [TooltipBox("Intensità della pulsazione")]
+    [TooltipBox("Intensit\u00e0 della pulsazione")]
     [Range(0.1f, 5f)]
     public float pulseStrength = 1.0f;
 
-    [TooltipBox("Velocità di ritorno alla scala originale")]
+    [TooltipBox("Velocit\u00e0 di ritorno alla scala originale")]
     [Range(0.1f, 10f)]
     public float damping = 2.0f;
 
@@ -50,16 +50,14 @@ public class PulseToMusic : MonoBehaviour
     [ReadOnly, SelfFill]
     public Transform objectTransform;
 
-    // Riduci il numero di campioni a 64, tanto ne usiamo solo 16.
     [SerializeField, HideField]
-    private float[] spectrumData = new float[64];
+    private float[] spectrumData = new float[16]; // Ridotto a 16 campioni direttamente
 
     private Vector3 baseScale;
     private float currentScaleMultiplier = 1.0f;
 
     private void Start()
     {
-        // Ottiene automaticamente la scala corrente come base.
         baseScale = transform.localScale;
 
         if (!audioSource)
@@ -67,7 +65,6 @@ public class PulseToMusic : MonoBehaviour
             Debug.LogWarning("AudioSource non assegnato! Assegna un AudioSource valido.", this);
         }
 
-        // Randomizza i valori solo se il bool è attivato
         if (randomizeAtStart)
         {
             pulseStrength = Random.Range(pulseStrengthMin, pulseStrengthMax);
@@ -75,39 +72,30 @@ public class PulseToMusic : MonoBehaviour
             sensitivityThreshold = Random.Range(sensitivityThresholdMin, sensitivityThresholdMax);
         }
 
-        // Memorizza il riferimento al transform se necessario
-        if (!objectTransform)
-            objectTransform = transform;
+        objectTransform = transform;
     }
 
     private void Update()
     {
-        // Se non c'è audio o non sta suonando, esci
         if (audioSource == null || !audioSource.isPlaying)
             return;
 
-        // Campiona lo spettro audio
         audioSource.GetSpectrumData(spectrumData, 0, FFTWindow.BlackmanHarris);
 
-        // Calcola energia nelle basse frequenze (primi 16 campioni)
         float bassEnergy = 0f;
-        for (int i = 0; i < 16; i++)
+        for (int i = 0; i < spectrumData.Length; i++)
         {
             bassEnergy += spectrumData[i];
         }
 
-        // Filtra i valori bassi in base alla soglia
-        float effectiveEnergy = bassEnergy - sensitivityThreshold;
-        if (effectiveEnergy < 0f)
-            effectiveEnergy = 0f;
+        float effectiveEnergy = Mathf.Max(0f, bassEnergy - sensitivityThreshold);
 
-        // Mappa l'energia ai valori di scala
         float targetScale = 1.0f + effectiveEnergy * pulseStrength;
 
-        // Applica smorzamento
-        currentScaleMultiplier = Mathf.Lerp(currentScaleMultiplier, targetScale, Time.deltaTime * damping);
-
-        // Aggiorna la scala dell'oggetto
-        objectTransform.localScale = baseScale * currentScaleMultiplier;
+        if (!Mathf.Approximately(currentScaleMultiplier, targetScale))
+        {
+            currentScaleMultiplier = Mathf.Lerp(currentScaleMultiplier, targetScale, Time.deltaTime * damping);
+            objectTransform.localScale = baseScale * currentScaleMultiplier;
+        }
     }
 }

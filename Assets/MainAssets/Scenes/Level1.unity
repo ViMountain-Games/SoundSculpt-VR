@@ -33036,7 +33036,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 6a39d370fbaf7004482ed3a251e57427, type: 2}
+  - {fileID: 2100000, guid: ebe79606522b04a42a54d74e711de8ff, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -41125,7 +41125,7 @@ PrefabInstance:
     - target: {fileID: 8219251432884417086, guid: 7c363f47ffc30e249922c6edc608f9ea, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 81caf0b4f4d2ac74e847cad8de1aa792, type: 2}
+      objectReference: {fileID: 2100000, guid: e2dac3dfb6d2b8341b10efd94f809063, type: 2}
     - target: {fileID: 8648969594324907557, guid: 7c363f47ffc30e249922c6edc608f9ea, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.0189
@@ -102582,7 +102582,7 @@ PrefabInstance:
     - target: {fileID: 8219251432884417086, guid: 7c363f47ffc30e249922c6edc608f9ea, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
-      objectReference: {fileID: 2100000, guid: 81caf0b4f4d2ac74e847cad8de1aa792, type: 2}
+      objectReference: {fileID: 2100000, guid: e2dac3dfb6d2b8341b10efd94f809063, type: 2}
     - target: {fileID: 8648969594324907557, guid: 7c363f47ffc30e249922c6edc608f9ea, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.0189
@@ -168064,7 +168064,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 6a39d370fbaf7004482ed3a251e57427, type: 2}
+  - {fileID: 2100000, guid: ebe79606522b04a42a54d74e711de8ff, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -188698,6 +188698,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 226882359}
     m_Modifications:
+    - target: {fileID: 746173502899861530, guid: 5d2c99a01db626c4bb172477002d2c17, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 8ea58280735bb994ea3a7a331a01be0e, type: 2}
     - target: {fileID: 3329304691146768512, guid: 5d2c99a01db626c4bb172477002d2c17, type: 3}
       propertyPath: m_Name
       value: TypeSwapper

@@ -20,7 +20,7 @@ GameObject:
   - component: {fileID: 486518669075665802}
   - component: {fileID: 7253244249963752071}
   - component: {fileID: 2019240282247395027}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: NoteCube
   m_TagString: Note
   m_Icon: {fileID: 0}
@@ -623,7 +623,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1061245597920889568}
   - component: {fileID: 3447941977900887292}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: DropWaterFeed
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1044,7 +1044,7 @@ GameObject:
   - component: {fileID: 250751948077152928}
   - component: {fileID: 2293475620148714242}
   - component: {fileID: 187011798675450356}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: Point Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1165,7 +1165,7 @@ GameObject:
   - component: {fileID: 8730905305629277317}
   - component: {fileID: 4013715762919186568}
   - component: {fileID: 3202018449256916172}
-  m_Layer: 0
+  m_Layer: 12
   m_Name: DropWater
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -6067,6 +6067,10 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: fd993ff36446c1a4d9187a7b0481627d, type: 3}
       propertyPath: m_Name
       value: Note1_4
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: fd993ff36446c1a4d9187a7b0481627d, type: 3}
+      propertyPath: m_Layer
+      value: 12
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: fd993ff36446c1a4d9187a7b0481627d, type: 3}
       propertyPath: m_TagString

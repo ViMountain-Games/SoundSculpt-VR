@@ -159,7 +159,7 @@ namespace Autohand {
             this.SetLayerRecursive(transform, LayerMask.NameToLayer(left ? Hand.leftHandLayerName : Hand.rightHandLayerName));
 
             if(highlightLayers.value == 0 || highlightLayers == LayerMask.GetMask("")) {
-                highlightLayers = LayerMask.GetMask(grabbableLayerNameDefault);
+                highlightLayers = LayerMask.GetMask(grabbableLayerNameDefault, "Note");
             }
 
             handLayers = LayerMask.GetMask(rightHandLayerName, leftHandLayerName, AutoHandPlayer.HandPlayerLayer);

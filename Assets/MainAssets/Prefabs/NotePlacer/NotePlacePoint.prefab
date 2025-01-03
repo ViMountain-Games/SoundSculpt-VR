@@ -1272,7 +1272,7 @@ MonoBehaviour:
   dontAllows: []
   placeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 4096
   showEvents: 1
   OnPlace:
     m_PersistentCalls:

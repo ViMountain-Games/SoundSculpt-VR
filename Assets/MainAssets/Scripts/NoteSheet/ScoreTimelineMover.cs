@@ -1,7 +1,10 @@
 using UnityEngine;
+using CustomInspector;
 using GridGen;
 using UnityEngine.Events;
+using System.Collections;
 
+[DefaultExecutionOrder(-50)]
 public class ScoreTimelineMover : MonoBehaviour
 {
     public TimelineMover mainTimelineMover;
@@ -17,7 +20,6 @@ public class ScoreTimelineMover : MonoBehaviour
     private bool loopMode;
     private Vector3 movementDirection;
 
-    // **Nuova Variabile**: Aggiunta alla lunghezza dello spartito (timeline musicale)
     [Header("Extra Staff Length (Additive)")]
     public float staffAdditionalLength = 0f;
 
@@ -43,12 +45,18 @@ public class ScoreTimelineMover : MonoBehaviour
     {
         if (mainTimelineMover == null || scoreGenerator == null)
         {
-            Debug.LogError("Assegna TimelineMover e ScoreGenerator!");
+            Debug.LogError("[ScoreTimelineMover] Assegna TimelineMover e ScoreGenerator!");
             return;
         }
 
-        // Prendiamo la lunghezza calcolata dallo ScoreGenerator
-        staffLength = scoreGenerator.lineLength;
+        // Se lineLength non Ã¨ ancora stato calcolato, forziamo la generazione
+        if (scoreGenerator.lineLength <= 0f)
+        {
+            Debug.Log("[ScoreTimelineMover] lineLength era 0, rigenero lo score...");
+            scoreGenerator.GenerateScore(); 
+        }
+
+        staffLength = scoreGenerator.lineLength;  // Ora dovrebbe essere > 0
 
         float pentagramHeight = (scoreGenerator.numberOfLines - 1) * scoreGenerator.lineSpacing;
         Vector3 newScale = transform.localScale;
@@ -57,7 +65,6 @@ public class ScoreTimelineMover : MonoBehaviour
         newScale.z = 0.01f;
         transform.localScale = newScale;
 
-        // Allineare la timeline esattamente dove inizia lo spartito
         float staffLeftX = scoreGenerator.transform.position.x;
         float centerY = scoreGenerator.transform.position.y + pentagramHeight * 0.5f;
         float centerZ = scoreGenerator.transform.position.z;
@@ -65,7 +72,6 @@ public class ScoreTimelineMover : MonoBehaviour
         startPosition = new Vector3(staffLeftX, centerY, centerZ);
         transform.position = startPosition;
 
-        // La timeline copre tutta la lunghezza dello spartito più l'additivo
         maxStaffDistance = staffLength + staffAdditionalLength;
 
         UpdateLocalParams();
@@ -109,11 +115,8 @@ public class ScoreTimelineMover : MonoBehaviour
         float mainSpeed = mainTimelineMover.speed;
         float mainMaxDistance = mainTimelineMover.MaxDistance;
 
-        // Evita divisioni per zero
         if (mainMaxDistance > 0)
         {
-            // Adattiamo la velocità in base al rapporto tra la lunghezza "staffLength + staffAdditionalLength"
-            // e la lunghezza percorsa dalla timeline principale.
             scoreboardSpeed = mainSpeed * ((staffLength + staffAdditionalLength) / mainMaxDistance);
         }
         else
@@ -148,7 +151,6 @@ public class ScoreTimelineMover : MonoBehaviour
         Vector3 currentStart = Application.isPlaying ? startPosition : transform.position;
         float sphereRadius = transform.localScale.y * 0.5f / 50f;
 
-        // Disegna linea pari a (staffLength + staffAdditionalLength)
         Vector3 endPos = currentStart + (movementDirection * (staffLength + staffAdditionalLength));
         Gizmos.DrawLine(currentStart, endPos);
         Gizmos.DrawWireSphere(endPos, sphereRadius);

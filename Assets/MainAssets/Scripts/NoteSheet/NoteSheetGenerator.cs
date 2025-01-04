@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 using GridGen;
-using CustomInspector; // Se nel tuo progetto serve, altrimenti rimuovi.
+using CustomInspector;
 
+[DefaultExecutionOrder(-150)]
 public class ScoreGenerator : MonoBehaviour
 {
     [Header("Note Data")]
@@ -20,9 +21,9 @@ public class ScoreGenerator : MonoBehaviour
     public List<NoteTypePrefabs> noteTypePrefabsList = new List<NoteTypePrefabs>();
 
     [Header("Rest Prefabs (Pause)")]
-    public GameObject quarterRestPrefab; // gialla => 1/4
-    public GameObject halfRestPrefab;    // arancione => 2/4
-    public GameObject wholeRestPrefab;   // rossa => 4/4
+    public GameObject quarterRestPrefab; 
+    public GameObject halfRestPrefab;    
+    public GameObject wholeRestPrefab;   
 
     [Header("Note Spacing Settings")]
     public float horizontalSpacing = 1.0f;
@@ -45,7 +46,7 @@ public class ScoreGenerator : MonoBehaviour
     public float staffExtraLength = 1.0f;
 
     [ReadOnly]
-    public float lineLength;
+    public float lineLength;  // usato da ScoreTimelineMover
 
     private Transform pentagramParent;
     private Transform noteParent;
@@ -53,9 +54,6 @@ public class ScoreGenerator : MonoBehaviour
     [Header("Grid Settings")]
     public Grid3DGenerator gridGenerator;
 
-    // ==========================
-    //   BAR LINE (prefab)
-    // ==========================
     [Header("Bar Line Settings")]
     public GameObject barLinePrefab;  // Il prefab della bar line
 
@@ -105,27 +103,40 @@ public class ScoreGenerator : MonoBehaviour
         { "Si",       6 }
     };
 
-    // Occupato [z, x]
-    private bool[,] occupied;
-
-    // Lista delle posizioni di bar line (colonne) calcolata da gridGenerator.cellsPerBar
+    private bool[,] occupied; // dimensione [gridSizeZ, gridSizeX]
     private List<int> barColumns = new List<int>();
+
+    private void Awake()
+    {
+        // Se gridGenerator è già assegnato, inizializziamo qui 'occupied'
+        if (gridGenerator != null)
+        {
+            occupied = new bool[gridGenerator.gridSizeZ, gridGenerator.gridSizeX];
+        }
+        else
+        {
+            Debug.LogWarning("[ScoreGenerator] gridGenerator è null in Awake!");
+        }
+    }
 
     void Start()
     {
         if (gridGenerator == null)
         {
-            Debug.LogError("Grid3DGenerator non assegnato!");
+            Debug.LogError("[ScoreGenerator] Nessun gridGenerator assegnato!");
             return;
         }
 
-        occupied = new bool[gridGenerator.gridSizeZ, gridGenerator.gridSizeX];
+        // Se 'occupied' non è stato creato (magari gridGenerator era null in Awake e lo hai assegnato dopo),
+        // lo creiamo ora.
+        if (occupied == null)
+        {
+            occupied = new bool[gridGenerator.gridSizeZ, gridGenerator.gridSizeX];
+        }
 
-        // Calcoliamo tutte le bar line in base a cellsPerBar
         ComputeBarColumns();
-
-        GenerateScore();
-        InitializePentagram();
+        GenerateScore();         // qui ClearScore() -> no NullRef, poiché 'occupied' esiste
+        InitializePentagram();   // disegna linee e bar lines
     }
 
 #if UNITY_EDITOR
@@ -153,13 +164,11 @@ public class ScoreGenerator : MonoBehaviour
         }
     }
 
-    /// <summary>
-    /// Prepara la lista barColumns, ossia le colonne (x) dove cade una bar line.
-    /// Esempio: se cellsPerBar=4 e gridSizeX=12, avremo barColumns = [4,8].
-    /// </summary>
     private void ComputeBarColumns()
     {
         barColumns.Clear();
+        if (gridGenerator == null) return;
+
         int step = gridGenerator.cellsPerBar;
         if (step < 1) step = 4; // fallback
 
@@ -169,7 +178,7 @@ public class ScoreGenerator : MonoBehaviour
         }
     }
 
-    private void GenerateScore()
+    public void GenerateScore()
     {
         ClearScore();
 
@@ -194,9 +203,8 @@ public class ScoreGenerator : MonoBehaviour
                     int neededCols = GetNeededCols(nd.duration);
 
                     if (x + neededCols - 1 >= gridGenerator.gridSizeX)
-                        continue; // sfora la griglia
+                        continue;
 
-                    // Se [x.. x+neededCols-1] è libero, piazza la nota
                     if (IsFree(x, z, neededCols))
                     {
                         float xPos, yPos, zPos;
@@ -233,12 +241,9 @@ public class ScoreGenerator : MonoBehaviour
 
         // STEP 3: Calcolo lunghezza staff
         lineLength = (gridGenerator.gridSizeX * horizontalSpacing) * lengthMultiplier + staffExtraLength;
+        // Ora lineLength > 0 (di solito)
     }
 
-    /// <summary>
-    /// Riempie le colonne libere in riga z con pause.
-    /// Se la pausa andrebbe oltre una bar line, la interrompiamo.
-    /// </summary>
     private void FillRestsForRow(int z)
     {
         int totalCols = gridGenerator.gridSizeX;
@@ -252,7 +257,6 @@ public class ScoreGenerator : MonoBehaviour
                 continue;
             }
 
-            // Trovato uno spazio libero => calcoliamo la lunghezza di questo "gap"
             int start = c;
             int length = 0;
             while (c < totalCols && !occupied[z, c])
@@ -261,48 +265,31 @@ public class ScoreGenerator : MonoBehaviour
                 length++;
             }
             int end = start + length - 1;
-
-            // Suddividiamo [start..end] in base alle bar line e riempiamo con FillRestsInRange
             SplitByBarLinesAndFill(z, start, end);
         }
     }
 
-    /// <summary>
-    /// Prende il gap [startCol..endCol] e lo spezza in sub-range se c’è una bar line in mezzo.
-    /// Esempio: se bar line è a 8 e [start..end] = [5..10], facciamo [5..7] e [8..10].
-    /// </summary>
     private void SplitByBarLinesAndFill(int z, int startCol, int endCol)
     {
-        // Può esserci più di una bar line dentro [startCol..endCol].
         int currentStart = startCol;
-
         foreach (int barCol in barColumns)
         {
-            // Se la bar line cade entro l'intervallo
             if (barCol > currentStart && barCol <= endCol)
             {
-                // Prima sub-range [currentStart..(barCol-1)]
                 int subEnd = barCol - 1;
                 if (subEnd >= currentStart)
                 {
                     FillRestsInRange(z, currentStart, subEnd);
                 }
-                // poi spostiamo lo start dopo la bar line
                 currentStart = barCol;
             }
         }
-
-        // Alla fine, ci resta [currentStart..endCol]
         if (currentStart <= endCol)
         {
             FillRestsInRange(z, currentStart, endCol);
         }
     }
 
-    /// <summary>
-    /// Riempi l’intervallo [startCol..endCol] con pause (4/4, 2/4, 1/4),
-    /// tenendo conto che qui NON ci sono bar line in mezzo.
-    /// </summary>
     private void FillRestsInRange(int z, int startCol, int endCol)
     {
         int gap = (endCol - startCol) + 1;
@@ -311,8 +298,6 @@ public class ScoreGenerator : MonoBehaviour
         while (offset < gap)
         {
             int remain = gap - offset;
-
-            // Se c’è spazio per 4 e hai wholeRestPrefab
             if (remain >= 4 && wholeRestPrefab != null)
             {
                 int col = startCol + offset;
@@ -320,7 +305,6 @@ public class ScoreGenerator : MonoBehaviour
                 MarkColumnsOccupied(col, z, 4);
                 offset += 4;
             }
-            // Se c’è spazio per 2 e hai halfRestPrefab
             else if (remain >= 2 && halfRestPrefab != null)
             {
                 int col = startCol + offset;
@@ -330,7 +314,6 @@ public class ScoreGenerator : MonoBehaviour
             }
             else
             {
-                // Piazziamo 1/4
                 if (quarterRestPrefab != null)
                 {
                     int col = startCol + offset;
@@ -340,16 +323,13 @@ public class ScoreGenerator : MonoBehaviour
                 }
                 else
                 {
-                    Debug.LogWarning("Manca quarterRestPrefab!");
+                    Debug.LogWarning("[ScoreGenerator] quarterRestPrefab mancante!");
                     break;
                 }
             }
         }
     }
 
-    // ============================
-    //   BAR LINE VISUAL
-    // ============================
     private void InitializePentagram()
     {
         if (pentagramParent == null)
@@ -361,11 +341,10 @@ public class ScoreGenerator : MonoBehaviour
 
         if (staffLinePrefab == null)
         {
-            Debug.LogError("Staff Line Prefab non assegnato!");
+            Debug.LogError("[ScoreGenerator] StaffLinePrefab non assegnato!");
             return;
         }
 
-        // Disegno le 5 linee
         for (int i = 0; i < numberOfLines; i++)
         {
             float yPos = i * lineSpacing;
@@ -390,24 +369,17 @@ public class ScoreGenerator : MonoBehaviour
             }
         }
 
-        // Bar lines
         InitializeBarLines();
     }
 
-    /// <summary>
-    /// Disegna le bar line visuali (verticali) ogni cellsPerBar colonne
-    /// </summary>
     private void InitializeBarLines()
     {
         if (barLinePrefab == null) return;
-
         Transform barLinesParent = new GameObject("BarLines").transform;
         barLinesParent.SetParent(transform);
         barLinesParent.localPosition = Vector3.zero;
 
-        // Altezza totale: dalla prima riga (0) all’ultima riga (numberOfLines-1)
         float totalHeight = (numberOfLines - 1) * lineSpacing;
-
         foreach (int barCol in barColumns)
         {
             float xPos = transform.position.x + (barCol * horizontalSpacing);
@@ -418,15 +390,12 @@ public class ScoreGenerator : MonoBehaviour
             barLineObj.name = $"BarLine_{barCol}";
 
             Vector3 scale = barLineObj.transform.localScale;
-            scale.x = lineWidth;   // spessore
-            scale.y = totalHeight; // altezza
+            scale.x = lineWidth;
+            scale.y = totalHeight;
             barLineObj.transform.localScale = scale;
         }
     }
 
-    // -----------------------------------------------------
-    //       Metodi di supporto per occupazione e note
-    // -----------------------------------------------------
     private bool IsFree(int x, int z, int neededCols)
     {
         for (int col = x; col < x + neededCols; col++)
@@ -449,9 +418,9 @@ public class ScoreGenerator : MonoBehaviour
     {
         switch (duration)
         {
-            case NoteData.NoteDuration.Quarter: return 1; // gialla
-            case NoteData.NoteDuration.Half: return 2; // arancione
-            case NoteData.NoteDuration.Whole: return 4; // rossa
+            case NoteData.NoteDuration.Quarter: return 1;
+            case NoteData.NoteDuration.Half:    return 2;
+            case NoteData.NoteDuration.Whole:   return 4;
         }
         return 1;
     }
@@ -478,27 +447,21 @@ public class ScoreGenerator : MonoBehaviour
         NoteTypePrefabs chosen = noteTypePrefabsList.Find(ntp => ntp.noteType == nd.SelectedNoteType);
         if (chosen == null)
         {
-            Debug.LogWarning("Manca il prefab per la nota: " + nd.SelectedNoteType);
+            Debug.LogWarning("[ScoreGenerator] Manca un prefab per la nota: " + nd.SelectedNoteType);
             return null;
         }
 
         GameObject notePrefab = null;
         switch (nd.duration)
         {
-            case NoteData.NoteDuration.Quarter:
-                notePrefab = chosen.quarterNotePrefab;
-                break;
-            case NoteData.NoteDuration.Half:
-                notePrefab = chosen.halfNotePrefab;
-                break;
-            case NoteData.NoteDuration.Whole:
-                notePrefab = chosen.wholeNotePrefab;
-                break;
+            case NoteData.NoteDuration.Quarter: notePrefab = chosen.quarterNotePrefab; break;
+            case NoteData.NoteDuration.Half:    notePrefab = chosen.halfNotePrefab;    break;
+            case NoteData.NoteDuration.Whole:   notePrefab = chosen.wholeNotePrefab;   break;
         }
 
         if (notePrefab == null)
         {
-            Debug.LogWarning($"Prefab non trovato per {nd.SelectedNoteType} - {nd.duration}");
+            Debug.LogWarning($"[ScoreGenerator] Prefab non trovato per {nd.SelectedNoteType} - {nd.duration}");
             return null;
         }
 
@@ -506,7 +469,7 @@ public class ScoreGenerator : MonoBehaviour
 
         if (!notePositionMapping.ContainsKey(noteName))
         {
-            Debug.LogWarning("Nota non trovata: " + noteName);
+            Debug.LogWarning("[ScoreGenerator] Nota non trovata: " + noteName);
             return null;
         }
         float spacingScale = lineSpacing / baseLineSpacing;
@@ -516,7 +479,7 @@ public class ScoreGenerator : MonoBehaviour
 
         if (!noteZIndex.ContainsKey(noteName))
         {
-            Debug.LogWarning("Nota ZIndex mancante: " + noteName);
+            Debug.LogWarning("[ScoreGenerator] Nota ZIndex mancante: " + noteName);
             return null;
         }
         int zIndex = noteZIndex[noteName];
@@ -556,6 +519,13 @@ public class ScoreGenerator : MonoBehaviour
 
     private void ClearScore()
     {
+        // Se non esiste, esci
+        if (occupied == null)
+        {
+            Debug.LogWarning("[ScoreGenerator] 'occupied' è null in ClearScore(), skip.");
+            return;
+        }
+
         if (noteParent != null) DestroyImmediate(noteParent.gameObject);
         if (pentagramParent != null) DestroyImmediate(pentagramParent.gameObject);
 

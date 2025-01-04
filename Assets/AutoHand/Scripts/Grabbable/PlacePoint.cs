@@ -38,7 +38,9 @@ namespace Autohand
         public bool ignoreMe;
 
         private NotePicker notePicker;
-        private Grid3DGenerator gridGenerator;
+
+        [Header("Grid Generator (assegnare da Inspector o codice)")]
+        public Grid3DGenerator gridGenerator;
 
         [AutoSmallHeader("Place Settings")]
         public bool showPlaceSettings = true;
@@ -119,17 +121,24 @@ namespace Autohand
 
         protected virtual void Awake()
         {
-            if (placedOffset == null)
-                placedOffset = transform;
-
-            if (placeLayers == 0)
-                placeLayers = LayerMask.GetMask(Hand.grabbableLayerNameDefault);
-
-            gridGenerator = Grid3DGenerator.Instance;
+            // Non assegniamo qui, perché Awake() di PlacePoint potrebbe avvenire
+            // prima che NotePicker abbia il .gridGenerator assegnato.
+            // Perciò, spostiamo la logica in Start().
         }
 
-        protected virtual void OnEnable()
+        protected virtual void Start()
         {
+            notePicker = GetComponent<NotePicker>();
+            if (!gridGenerator && notePicker != null && notePicker.gridGenerator != null)
+            {
+                gridGenerator = notePicker.gridGenerator;
+            }
+
+            if (!gridGenerator)
+            {
+                Debug.LogWarning($"[PlacePoint on {name}] Nessun gridGenerator assegnato né trovato via NotePicker!");
+            }
+
             if (checkRoutine == null)
                 checkRoutine = StartCoroutine(CheckPlaceObjectLoop());
         }
@@ -148,7 +157,7 @@ namespace Autohand
         {
             if (parentGrabbable && !disableRigidbodyOnPlace && parentOnPlace)
             {
-                Debug.LogWarning("Place Points placed under a grabbable cannot support parenting other rigidbody grabbables, disable rigibody on place is being enabled", this);
+                Debug.LogWarning("Place Points sotto un Grabbable non possono parentare altri rigidbody. Forzo disableRigidbodyOnPlace.", this);
                 disableRigidbodyOnPlace = true;
                 makePlacedKinematic = false;
             }
@@ -186,10 +195,8 @@ namespace Autohand
                 {
                     if (startPlaced != null && startPlaced.childPlacePoints.Count > 0)
                         SetStartPlaced();
-
                     break;
                 }
-
             }
         }
 
@@ -204,7 +211,7 @@ namespace Autohand
                 }
                 else
                 {
-                    var instance = GameObject.Instantiate(startPlaced);
+                    var instance = Instantiate(startPlaced);
                     instance.transform.position = placedOffset.position;
                     instance.transform.rotation = placedOffset.rotation;
                     Highlight(instance);
@@ -213,43 +220,19 @@ namespace Autohand
             }
         }
 
-        public Grabbable GetPlacedObject()
-        {
-            return placedObject;
-        }
+        public Grabbable GetPlacedObject() => placedObject;
 
         public virtual bool CanPlace(Grabbable placeObj, bool checkRoot = true)
         {
-            if (gridGenerator == null)
-                return false;
+            if (!gridGenerator) return false;
 
             if (checkRoot && CanPlace(placeObj.rootGrabbable, false))
                 return true;
-
-            if (placedObject != null)
-            {
-                return false;
-            }
-
-            if (!placeObj.parentOnGrab && parentGrabbable != null)
-            {
-                return false;
-            }
-
-            if (heldPlaceOnly && placeObj.HeldCount() == 0)
-            {
-                return false;
-            }
-
-            if (onlyAllows.Count > 0 && !onlyAllows.Contains(placeObj))
-            {
-                return false;
-            }
-
-            if (dontAllows.Count > 0 && dontAllows.Contains(placeObj))
-            {
-                return false;
-            }
+            if (placedObject != null) return false;
+            if (!placeObj.parentOnGrab && parentGrabbable != null) return false;
+            if (heldPlaceOnly && placeObj.HeldCount() == 0) return false;
+            if (onlyAllows.Count > 0 && !onlyAllows.Contains(placeObj)) return false;
+            if (dontAllows.Count > 0 && dontAllows.Contains(placeObj)) return false;
 
             if (blacklistNames.Length > 0)
             {
@@ -261,7 +244,6 @@ namespace Autohand
                         return false;
                 }
             }
-
             if (placeNames.Length > 0)
             {
                 bool allowedByName = false;
@@ -272,20 +254,18 @@ namespace Autohand
                     if (nameCompareType == PlacePointNameType.tag && placeObj.CompareTag(placeName))
                         allowedByName = true;
                 }
-                if (!allowedByName)
-                    return false;
+                if (!allowedByName) return false;
             }
 
-            // Controllo dello spazio sulla griglia
             Note noteComponent = placeObj.GetComponent<Note>();
-            if (noteComponent != null && gridGenerator != null)
+            if (noteComponent != null)
             {
-                NoteData.NoteDuration duration = noteComponent.noteData.duration;
+                var dur = noteComponent.noteData.duration;
                 int x = Mathf.FloorToInt((placedOffset.position.x - gridGenerator.transform.position.x) / gridGenerator.cellSize.value);
                 int y = Mathf.FloorToInt((placedOffset.position.y - gridGenerator.transform.position.y) / gridGenerator.cellSize.value);
                 int z = Mathf.FloorToInt((placedOffset.position.z - gridGenerator.transform.position.z) / gridGenerator.cellSize.value);
 
-                if (!gridGenerator.CanPlaceNote(x, y, z, duration))
+                if (!gridGenerator.CanPlaceNote(x, y, z, dur))
                 {
                     return false;
                 }
@@ -302,8 +282,7 @@ namespace Autohand
 
         public virtual void Place(Grabbable placeObj)
         {
-            if (placedObject != null)
-                return;
+            if (placedObject != null) return;
 
             placingFrame = true;
             placeObj = placeObj.rootGrabbable;
@@ -321,10 +300,8 @@ namespace Autohand
                     grab.ForceHandsRelease();
             }
 
-            if (matchPosition)
-                placeObj.rootTransform.position = placedOffset.position;
-            if (matchRotation)
-                placeObj.rootTransform.rotation = placedOffset.rotation;
+            if (matchPosition) placeObj.rootTransform.position = placedOffset.position;
+            if (matchRotation) placeObj.rootTransform.rotation = placedOffset.rotation;
 
             if (placeObj.body != null)
             {
@@ -344,7 +321,6 @@ namespace Autohand
                     joint.connectedBody = placeObj.body;
                     joint.breakForce = jointBreakForce;
                     joint.breakTorque = jointBreakForce;
-
                     joint.connectedMassScale = 1;
                     joint.massScale = 1;
                     joint.enableCollision = false;
@@ -385,6 +361,7 @@ namespace Autohand
             if (disableGrabOnPlace || disablePlacePointOnPlace)
                 placeObj.isGrabbable = false;
 
+            // resizeOnPlace e grabbablePlacePoint
             if (resizeOnPlace)
             {
                 placeObj.OnBeforeGrabEvent += ResizeBeforeGrab;
@@ -393,25 +370,27 @@ namespace Autohand
 
                 placeObj.OnGrabEvent += RecacluatePoseAfterGrab;
                 foreach (var grabChild in placeObj.rootGrabbable.grabbableChildren)
+                {
                     grabChild.OnGrabEvent += RecacluatePoseAfterGrab;
+                }
 
                 prefitScale = placeObj.rootTransform.localScale;
                 wasInstantGrab = placeObj.instantGrab;
                 placeObj.instantGrab = true;
 
-                var scale = Mathf.Abs(transform.lossyScale.x < transform.lossyScale.y ? transform.lossyScale.x : transform.lossyScale.y);
-                scale = Mathf.Abs(scale < transform.lossyScale.z ? scale : transform.lossyScale.z);
+                float scaleVal = Mathf.Abs(transform.lossyScale.x < transform.lossyScale.y ? transform.lossyScale.x : transform.lossyScale.y);
+                scaleVal = Mathf.Abs(scaleVal < transform.lossyScale.z ? scaleVal : transform.lossyScale.z);
                 if (shapeType == PlacePointShape.Sphere)
-                    FitAndCenterToBounds(placeObj.rootTransform.gameObject, placeRadius * scale + resizeOffset * scale);
+                    FitAndCenterToBounds(placeObj.rootTransform.gameObject, placeRadius * scaleVal + resizeOffset * scaleVal);
                 else if (shapeType == PlacePointShape.Box)
-                    FitAndCenterToBounds(placeObj.rootTransform.gameObject, (placeSize + placeSize * resizeOffset) * scale);
+                    FitAndCenterToBounds(placeObj.rootTransform.gameObject, (placeSize + placeSize * resizeOffset) * scaleVal);
             }
 
             if (grabbablePlacePoint)
             {
                 placeObj.OnBeforeGrabEvent += RecalculateBeforeGrab;
-                foreach (var grabbable in placeObj.grabbableChildren)
-                    grabbable.OnBeforeGrabEvent += RecalculateBeforeGrab;
+                foreach (var g in placeObj.grabbableChildren)
+                    g.OnBeforeGrabEvent += RecalculateBeforeGrab;
             }
 
             if (parentGrabbable != null)
@@ -428,7 +407,7 @@ namespace Autohand
                     parentGrabbable.AddGrabbableColliders(placeObj);
             }
 
-            // A questo punto aggiorniamo la griglia
+            // Se c'è un Note, aggiorniamo la Grid
             if (gridGenerator != null)
             {
                 Note noteComponent = placeObj.GetComponent<Note>();
@@ -442,7 +421,6 @@ namespace Autohand
                     placedX = x;
                     placedY = y;
                     placedZ = z;
-
                     gridGenerator.PlaceNoteInGrid(x, y, z, placeObj.gameObject, duration);
                 }
             }
@@ -451,7 +429,6 @@ namespace Autohand
         public virtual void Remove(Grabbable placeObj)
         {
             placeObj = placeObj.rootGrabbable;
-
             if (placeObj == null || placeObj != placedObject || disablePlacePointOnPlace)
                 return;
 
@@ -467,7 +444,6 @@ namespace Autohand
             {
                 if (makePlacedKinematic && !disableRigidbodyOnPlace)
                     placeObj.body.isKinematic = false;
-
                 placeObj.body.collisionDetectionMode = placedObjDetectionMode;
             }
 
@@ -483,7 +459,6 @@ namespace Autohand
                             childPlacePoint.placedObject.enabled = true;
                     }
                 }
-
                 parentGrabbable.RemoveGrabbableColliders(placeObj);
                 parentGrabbable.IgnoreGrabbableCollisionUntilNone(placeObj);
                 foreach (var hand in parentGrabbable.GetHeldBy())
@@ -495,20 +470,19 @@ namespace Autohand
             if (resizeOnPlace)
             {
                 placedObject.OnBeforeGrabEvent -= ResizeBeforeGrab;
-                foreach (var grabbable in placedObject.grabbableChildren)
-                    grabbable.OnBeforeGrabEvent -= ResizeBeforeGrab;
+                foreach (var g in placedObject.grabbableChildren)
+                    g.OnBeforeGrabEvent -= ResizeBeforeGrab;
 
                 if (placeObj.HeldCount() == 0)
                     placeObj.rootTransform.localScale = prefitScale;
-
                 placeObj.instantGrab = wasInstantGrab;
             }
 
             if (grabbablePlacePoint)
             {
                 placedObject.OnBeforeGrabEvent -= RecalculateBeforeGrab;
-                foreach (var grabbable in placedObject.grabbableChildren)
-                    grabbable.OnBeforeGrabEvent -= RecalculateBeforeGrab;
+                foreach (var g in placedObject.grabbableChildren)
+                    g.OnBeforeGrabEvent -= RecalculateBeforeGrab;
             }
 
             if ((!placeObj.parentOnGrab || placeObj.HeldCount() == 0) && parentOnPlace && gameObject.activeInHierarchy)
@@ -530,7 +504,6 @@ namespace Autohand
 
             lastPlacedObject = placedObject;
 
-            // Rimuoviamo dalla griglia
             if (gridGenerator != null && placedObject != null)
             {
                 Note noteComponent = placedObject.GetComponent<Note>();
@@ -567,7 +540,9 @@ namespace Autohand
                 OnHighlight?.Invoke(this, from);
 
                 if (placedObject == null && (forcePlace || (!heldPlaceOnly && from.HeldCount() == 0)))
+                {
                     Place(from);
+                }
             }
         }
 
@@ -598,7 +573,6 @@ namespace Autohand
             }
         }
 
-        int lastOverlapCount = 0;
         protected virtual IEnumerator CheckPlaceObjectLoop()
         {
             yield return new WaitForSeconds(0.2f);
@@ -606,10 +580,12 @@ namespace Autohand
 
             while (gameObject.activeInHierarchy)
             {
-                var scale = Mathf.Abs(transform.lossyScale.x < transform.lossyScale.y ? transform.lossyScale.x : transform.lossyScale.y);
+                float scale = Mathf.Abs(transform.lossyScale.x < transform.lossyScale.y ? transform.lossyScale.x : transform.lossyScale.y);
                 scale = Mathf.Abs(scale < transform.lossyScale.z ? scale : transform.lossyScale.z);
+
                 if (!disablePlacePointOnPlace && !disableRigidbodyOnPlace && placedObject != null &&
-                    lastPlacePosition != placedObject.transform.position && !IsStillOverlapping(placedObject, scale) && !placingFrame)
+                    lastPlacePosition != placedObject.transform.position &&
+                    !IsStillOverlapping(placedObject, scale) && !placingFrame)
                 {
                     Remove(placedObject);
                 }
@@ -620,6 +596,7 @@ namespace Autohand
                 CheckHighlight(scale);
 
                 yield return new WaitForSeconds(tickRate);
+
                 if (placedObject != null && placingFrame)
                 {
                     if (matchPosition)
@@ -638,7 +615,7 @@ namespace Autohand
         {
             if (placedObject == null && highlightingObj == null)
             {
-                var overlapCenterPos = placedOffset.position + transform.rotation * shapeOffset;
+                Vector3 overlapCenterPos = placedOffset.position + transform.rotation * shapeOffset;
                 int overlaps = 0;
                 switch (shapeType)
                 {
@@ -650,25 +627,24 @@ namespace Autohand
                         break;
                 }
 
-                if (overlaps != lastOverlapCount)
+                if (overlaps > 0)
                 {
-                    var updateOverlaps = true;
                     for (int i = 0; i < overlaps; i++)
                     {
                         if (AutoHandExtensions.HasGrabbable(collidersNonAlloc[i].gameObject, out var tempGrabbable))
                         {
                             tempGrabbable = tempGrabbable.rootGrabbable;
-                            updateOverlaps = false;
 
                             if (CanPlace(tempGrabbable))
                             {
                                 var existingPlacePoint = tempGrabbable.placePoint;
                                 if (existingPlacePoint)
                                 {
-                                    var grabbablePos = tempGrabbable.transform.position;
-                                    var concurrentCenterPos = existingPlacePoint.placedOffset.position + existingPlacePoint.transform.rotation * existingPlacePoint.shapeOffset;
-                                    var concurrentDist = Vector3.Distance(concurrentCenterPos, grabbablePos);
-                                    var currentDist = Vector3.Distance(overlapCenterPos, grabbablePos);
+                                    Vector3 grabbablePos = tempGrabbable.transform.position;
+                                    Vector3 concurrentCenterPos = existingPlacePoint.placedOffset.position + existingPlacePoint.transform.rotation * existingPlacePoint.shapeOffset;
+                                    float concurrentDist = Vector3.Distance(concurrentCenterPos, grabbablePos);
+                                    float currentDist = Vector3.Distance(overlapCenterPos, grabbablePos);
+
                                     if (currentDist >= concurrentDist)
                                         continue;
 
@@ -679,11 +655,6 @@ namespace Autohand
                                 break;
                             }
                         }
-                    }
-
-                    if (updateOverlaps)
-                    {
-                        lastOverlapCount = overlaps;
                     }
                 }
             }
@@ -698,8 +669,9 @@ namespace Autohand
 
         protected bool IsStillOverlapping(Grabbable from, float scale = 1)
         {
-            var overlapCenterPos = placedOffset.position + transform.rotation * shapeOffset;
+            Vector3 overlapCenterPos = placedOffset.position + transform.rotation * shapeOffset;
             int overlaps = 0;
+
             switch (shapeType)
             {
                 case PlacePointShape.Sphere:
@@ -713,11 +685,8 @@ namespace Autohand
             for (int i = 0; i < overlaps; i++)
             {
                 if (collidersNonAlloc[i].attachedRigidbody == from.body)
-                {
                     return true;
-                }
             }
-
             return false;
         }
 
@@ -736,7 +705,6 @@ namespace Autohand
                 grab.body.detectCollisions = false;
                 grab.body.detectCollisions = true;
             }
-
         }
 
         protected void RecalculateBeforeGrab(Hand hand, Grabbable grab)
@@ -748,19 +716,20 @@ namespace Autohand
         {
             hand.RecaculateHeldAutoPose();
             grab.rootGrabbable.OnGrabEvent -= RecacluatePoseAfterGrab;
-            foreach (var grabChild in grab.rootGrabbable.grabbableChildren)
+            foreach (var child in grab.rootGrabbable.grabbableChildren)
             {
-                grabChild.OnGrabEvent -= RecacluatePoseAfterGrab;
+                child.OnGrabEvent -= RecacluatePoseAfterGrab;
             }
         }
 
         protected void FitAndCenterToBounds(GameObject obj, float radius)
         {
             Bounds bounds = CalculateCombinedBounds(obj);
-            var scaleOffset = ScaleToFitRadius(obj, bounds, radius);
+            float scaleOffset = ScaleToFitRadius(obj, bounds, radius);
             obj.transform.localScale *= scaleOffset;
             bounds.extents *= scaleOffset;
             bounds = CalculateCombinedBounds(obj);
+
             if (matchPosition)
                 obj.transform.position = placedOffset.position + (obj.transform.position - bounds.center);
             if (matchRotation)
@@ -773,6 +742,7 @@ namespace Autohand
             float scale = radius / maxExtent;
             return scale;
         }
+
         protected void FitAndCenterToBounds(GameObject obj, Vector3 size)
         {
             Bounds bounds = CalculateCombinedBounds(obj);
@@ -780,6 +750,7 @@ namespace Autohand
             obj.transform.localScale *= scaleOffset;
             bounds.extents *= scaleOffset;
             bounds = CalculateCombinedBounds(obj);
+
             if (matchPosition)
                 obj.transform.position = placedOffset.position + (obj.transform.position - bounds.center);
             if (matchRotation)
@@ -801,11 +772,10 @@ namespace Autohand
             var meshRenderers = obj.GetComponentsInChildren<MeshRenderer>().OfType<Renderer>();
             var skinnedMeshRenderers = obj.GetComponentsInChildren<SkinnedMeshRenderer>().OfType<Renderer>();
             List<Renderer> renderers = new List<Renderer>();
-
             renderers.AddRange(meshRenderers);
             renderers.AddRange(skinnedMeshRenderers);
-            Bounds combinedBounds = new Bounds(obj.transform.position, Vector3.zero);
 
+            Bounds combinedBounds = new Bounds(obj.transform.position, Vector3.zero);
             foreach (Renderer renderer in renderers)
                 combinedBounds.Encapsulate(renderer.bounds);
 
@@ -823,7 +793,7 @@ namespace Autohand
             if (placedOffset == null)
                 placedOffset = transform;
 
-            var scale = Mathf.Abs(transform.lossyScale.x < transform.lossyScale.y ? transform.lossyScale.x : transform.lossyScale.y);
+            float scale = Mathf.Abs(transform.lossyScale.x < transform.lossyScale.y ? transform.lossyScale.x : transform.lossyScale.y);
             scale = Mathf.Abs(scale < transform.lossyScale.z ? scale : transform.lossyScale.z);
 
             Gizmos.color = Color.white;
@@ -832,7 +802,6 @@ namespace Autohand
             if (shapeType == PlacePointShape.Box)
             {
                 Gizmos.DrawWireCube(shapeOffset, placeSize);
-
                 if (resizeOffset != 0 && resizeOnPlace)
                 {
                     Gizmos.color = Color.red;
@@ -841,9 +810,7 @@ namespace Autohand
             }
             else if (shapeType == PlacePointShape.Sphere)
             {
-
                 Gizmos.DrawWireSphere(shapeOffset, placeRadius);
-
                 if (resizeOffset != 0 && resizeOnPlace)
                 {
                     Gizmos.color = Color.red;
@@ -852,48 +819,41 @@ namespace Autohand
             }
         }
 
+        // IGrabbableEvents
         void IGrabbableEvents.OnHighlight(Hand hand)
         {
-            if (!grabbablePlacePoint)
-                return;
+            if (!grabbablePlacePoint) return;
             if (placedObject != null)
                 placedObject.Highlight(hand);
         }
 
         public virtual void OnUnhighlight(Hand hand)
         {
-            if (!grabbablePlacePoint)
-                return;
+            if (!grabbablePlacePoint) return;
             if (placedObject != null)
                 placedObject.Unhighlight(hand);
         }
 
         public virtual void OnGrab(Hand hand)
         {
-            if (!grabbablePlacePoint)
-                return;
+            if (!grabbablePlacePoint) return;
             hand.RecaculateHeldAutoPose();
         }
 
         public virtual void OnRelease(Hand hand)
         {
-            if (!grabbablePlacePoint)
-                return;
+            if (!grabbablePlacePoint) return;
         }
 
         public virtual bool CanGrab(Hand hand)
         {
-            if (!grabbablePlacePoint || placedObject == null)
-                return false;
-
+            if (!grabbablePlacePoint || placedObject == null) return false;
             return placedObject.CanGrab(hand);
         }
 
         public virtual Grabbable GetGrabbable()
         {
-            if (!grabbablePlacePoint || placedObject == null || !enabled)
-                return null;
-
+            if (!grabbablePlacePoint || placedObject == null || !enabled) return null;
             return placedObject;
         }
     }

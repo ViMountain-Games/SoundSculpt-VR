@@ -2,9 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 #if UNITY_EDITOR
-using UnityEditor; // Questo rimane per il codice editor
+using UnityEditor;
 #endif
 using CustomInspector;
+using Autohand;
 
 namespace GridGen
 {
@@ -14,19 +15,20 @@ namespace GridGen
         public List<string> validTags;
 
         [Header("GameObject selezionato")]
-        [ReadOnly] public GameObject selectedObject;
+        [ReadOnly]
+        public GameObject selectedObject;
 
         [Header("Delay in secondi")]
         public float delay = 1.0f;
 
-        private Grid3DGenerator gridGenerator;
+        [Header("Grid Generator (assegnare da Inspector o tramite instanziazione)")]
+        public Grid3DGenerator gridGenerator;
 
         private void Start()
         {
-            gridGenerator = Grid3DGenerator.Instance;
-            if (gridGenerator == null)
+            if (!gridGenerator)
             {
-                Debug.LogError("Nessuna istanza di Grid3DGenerator trovata!");
+                Debug.LogWarning($"[NotePicker on {name}] gridGenerator non assegnato in Inspector/istanziazione.");
             }
         }
 
@@ -51,28 +53,39 @@ namespace GridGen
 
             if (selectedObject != null && gridGenerator != null)
             {
+                // Calcoliamo gli indici di cella
                 int x = Mathf.FloorToInt((transform.position.x - gridGenerator.transform.position.x) / gridGenerator.cellSize.value);
                 int y = Mathf.FloorToInt((transform.position.y - gridGenerator.transform.position.y) / gridGenerator.cellSize.value);
                 int z = Mathf.FloorToInt((transform.position.z - gridGenerator.transform.position.z) / gridGenerator.cellSize.value);
 
-                if (x >= 0 && x < gridGenerator.gridSizeX && y >= 0 && y < gridGenerator.gridSizeY && z >= 0 && z < gridGenerator.gridSizeZ)
+                if (x >= 0 && x < gridGenerator.gridSizeX &&
+                    y >= 0 && y < gridGenerator.gridSizeY &&
+                    z >= 0 && z < gridGenerator.gridSizeZ)
                 {
                     gridGenerator.UpdateGridMatrix(x, y, z, selectedObject);
 
+                    // Se l'oggetto selezionato è una Nota
                     Note noteComponent = selectedObject.GetComponent<Note>();
                     if (noteComponent != null)
                     {
                         noteComponent.SetGridPosition(x, y, z);
                     }
+
+                    // [NUOVA MODIFICA] Se l'oggetto ha un MusicScaleGenerator, assegniamogli lo stesso gridGenerator
+                    MusicScaleGenerator ms = selectedObject.GetComponent<MusicScaleGenerator>();
+                    if (ms != null)
+                    {
+                        ms.gridGenerator = gridGenerator;
+                    }
                 }
                 else
                 {
-                    Debug.LogError($"Indices out of bounds: ({x}, {y}, {z}). Object not assigned.");
+                    Debug.LogError($"Indices out of bounds: ({x}, {y}, {z}). [NotePicker on {name}]");
                 }
             }
             else
             {
-                Debug.LogError("SelectedObject is invalid or Grid3DGenerator is not assigned.");
+                Debug.LogError($"[NotePicker on {name}] No valid child or missing gridGenerator.");
             }
 
 #if UNITY_EDITOR
@@ -88,7 +101,9 @@ namespace GridGen
                 int y = Mathf.FloorToInt((transform.position.y - gridGenerator.transform.position.y) / gridGenerator.cellSize.value);
                 int z = Mathf.FloorToInt((transform.position.z - gridGenerator.transform.position.z) / gridGenerator.cellSize.value);
 
-                if (x >= 0 && x < gridGenerator.gridSizeX && y >= 0 && y < gridGenerator.gridSizeY && z >= 0 && z < gridGenerator.gridSizeZ)
+                if (x >= 0 && x < gridGenerator.gridSizeX &&
+                    y >= 0 && y < gridGenerator.gridSizeY &&
+                    z >= 0 && z < gridGenerator.gridSizeZ)
                 {
                     gridGenerator.UpdateGridMatrix(x, y, z, null);
                 }

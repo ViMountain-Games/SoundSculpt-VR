@@ -98,6 +98,12 @@ MonoBehaviour:
         - GlobalObjectId_V1-2-99c9720ab356a0642a771bea13969a05-42473500-0
         - GlobalObjectId_V1-2-99c9720ab356a0642a771bea13969a05-914003999-0
         - GlobalObjectId_V1-2-99c9720ab356a0642a771bea13969a05-961052083-0
+        - GlobalObjectId_V1-2-99c9720ab356a0642a771bea13969a05-333332455-0
+        - GlobalObjectId_V1-2-99c9720ab356a0642a771bea13969a05-1555031265-0
+        - GlobalObjectId_V1-2-99c9720ab356a0642a771bea13969a05-1863446444-0
+        - GlobalObjectId_V1-2-99c9720ab356a0642a771bea13969a05-1523324391-0
+        - GlobalObjectId_V1-2-99c9720ab356a0642a771bea13969a05-960963285-0
+        - GlobalObjectId_V1-2-99c9720ab356a0642a771bea13969a05-223344692-0
         values:
         - iColor: 1
           icon: PreMatQuad
@@ -243,8 +249,20 @@ MonoBehaviour:
           icon: AudioListener Icon
         - iColor: 4
           icon: AudioClip Icon
+        - iColor: 9
+          icon: AudioSource Icon
+        - iColor: 9
+          icon: AudioListener Icon
+        - iColor: 2
+          icon: AudioSource Icon
+        - iColor: 2
+          icon: AudioListener Icon
+        - iColor: 9
+          icon: AudioSource Icon
+        - iColor: 9
+          icon: AudioListener Icon
       goDatasByInstanceId:
-        keys: f0dd000002de000062dc000074e0000082d800007adc00004ae00000e0d90000d0dc00004adb00009cdd000048dd000018db0000b8db0000ccdb000062dd0000c6d700005adc000064de0000ccd80000ded800009ee0000020da00003edf00005add000068e00000bedd0000f6d7000062da0000ace0000074de00008edf0000f4d8000052dc0000dede000060d9000014d900006cde000004da0000b6dd0000c6da00001ce000005cde00004adc0000fcd800004ad8000054df00001ade00002cd90000e8df0000e8dd000090e0000052e000001cdc00001cd9000058db0000b0db0000e8de000058d90000f0db000072da00008adc0000bedf000066df0000bed7000014e000003cde0000dcd70000bada0000e4d700007adb0000c8db0000
+        keys: 26e4000038e4000066e2000004e7000008de00007ee20000c6e6000090df0000ece2000024e10000c4e3000064e30000e2e00000a2e10000c2e100007ee3000030dd00005ee20000a4e4000052de000068de00002ee70000d0df00009ee5000076e30000f2e60000e8e3000060dd00001ae000003ce70000b4e40000f4e5000084de000056e2000030e5000004df0000aede0000ace40000b4df0000e0e3000086e0000092e6000098e400004ee2000092de0000d0dd0000b4e5000056e40000c6de000054e6000018e4000020e70000cee600001ee20000b6de000036e100009ae100003ae50000fcde0000ece100002ae0000094e2000024e60000c6e5000028dd00008ae6000078e4000046dd000078e000004edd00005ee10000bee1000062de0000bee4000036bcfeff2cbcfeff22bcfeff1cbcfeff
         values:
         - iColor: 1
           icon: PreMatQuad
@@ -390,6 +408,18 @@ MonoBehaviour:
           icon: AudioListener Icon
         - iColor: 4
           icon: AudioClip Icon
+        - iColor: 9
+          icon: AudioSource Icon
+        - iColor: 9
+          icon: AudioListener Icon
+        - iColor: 2
+          icon: AudioSource Icon
+        - iColor: 2
+          icon: AudioListener Icon
+        - iColor: 9
+          icon: AudioSource Icon
+        - iColor: 9
+          icon: AudioListener Icon
     - goDatasByGlobalId:
         keys: []
         values: []

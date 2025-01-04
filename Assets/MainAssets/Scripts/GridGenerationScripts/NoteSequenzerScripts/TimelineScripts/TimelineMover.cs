@@ -19,8 +19,7 @@ namespace GridGen
         public Vector3 positionOffset = Vector3.zero;
 
         [Header("Start Delay")]
-        [Tooltip("Ritardo in secondi prima che la timeline inizi a muoversi.")]
-        public float startDelay = 0f; // Nuova variabile per il ritardo
+        public float startDelay = 0f;
 
         [Header("Debug Settings")]
         public Color gizmoColor = Color.red;
@@ -28,10 +27,11 @@ namespace GridGen
         [ReadOnly]
         public float speed;
 
+        public Grid3DGenerator gridGenerator; // Riferimento assegnabile da Inspector
+
         private Vector3 startPosition;
         private bool isMoving = false;
 
-        private Grid3DGenerator gridGenerator;
         private float maxDistance;
 
         [Header("Loop Settings")]
@@ -44,16 +44,14 @@ namespace GridGen
         public bool IsMoving { get { return isMoving; } }
         public float MaxDistance { get { return maxDistance; } }
 
-        // **Nuova Variabile**: Aggiunge una lunghezza extra (non moltiplicata) alla timeline.
         [Header("Extra Length (Additive)")]
         public float additionalLength = 0f;
 
         void Start()
         {
-            gridGenerator = Grid3DGenerator.Instance;
             if (gridGenerator == null)
             {
-                Debug.LogError("Grid3DGenerator instance not found!");
+                Debug.LogError("Grid3DGenerator instance not found in TimelineMover!");
                 return;
             }
 
@@ -79,10 +77,7 @@ namespace GridGen
 
             transform.position = startPosition;
 
-            // Distanza totale base che la timeline deve percorrere
             maxDistance = gridWidth + halfTimelineWidth * 2f;
-
-            // Aggiungiamo la distanza extra (additiva)
             maxDistance += additionalLength;
 
             CalculateSpeed();
@@ -101,7 +96,6 @@ namespace GridGen
         {
             if (!isMoving)
             {
-                // Se c'è un ritardo definito, avvia una Coroutine
                 if (startDelay > 0f)
                 {
                     StartCoroutine(DelayedStartMovement());
@@ -132,7 +126,7 @@ namespace GridGen
             if (isMoving)
             {
                 isMoving = false;
-                Grid3DGenerator.Instance?.CheckCombination();
+                gridGenerator?.CheckCombination();
                 OnMovementFinished?.Invoke();
             }
         }
@@ -158,8 +152,8 @@ namespace GridGen
                 if (loopMode)
                 {
                     transform.position = startPosition;
+                    gridGenerator?.CheckCombination();
                     OnMovementStarted?.Invoke();
-                    Grid3DGenerator.Instance?.CheckCombination();
                 }
                 else
                 {
@@ -193,7 +187,6 @@ namespace GridGen
             Vector3 currentStartPosition = Application.isPlaying ? startPosition : transform.position;
             float sphereRadius = ((transform.localScale.y + transform.localScale.z) / 2f) / 50f;
 
-            // Disegna la linea e la sfera che segnalano la fine del percorso
             Gizmos.DrawLine(currentStartPosition, currentStartPosition + direction.normalized * maxDistance);
             Gizmos.DrawWireSphere(currentStartPosition + direction.normalized * maxDistance, sphereRadius);
         }

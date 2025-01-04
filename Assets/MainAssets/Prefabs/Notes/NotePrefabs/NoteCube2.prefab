@@ -5830,6 +5830,7 @@ MonoBehaviour:
   onNotePlayed:
     m_PersistentCalls:
       m_Calls: []
+  gridGenerator: {fileID: 0}
 --- !u!114 &8012351391190151307
 MonoBehaviour:
   m_ObjectHideFlags: 0

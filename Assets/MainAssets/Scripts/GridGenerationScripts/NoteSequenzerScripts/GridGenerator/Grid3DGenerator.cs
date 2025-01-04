@@ -7,14 +7,13 @@ using TMPro; // Per TextMeshPro
 using UnityEditor;
 #endif
 using UnityEngine.Events;
+using Autohand;
 
 namespace GridGen
 {
     [DefaultExecutionOrder(-100)]
     public class Grid3DGenerator : MonoBehaviour
     {
-        public static Grid3DGenerator Instance { get; private set; }
-
         public enum NoteName
         {
             Do,
@@ -106,10 +105,12 @@ namespace GridGen
         public float cellInstantiationDelay = 0.1f;
 
         [HorizontalLine("Grid Matrix", 2)]
-        [ReadOnly] public GameObject[,,] gridMatrix;
+        [ReadOnly]
+        public GameObject[,,] gridMatrix;
 
         [HorizontalLine("Object List", 2)]
-        [ReadOnly] public List<GridEntry> objectList = new List<GridEntry>();
+        [ReadOnly]
+        public List<GridEntry> objectList = new List<GridEntry>();
 
         [Header("Octave Mappings")]
         [SerializeField]
@@ -131,11 +132,16 @@ namespace GridGen
         [Title("Solution Grid Configuration (NoteData)")]
         [Tooltip("Array monodimensionale per gestire la solution grid")]
         [SerializeField]
-        private NoteData[] solutionCells; // Lunghezza = gridSizeX * gridSizeY * gridSizeZ
+        private NoteData[] solutionCells; // = gridSizeX * gridSizeY * gridSizeZ
 
         [HorizontalLine("Combination Events", 2)]
         public UnityEvent OnCorrectCombination;
         public UnityEvent OnIncorrectCombination;
+
+        [HorizontalLine("Grid Events", 2)]
+        public UnityEvent OnGridGenerated;
+        public UnityEvent OnGridCleared;
+
         [ReadOnly]
         public int attempts = 0;
 
@@ -144,29 +150,12 @@ namespace GridGen
 
         private void Awake()
         {
-            if (Instance == null)
-            {
-                Instance = this;
-            }
-            else
-            {
-                Debug.LogError("Un'altra istanza di Grid3DGenerator esiste già!");
-            }
-
             if (MeshRendererActivatorManager.Instance != null)
                 meshActivatorManager = MeshRendererActivatorManager.Instance;
 
             if (generateOnStart)
             {
                 GenerateGrid();
-            }
-        }
-
-        private void OnDestroy()
-        {
-            if (Instance == this)
-            {
-                Instance = null;
             }
         }
 
@@ -181,16 +170,12 @@ namespace GridGen
             if (solutionCells == null || solutionCells.Length != neededSize)
             {
                 NoteData[] newArray = new NoteData[neededSize];
-
                 if (solutionCells != null)
                 {
                     int minSize = Mathf.Min(neededSize, solutionCells.Length);
                     for (int i = 0; i < minSize; i++)
-                    {
                         newArray[i] = solutionCells[i];
-                    }
                 }
-
                 solutionCells = newArray;
 #if UNITY_EDITOR
                 EditorUtility.SetDirty(this);
@@ -204,16 +189,22 @@ namespace GridGen
 
             gridMatrix = new GameObject[gridSizeX, gridSizeY, gridSizeZ];
 
-            GameObject gridParent = new GameObject("3DGrid") { transform = { parent = this.transform } };
-            labelsParent = new GameObject("Labels") { transform = { parent = this.transform } };
-            Vector3 origin = transform.position;
+            GameObject gridParent = new GameObject("3DGrid")
+            {
+                transform = { parent = this.transform }
+            };
+            labelsParent = new GameObject("Labels")
+            {
+                transform = { parent = this.transform }
+            };
 
+            Vector3 origin = transform.position;
             float gridDepth = gridSizeZ * cellSize.value;
 
+            // Generazione label
             for (int y = 0; y < gridSizeY; y++)
             {
                 NoteName noteName = GetNoteNameFromY(y);
-
                 Vector3 labelPosition = origin + new Vector3(
                     labelSettings.offsetX * cellSize.value,
                     y * cellSize.value + cellSize.value / 2,
@@ -221,7 +212,6 @@ namespace GridGen
                 );
 
                 GameObject labelInstance = Instantiate(labelPrefab, labelPosition, Quaternion.identity, labelsParent.transform);
-
                 TextMeshPro tmp = labelInstance.GetComponentInChildren<TextMeshPro>();
                 if (tmp != null)
                 {
@@ -231,7 +221,7 @@ namespace GridGen
                 }
                 else
                 {
-                    Debug.LogError("Il prefab dell'etichetta non ha un componente TextMeshPro nei suoi figli.");
+                    Debug.LogError("[Grid3DGenerator] Label prefab missing TextMeshPro child.");
                 }
             }
 
@@ -242,53 +232,42 @@ namespace GridGen
 #if UNITY_EDITOR
             EditorUtility.SetDirty(this);
 #endif
+
+            Debug.Log("Grid generated successfully.");
+            OnGridGenerated?.Invoke();
         }
 
         public void ClearGrid()
         {
             StopAllCoroutines();
 
-            // Miglioramento prestazionale: evitiamo DestroyImmediate a runtime
+            if (labelsParent != null)
+            {
+                Destroy(labelsParent);
+                labelsParent = null;
+            }
+
+            List<GameObject> children = new List<GameObject>();
             foreach (Transform child in transform)
             {
-#if UNITY_EDITOR
-                if (!Application.isPlaying)
-                {
-                    DestroyImmediate(child.gameObject);
-                }
-                else
-                {
-                    Destroy(child.gameObject);
-                }
-#else
-                Destroy(child.gameObject);
-#endif
+                children.Add(child.gameObject);
+            }
+
+            foreach (GameObject child in children)
+            {
+                Destroy(child);
             }
 
             gridMatrix = null;
             objectList.Clear();
             lineDataList.Clear();
 
-            if (labelsParent != null)
-            {
-#if UNITY_EDITOR
-                if (!Application.isPlaying)
-                {
-                    DestroyImmediate(labelsParent);
-                }
-                else
-                {
-                    Destroy(labelsParent);
-                }
-#else
-                Destroy(labelsParent);
-#endif
-                labelsParent = null;
-            }
-
 #if UNITY_EDITOR
             EditorUtility.SetDirty(this);
 #endif
+
+            Debug.Log("Grid cleared successfully.");
+            OnGridCleared?.Invoke();
         }
 
         private void CreateGridLines(Vector3 origin, GameObject parent)
@@ -299,8 +278,7 @@ namespace GridGen
                 {
                     Vector3 start = origin + new Vector3(x * cellSize.value, y * cellSize.value, 0);
                     Vector3 end = origin + new Vector3(x * cellSize.value, y * cellSize.value, gridSizeZ * cellSize.value);
-
-                    lineDataList.Add(new LineData(start, end, parent, lineMaterial, lineColor, lineWidth));
+                    lineDataList.Add(new LineData(start, end, parent, lineMaterial, Color.white, lineWidth));
                 }
             }
 
@@ -310,8 +288,7 @@ namespace GridGen
                 {
                     Vector3 start = origin + new Vector3(0, y * cellSize.value, z * cellSize.value);
                     Vector3 end = origin + new Vector3(gridSizeX * cellSize.value, y * cellSize.value, z * cellSize.value);
-
-                    lineDataList.Add(new LineData(start, end, parent, lineMaterial, lineColor, lineWidth));
+                    lineDataList.Add(new LineData(start, end, parent, lineMaterial, Color.white, lineWidth));
                 }
             }
 
@@ -321,8 +298,7 @@ namespace GridGen
                 {
                     Vector3 start = origin + new Vector3(x * cellSize.value, 0, z * cellSize.value);
                     Vector3 end = origin + new Vector3(x * cellSize.value, gridSizeY * cellSize.value, z * cellSize.value);
-
-                    lineDataList.Add(new LineData(start, end, parent, lineMaterial, lineColor, lineWidth));
+                    lineDataList.Add(new LineData(start, end, parent, lineMaterial, Color.white, lineWidth));
                 }
             }
         }
@@ -331,34 +307,27 @@ namespace GridGen
         {
             for (int i = 0; i < lineDataList.Count; i++)
             {
-                LineData lineData = lineDataList[i];
+                var lineData = lineDataList[i];
                 lineData.lineRenderer.enabled = true;
-
                 StartCoroutine(AnimateLine(lineData.lineRenderer, lineData.start, lineData.end));
-
                 yield return new WaitForSeconds(lineAnimationDelay);
             }
 
             yield return new WaitForSeconds(lineAnimationDuration);
-
             yield return StartCoroutine(InstantiateCells());
         }
 
         private IEnumerator AnimateLine(LineRenderer lineRenderer, Vector3 start, Vector3 end)
         {
             float elapsedTime = 0f;
-
             while (elapsedTime < lineAnimationDuration)
             {
                 elapsedTime += Time.deltaTime;
                 float t = elapsedTime / lineAnimationDuration;
-
                 Vector3 currentPos = Vector3.Lerp(start, end, t);
                 lineRenderer.SetPosition(1, currentPos);
-
                 yield return null;
             }
-
             lineRenderer.SetPosition(1, end);
         }
 
@@ -378,14 +347,24 @@ namespace GridGen
 
                         GameObject newCell = Instantiate(cellPrefab, cellCenter, Quaternion.identity, transform);
 
-                        // >>> REGISTRAZIONE AL MANAGER <<<
-                        if (meshActivatorManager != null)
+                        // [MODIFICA IMPORTANTE] Assegniamo 'this' a tutti i componenti nel cellPrefab
+                        NotePicker picker = newCell.GetComponent<NotePicker>();
+                        if (picker != null)
                         {
-                            meshActivatorManager.RegisterCell(newCell);
+                            picker.gridGenerator = this;
                         }
 
-                        gridMatrix[x, y, z] = null;
+                        // Se c'è un MusicScaleGenerator nel cell prefab, assegna pure lì
+                        MusicScaleGenerator musicScale = newCell.GetComponent<MusicScaleGenerator>();
+                        if (musicScale != null)
+                        {
+                            musicScale.gridGenerator = this;
+                        }
 
+                        if (meshActivatorManager != null)
+                            meshActivatorManager.RegisterCell(newCell);
+
+                        gridMatrix[x, y, z] = null;
                         yield return new WaitForSeconds(cellInstantiationDelay);
                     }
                 }
@@ -401,7 +380,6 @@ namespace GridGen
             }
 
             GameObject barLinesParent = new GameObject("BarLines") { transform = { parent = this.transform } };
-
             for (int x = cellsPerBar; x < gridSizeX; x += cellsPerBar)
             {
                 Vector3 barLinePosition = origin + new Vector3(
@@ -411,7 +389,6 @@ namespace GridGen
                 );
 
                 GameObject barLineInstance = Instantiate(barLinePrefab, barLinePosition, Quaternion.identity, barLinesParent.transform);
-
                 Vector3 barLineScale = barLineInstance.transform.localScale;
                 barLineScale.y = gridSizeY * cellSize.value + yOffset;
                 barLineScale.z = gridSizeZ * cellSize.value + zOffset;
@@ -421,33 +398,29 @@ namespace GridGen
 
         public string FormatNoteName(NoteName noteName)
         {
-            return noteName switch
+            switch (noteName)
             {
-                NoteName.DoSharp => "Do♯",
-                NoteName.ReSharp => "Re♯",
-                NoteName.FaSharp => "Fa♯",
-                NoteName.SolSharp => "Sol♯",
-                NoteName.LaSharp => "La♯",
-                NoteName.ReFlat => "Reb",
-                NoteName.MiFlat => "Mib",
-                NoteName.SolFlat => "Solb",
-                NoteName.LaFlat => "Lab",
-                NoteName.SiFlat => "Sib",
-                _ => noteName.ToString()
-            };
+                case NoteName.DoSharp: return "Do♯";
+                case NoteName.ReSharp: return "Re♯";
+                case NoteName.FaSharp: return "Fa♯";
+                case NoteName.SolSharp: return "Sol♯";
+                case NoteName.LaSharp: return "La♯";
+                case NoteName.ReFlat:  return "Reb";
+                case NoteName.MiFlat:  return "Mib";
+                case NoteName.SolFlat: return "Solb";
+                case NoteName.LaFlat:  return "Lab";
+                case NoteName.SiFlat:  return "Sib";
+                default: return noteName.ToString();
+            }
         }
 
         public int GetOctaveFromZ(int z)
         {
             foreach (var mapping in octaveMappings)
             {
-                if (mapping.zValue == z)
-                {
-                    return mapping.octave;
-                }
+                if (mapping.zValue == z) return mapping.octave;
             }
-
-            Debug.LogWarning($"Nessuna mappatura di ottava trovata per z: {z}. Utilizzo l'ottava di default {defaultOctave}.");
+            Debug.LogWarning($"[Grid3DGenerator] No octave mapping for z={z}, using default {defaultOctave}.");
             return defaultOctave;
         }
 
@@ -455,13 +428,9 @@ namespace GridGen
         {
             foreach (var mapping in noteMappings)
             {
-                if (mapping.yValue == y)
-                {
-                    return mapping.noteName;
-                }
+                if (mapping.yValue == y) return mapping.noteName;
             }
-
-            Debug.LogWarning($"Nessuna mappatura di nota trovata per y: {y}. Utilizzo la nota di default 'Do'.");
+            Debug.LogWarning($"[Grid3DGenerator] No note mapping for y={y}, using 'Do'.");
             return NoteName.Do;
         }
 
@@ -472,47 +441,40 @@ namespace GridGen
                 Debug.LogError("GridMatrix non è inizializzata.");
                 return;
             }
-
             if (x < 0 || x >= gridSizeX || y < 0 || y >= gridSizeY || z < 0 || z >= gridSizeZ)
             {
-                Debug.LogError($"Indici non validi: ({x}, {y}, {z}).");
+                Debug.LogError($"Indici non validi: ({x},{y},{z}).");
                 return;
             }
-
             gridMatrix[x, y, z] = newObject;
-            //Debug.Log($"Aggiornata la griglia in ({x}, {y}, {z}) con l'oggetto: {newObject?.name}");
         }
 
         public bool CanPlaceNote(int x, int y, int z, NoteData.NoteDuration duration)
         {
-            int length = duration == NoteData.NoteDuration.Quarter ? 1 :
-                         (duration == NoteData.NoteDuration.Half ? 2 : 4);
-
+            int length = (duration == NoteData.NoteDuration.Quarter) ? 1 :
+                         (duration == NoteData.NoteDuration.Half) ? 2 : 4;
             for (int i = 0; i < length; i++)
             {
                 int checkX = x + i;
                 if (checkX < 0 || checkX >= gridSizeX || y < 0 || y >= gridSizeY || z < 0 || z >= gridSizeZ)
-                {
                     return false;
-                }
-
                 if (gridMatrix[checkX, y, z] != null)
-                {
                     return false;
-                }
             }
             return true;
         }
 
         public void PlaceNoteInGrid(int x, int y, int z, GameObject noteObj, NoteData.NoteDuration duration)
         {
-            int length = duration == NoteData.NoteDuration.Quarter ? 1 :
-                         (duration == NoteData.NoteDuration.Half ? 2 : 4);
+            int length = (duration == NoteData.NoteDuration.Quarter) ? 1 :
+                         (duration == NoteData.NoteDuration.Half) ? 2 : 4;
 
             for (int i = 0; i < length; i++)
             {
                 int placeX = x + i;
-                if (placeX >= 0 && placeX < gridSizeX && y >= 0 && y < gridSizeY && z >= 0 && z < gridSizeZ)
+                if (placeX >= 0 && placeX < gridSizeX &&
+                    y >= 0 && y < gridSizeY &&
+                    z >= 0 && z < gridSizeZ)
                 {
                     gridMatrix[placeX, y, z] = noteObj;
                 }
@@ -521,42 +483,32 @@ namespace GridGen
 
         public void RemoveNoteFromGrid(int x, int y, int z, NoteData.NoteDuration duration)
         {
-            int length = duration == NoteData.NoteDuration.Quarter ? 1 :
-                         (duration == NoteData.NoteDuration.Half ? 2 : 4);
-
+            int length = (duration == NoteData.NoteDuration.Quarter) ? 1 :
+                         (duration == NoteData.NoteDuration.Half) ? 2 : 4;
             for (int i = 0; i < length; i++)
             {
                 int remX = x + i;
-                if (remX >= 0 && remX < gridSizeX && y >= 0 && y < gridSizeY && z >= 0 && z < gridSizeZ)
+                if (remX >= 0 && remX < gridSizeX &&
+                    y >= 0 && y < gridSizeY &&
+                    z >= 0 && z < gridSizeZ)
                 {
                     gridMatrix[remX, y, z] = null;
                 }
             }
         }
 
-        public void IncreaseAttempts()
-        {
-            attempts += 1;
-        }
-
-        public void DecreaseAttempts()
-        {
-            if (attempts > 0)
-            {
-                attempts -= 1;
-            }
-        }
+        public void IncreaseAttempts() => attempts++;
+        public void DecreaseAttempts() { if (attempts > 0) attempts--; }
 
         public void CheckCombination()
         {
             if (gridMatrix == null || solutionCells == null)
             {
-                Debug.LogError("Impossibile controllare la combinazione: griglia o solutionCells null.");
+                Debug.LogError("[Grid3DGenerator] GridMatrix or solutionCells is null - can't check combination.");
                 return;
             }
 
             bool isCorrect = true;
-
             for (int x = 0; x < gridSizeX && isCorrect; x++)
             {
                 for (int y = 0; y < gridSizeY && isCorrect; y++)
@@ -569,45 +521,27 @@ namespace GridGen
 
                         if (expectedNote == null)
                         {
-                            if (placedObj != null)
-                            {
-                                isCorrect = false;
-                            }
+                            if (placedObj != null) isCorrect = false;
                         }
                         else
                         {
-                            if (placedObj == null)
-                            {
-                                isCorrect = false;
-                            }
+                            if (placedObj == null) isCorrect = false;
                             else
                             {
                                 Note placedNote = placedObj.GetComponent<Note>();
                                 if (placedNote == null || placedNote.noteData == null)
-                                {
                                     isCorrect = false;
-                                }
                                 else
-                                {
                                     if (placedNote.noteData != expectedNote)
-                                    {
                                         isCorrect = false;
-                                    }
-                                }
                             }
                         }
                     }
                 }
             }
 
-            if (isCorrect)
-            {
-                OnCorrectCombination?.Invoke();
-            }
-            else
-            {
-                OnIncorrectCombination?.Invoke();
-            }
+            if (isCorrect) OnCorrectCombination?.Invoke();
+            else OnIncorrectCombination?.Invoke();
         }
 
         public int GetIndex(int x, int y, int z)
@@ -640,7 +574,6 @@ namespace GridGen
             {
                 this.start = start;
                 this.end = end;
-
                 GameObject lineObject = new GameObject("Line");
                 lineObject.transform.parent = parent.transform;
 

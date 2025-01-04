@@ -19,13 +19,11 @@ namespace GridGen
         [Header("Events")]
         public UnityEvent onNotePlayed;
 
-        // Statici per evitare rigenerazioni continue
         private static bool notesPreGenerated = false;
         private static Dictionary<string, AudioClip> noteCache = new Dictionary<string, AudioClip>();
         private static AudioClip baseNoteClip;
-        private static float baseFrequency = 261.63f; // Frequenza del Do base (C4 circa)
+        private static float baseFrequency = 261.63f; // Do base (C4 circa)
 
-        // Lista di note considerata
         private readonly Grid3DGenerator.NoteName[] noteNamesInOctave =
         {
             Grid3DGenerator.NoteName.Do,
@@ -47,14 +45,17 @@ namespace GridGen
             Grid3DGenerator.NoteName.SiFlat
         };
 
-        private Grid3DGenerator gridGenerator;
+        [Header("Grid Generator (assegnare da Inspector o tramite iniezione)")]
+        public Grid3DGenerator gridGenerator;
 
         private void Awake()
         {
             audioSource = GetComponent<AudioSource>();
 
-            if (Grid3DGenerator.Instance != null)
-                gridGenerator = Grid3DGenerator.Instance;
+            if (!gridGenerator)
+            {
+                Debug.LogWarning($"[MusicScaleGenerator] Il campo gridGenerator non è assegnato su {name}. Assicurarsi di iniettarlo dopo Instantiate.");
+            }
 
             if (!notesPreGenerated)
             {
@@ -63,15 +64,12 @@ namespace GridGen
                 notesPreGenerated = true;
             }
 
-            // Inizializza l'evento se non è assegnato
             if (onNotePlayed == null)
                 onNotePlayed = new UnityEvent();
         }
 
-
         private void PreInitializeBaseNote()
         {
-            // Cerca il componente Note e recupera il suo NoteData solo se non abbiamo ancora baseNoteClip
             if (baseNoteClip == null)
             {
                 Note noteComponent = GetComponent<Note>();
@@ -81,22 +79,15 @@ namespace GridGen
                 }
                 else
                 {
-                    // Se non esiste la nota base, occorre assicurarsi di averne una di fallback.
-                    // In caso di assenza, loggare un avviso. L'utente deve assicurarsi di avere una clip.
-                    Debug.LogWarning("Base note clip not found on this Note. Assign a NoteData with an audioClip.");
+                    Debug.LogWarning("[MusicScaleGenerator] Base note clip not found on this Note. Provide a NoteData with audioClip.");
                 }
             }
         }
 
         private void PreGenerateNotes()
         {
-            if (baseNoteClip == null)
-            {
-                // Non possiamo generare le note senza una nota base
-                return;
-            }
+            if (baseNoteClip == null) return;
 
-            // Genera tutte le note necessarie e salva nella cache statica
             for (int octave = minOctave; octave <= maxOctave; octave++)
             {
                 foreach (Grid3DGenerator.NoteName noteName in noteNamesInOctave)
@@ -119,9 +110,9 @@ namespace GridGen
 
         public void PlayNoteByPosition(int x, int y, int z, NoteData.NoteDuration duration, float fadeOutTime)
         {
-            if (gridGenerator == null)
+            if (!gridGenerator)
             {
-                Debug.LogError("Grid3DGenerator instance not found!");
+                Debug.LogError("[MusicScaleGenerator] gridGenerator è null, impossibile suonare la nota!");
                 return;
             }
 
@@ -129,29 +120,26 @@ namespace GridGen
             int octave = gridGenerator.GetOctaveFromZ(z);
 
             string noteKey = GetNoteKey(noteName, octave);
-
             if (noteCache.TryGetValue(noteKey, out AudioClip newNote))
             {
                 audioSource.clip = newNote;
-                audioSource.volume = 1.0f; // Assicurarsi che il volume sia pieno all'inizio
+                audioSource.volume = 1.0f;
                 audioSource.Play();
 
-                // Invoca l'evento quando la nota viene suonata
                 onNotePlayed?.Invoke();
 
                 StartCoroutine(StopNoteWithFadeOut(duration, fadeOutTime));
             }
             else
             {
-                Debug.LogError($"Note {noteName} in octave {octave} not found in cache.");
+                Debug.LogError($"[MusicScaleGenerator] Note {noteName} in octave {octave} not found in cache.");
             }
         }
-
 
         private IEnumerator StopNoteWithFadeOut(NoteData.NoteDuration duration, float fadeOutTime)
         {
             float durationInSeconds = (float)duration / 4f;
-            yield return new WaitForSeconds(durationInSeconds - fadeOutTime); // Attendere la durata prima del fade
+            yield return new WaitForSeconds(durationInSeconds - fadeOutTime);
 
             float startVolume = audioSource.volume;
             float fadeStep = startVolume / fadeOutTime;
@@ -160,9 +148,8 @@ namespace GridGen
                 audioSource.volume -= fadeStep * Time.deltaTime;
                 yield return null;
             }
-
             audioSource.Stop();
-            audioSource.volume = startVolume; // Ripristina il volume
+            audioSource.volume = startVolume;
         }
 
         private float CalculateFrequency(Grid3DGenerator.NoteName noteName, int octave)
@@ -189,7 +176,7 @@ namespace GridGen
                 Grid3DGenerator.NoteName.SolSharp => 8,
                 Grid3DGenerator.NoteName.La => 9,
                 Grid3DGenerator.NoteName.LaSharp => 10,
-                Grid3DGenerator.NoteName.LaFlat => 8, // attento a note doppie
+                Grid3DGenerator.NoteName.LaFlat => 8,
                 Grid3DGenerator.NoteName.SiFlat => 10,
                 Grid3DGenerator.NoteName.Si => 11,
                 _ => 0
@@ -198,7 +185,6 @@ namespace GridGen
 
         private AudioClip GenerateNote(AudioClip originalClip, float targetFrequency)
         {
-            // Se la base è nulla, ritorna subito
             if (originalClip == null) return null;
 
             float[] originalData = new float[originalClip.samples * originalClip.channels];
@@ -220,7 +206,6 @@ namespace GridGen
 
             AudioClip newClip = AudioClip.Create("GeneratedNote", newData.Length / originalClip.channels, originalClip.channels, sampleRate, false);
             newClip.SetData(newData, 0);
-
             return newClip;
         }
     }

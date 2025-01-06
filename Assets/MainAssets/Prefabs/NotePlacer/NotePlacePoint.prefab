@@ -737,6 +737,7 @@ MonoBehaviour:
     m_RotationOrder: 4
   MinAlpha: 0
   MaxAlpha: 0.2
+  startBlink: 0
 --- !u!1 &5687646078406486793
 GameObject:
   m_ObjectHideFlags: 0
@@ -1227,6 +1228,7 @@ MonoBehaviour:
   - Note
   selectedObject: {fileID: 0}
   delay: 0
+  gridGenerator: {fileID: 0}
 --- !u!114 &8468680384923396964
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1240,6 +1242,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   ignoreMe: 0
+  gridGenerator: {fileID: 0}
   showPlaceSettings: 1
   startPlaced: {fileID: 0}
   placedOffset: {fileID: 4913046769499813163}

@@ -32,7 +32,7 @@ public class VolumeSettings : MonoBehaviour
     private const string MIXER_MUSIC = "MusicVolume";
     private const string MIXER_SFX = "SfxVolume";
     private const string MIXER_MASTER = "MasterVolume";
-    private const string MIXER_UI = "UIVolume";
+    private const string MIXER_UI = "UiVolume";
 
     private void Awake()
     {

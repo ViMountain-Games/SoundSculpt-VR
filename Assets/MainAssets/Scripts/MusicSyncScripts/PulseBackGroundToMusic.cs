@@ -57,14 +57,24 @@ public class PulseBackGroundToMusic : MonoBehaviour
     [Range(64, 8192)]
     public int spectrumSize = 64;
 
+    [TooltipBox("Aggiorna lo spettro audio solo ogni X frame (1 significa ad ogni frame)")]
+    [Range(1, 60)]
+    public int framesBetweenUpdates = 1;
+
     [SerializeField, HideField]
     private float[] spectrumData;
 
-    private float currentIntensity = 1.0f;
+    // Cache componenti per evitare chiamate ripetute
+    private AudioSource cachedAudioSource;
 
-    // Questo metodo viene richiamato ogni volta che modifichi qualcosa in Inspector.
-    // Qui forziamo spectrumSize a rientrare nei limiti validi di GetSpectrumData (64-8192) 
-    // e lo convertiamo alla potenza di due più vicina.
+    // Variabili per la gestione dell'intensità
+    private float currentIntensity = 1.0f;
+    private float intensityVelocity; // Usata da SmoothDamp
+
+    // Per controllare ogni quanti frame leggere lo spettro audio
+    private int frameCounter;
+
+    // Viene richiamato quando modifichi qualcosa in Inspector
     private void OnValidate()
     {
         // Forza spectrumSize ad essere fra 64 e 8192
@@ -73,35 +83,48 @@ public class PulseBackGroundToMusic : MonoBehaviour
         spectrumSize = Mathf.ClosestPowerOfTwo(spectrumSize);
     }
 
-    private void Start()
+    private void Awake()
     {
-        if (!audioSource)
+        // Cache dell'AudioSource (se presente)
+        if (audioSource != null)
+        {
+            cachedAudioSource = audioSource;
+        }
+        else
         {
             Debug.LogWarning("AudioSource non assegnato! Assegna un AudioSource valido.", this);
         }
+    }
 
-        // All'avvio, inizializziamo l'array in base al valore (già validato) di spectrumSize
+    private void Start()
+    {
+        // All'avvio, inizializziamo l'array in base a spectrumSize
         spectrumData = new float[spectrumSize];
 
         // Eventuale randomizzazione iniziale
         if (randomizeAtStart)
         {
-            pulseStrength = Random.Range(pulseStrengthMin, pulseStrengthMax);
-            damping = Random.Range(dampingMin, dampingMax);
+            pulseStrength        = Random.Range(pulseStrengthMin, pulseStrengthMax);
+            damping              = Random.Range(dampingMin, dampingMax);
             sensitivityThreshold = Random.Range(sensitivityThresholdMin, sensitivityThresholdMax);
         }
     }
 
     private void Update()
     {
-        // Se non c'è audio in riproduzione o non abbiamo un materiale, fermiamo qui.
-        if (audioSource == null || !audioSource.isPlaying || targetMaterial == null)
+        // Se non c'è audio in riproduzione o non abbiamo un materiale, fermiamo qui
+        if (cachedAudioSource == null || !cachedAudioSource.isPlaying || targetMaterial == null)
             return;
 
-        // Campioniamo lo spettro audio
-        audioSource.GetSpectrumData(spectrumData, 0, FFTWindow.BlackmanHarris);
+        // Richiamiamo GetSpectrumData solo ogni 'framesBetweenUpdates' frame
+        frameCounter++;
+        if (frameCounter < framesBetweenUpdates) return;
+        frameCounter = 0;
 
-        // Calcoliamo la somma dei campioni (bassEnergy)
+        // Campioniamo lo spettro audio
+        cachedAudioSource.GetSpectrumData(spectrumData, 0, FFTWindow.BlackmanHarris);
+
+        // Calcoliamo la somma dei campioni
         float bassEnergy = 0f;
         for (int i = 0; i < spectrumData.Length; i++)
         {
@@ -114,12 +137,15 @@ public class PulseBackGroundToMusic : MonoBehaviour
         // Calcoliamo il valore target per l'intensità
         float targetIntensity = 1.0f + (effectiveEnergy * pulseStrength);
 
-        // Interpoliamo verso il target in modo graduale
-        if (!Mathf.Approximately(currentIntensity, targetIntensity))
-        {
-            currentIntensity = Mathf.Lerp(currentIntensity, targetIntensity, Time.deltaTime * damping);
-            // Impostiamo il parametro sul materiale
-            targetMaterial.SetFloat(intensityParameter, currentIntensity);
-        }
+        // Aggiorniamo l'intensità in modo fluido con SmoothDamp
+        currentIntensity = Mathf.SmoothDamp(
+            currentIntensity,           // valore attuale
+            targetIntensity,            // valore target
+            ref intensityVelocity,      // velocità (passata come reference)
+            1f / damping                // tempo di "ammortizzazione"
+        );
+
+        // Impostiamo il parametro sul materiale
+        targetMaterial.SetFloat(intensityParameter, currentIntensity);
     }
 }

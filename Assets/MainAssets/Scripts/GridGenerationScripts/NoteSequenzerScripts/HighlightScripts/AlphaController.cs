@@ -20,6 +20,8 @@ public class AlphaController : MonoBehaviour
     [Range(0f, 1f)]
     public float MaxAlpha = 1f;
 
+    public bool startBlink = true;
+
     private Renderer _renderer;
     private Material _material;
 
@@ -42,14 +44,16 @@ public class AlphaController : MonoBehaviour
         }
         _transitionTime = 0f;
 
-        StartCoroutine(Blink());
+        if (startBlink){
+            StartCoroutine(Blink());
+        }
     }
 
     private void Update()
     {
         if (_material == null || TransitionDuration <= 0f) return;
 
-        // Controlla se la transizione è in corso
+        // Controlla se la transizione ï¿½ in corso
         if (!Mathf.Approximately(_currentAlpha, _targetAlpha))
         {
             // Calcola il progresso della transizione
@@ -67,7 +71,7 @@ public class AlphaController : MonoBehaviour
 
             //Debug.Log($"CurrentAlpha: {_currentAlpha}, TargetAlpha: {_targetAlpha}");
 
-            // Controlla se la transizione è completa
+            // Controlla se la transizione ï¿½ completa
             if (progress >= 1f)
             {
                 _currentAlpha = Mathf.Clamp(_targetAlpha, MinAlpha, MaxAlpha); // Forza il valore finale

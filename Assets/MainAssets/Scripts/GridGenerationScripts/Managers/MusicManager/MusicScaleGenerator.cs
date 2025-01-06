@@ -54,7 +54,7 @@ namespace GridGen
 
             if (!gridGenerator)
             {
-                Debug.LogWarning($"[MusicScaleGenerator] Il campo gridGenerator non è assegnato su {name}. Assicurarsi di iniettarlo dopo Instantiate.");
+                //Debug.LogWarning($"[MusicScaleGenerator] Il campo gridGenerator non è assegnato su {name}. Assicurarsi di iniettarlo dopo Instantiate.");
             }
 
             if (!notesPreGenerated)

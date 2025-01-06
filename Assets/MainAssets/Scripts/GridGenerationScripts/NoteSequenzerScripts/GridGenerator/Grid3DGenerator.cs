@@ -233,7 +233,7 @@ namespace GridGen
             EditorUtility.SetDirty(this);
 #endif
 
-            Debug.Log("Grid generated successfully.");
+            //Debug.Log("Grid generated successfully.");
             OnGridGenerated?.Invoke();
         }
 
@@ -266,7 +266,7 @@ namespace GridGen
             EditorUtility.SetDirty(this);
 #endif
 
-            Debug.Log("Grid cleared successfully.");
+            //Debug.Log("Grid cleared successfully.");
             OnGridCleared?.Invoke();
         }
 

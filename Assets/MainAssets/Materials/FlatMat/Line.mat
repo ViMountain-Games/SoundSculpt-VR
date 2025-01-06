@@ -13,6 +13,7 @@ Material:
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords:
   - DR_CEL_EXTRA_ON
+  - DR_RIM_ON
   - DR_SPECULAR_ON
   - _CELPRIMARYMODE_SINGLE
   - _DETAILMAPBLENDINGMODE_MULTIPLY
@@ -104,7 +105,7 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _FlatRimAmount: 0.5
-    - _FlatRimEdgeSmoothness: 0
+    - _FlatRimEdgeSmoothness: 0.412
     - _FlatRimEnabled: 1
     - _FlatRimLightAlign: 0
     - _FlatRimSize: 0.305
@@ -145,7 +146,7 @@ Material:
     - _OverrideShadowsEnabled: 1
     - _Parallax: 0.02
     - _QueueOffset: 0
-    - _RimEnabled: 0
+    - _RimEnabled: 1
     - _SecondaryColor: 1
     - _SecondaryColorEnabled: 1
     - _SelfShadingSize: 0.55

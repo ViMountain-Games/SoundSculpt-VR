@@ -1,5 +1,6 @@
 using UnityEngine;
 using NaughtyAttributes;
+using UnityEngine.Events;
 
 namespace GridGen
 {
@@ -16,12 +17,15 @@ namespace GridGen
         [Tooltip("Controller del Particle System associato a questa nota")]
         public ParticleSystemController particleSystemController;
 
+        [Header("Eventi")]
+        public UnityEvent onNotePlayed;
+
         private MusicScaleGenerator musicScaleGenerator;
         private Renderer objectRenderer;
 
         private void Awake()
         {
-            // Recupera il MusicScaleGenerator già presente sul GameObject.
+            // Recupera il MusicScaleGenerator giï¿½ presente sul GameObject.
             musicScaleGenerator = GetComponent<MusicScaleGenerator>();
 
             // Assicura che il target per il materiale sia impostato.
@@ -34,7 +38,7 @@ namespace GridGen
                     objectRenderer = materialTarget.AddComponent<Renderer>();
                 }
 
-                // Se c'è già un NoteData, lo applichiamo
+                // Se c'ï¿½ giï¿½ un NoteData, lo applichiamo
                 if (noteData != null)
                 {
                     ApplyNoteDataAndMaterial(noteData);
@@ -42,7 +46,7 @@ namespace GridGen
             }
             else
             {
-                Debug.LogWarning("[Note] MaterialTarget non è impostato. Il materiale non sarà assegnato.");
+                Debug.LogWarning("[Note] MaterialTarget non ï¿½ impostato. Il materiale non sarï¿½ assegnato.");
             }
         }
 
@@ -59,6 +63,7 @@ namespace GridGen
             {
                 // Riproduce la nota basandosi sui dati del NoteData.
                 musicScaleGenerator.PlayNoteByPosition(gridX, gridY, gridZ, noteData.duration, noteData.fadeOutTime);
+                onNotePlayed.Invoke();
             }
         }
 
@@ -73,7 +78,7 @@ namespace GridGen
 
             if (noteData == null)
             {
-                Debug.LogWarning("[Note] Il nuovo NoteData è null, impossibile applicare materiale o gradient.");
+                Debug.LogWarning("[Note] Il nuovo NoteData ï¿½ null, impossibile applicare materiale o gradient.");
                 return;
             }
 

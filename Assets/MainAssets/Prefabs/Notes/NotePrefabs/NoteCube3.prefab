@@ -5077,6 +5077,9 @@ MonoBehaviour:
   gridZ: 0
   materialTarget: {fileID: 1971362007797469789}
   particleSystemController: {fileID: 2626865109144079514}
+  onNotePlayed:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!82 &195695186631700235
 AudioSource:
   m_ObjectHideFlags: 0

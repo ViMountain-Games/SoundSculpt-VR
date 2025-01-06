@@ -12,21 +12,24 @@ public class CombinationEventManager : MonoBehaviour
     [Tooltip("Evento attivato quando tutti gli eventi necessari sono stati chiamati.")]
     public UnityEvent onAllEventsTriggered;
 
-    private HashSet<int> triggeredEvents = new HashSet<int>(); // Per tenere traccia degli eventi attivati
-    private int currentEventId = 0; // Identificativo univoco per ciascun evento
+    private HashSet<int> triggeredEvents = new HashSet<int>(); // Per tenere traccia degli eventi unici attivati
 
     /// <summary>
     /// Metodo da assegnare agli eventi di altri codici (es. B e C).
     /// </summary>
-    public void RegisterEvent()
+    /// <param name="eventId">Identificativo univoco dell'evento.</param>
+    public void RegisterEvent(int eventId)
     {
-        triggeredEvents.Add(currentEventId++);
-
-        // Verifica se il numero di eventi richiesti è stato raggiunto
-        if (triggeredEvents.Count >= requiredEventCount)
+        if (!triggeredEvents.Contains(eventId)) // Controlla se l'evento non è già stato attivato
         {
-            onAllEventsTriggered?.Invoke();
-            ResetEvents(); // Resetta per poter riutilizzare il sistema
+            triggeredEvents.Add(eventId);
+
+            // Verifica se il numero di eventi richiesti è stato raggiunto
+            if (triggeredEvents.Count >= requiredEventCount)
+            {
+                onAllEventsTriggered?.Invoke();
+                ResetEvents(); // Resetta per poter riutilizzare il sistema
+            }
         }
     }
 

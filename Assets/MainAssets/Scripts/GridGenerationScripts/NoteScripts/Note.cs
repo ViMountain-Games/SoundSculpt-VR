@@ -27,6 +27,10 @@ namespace GridGen
         [Header("Stato della nota")]
         public bool isPlaced;
 
+        [Header("Luci associate alla nota")]
+        [Tooltip("Lista di Point Light a cui assegnare il colore della nota")]
+        public Light[] pointLights;
+
         private MusicScaleGenerator musicScaleGenerator;
         private Renderer objectRenderer;
 
@@ -76,7 +80,8 @@ namespace GridGen
 
         /// <summary>
         /// Aggiorna il NoteData dell'oggetto e ri-applica il materiale associato,
-        /// inclusa l'applicazione del gradient al ParticleSystemController (se assegnato).
+        /// inclusa l'applicazione del gradient al ParticleSystemController (se assegnato),
+        /// oltre ad aggiornare il colore delle luci.
         /// </summary>
         public void ApplyNoteDataAndMaterial(NoteData newNoteData)
         {
@@ -116,6 +121,18 @@ namespace GridGen
             else
             {
                 Debug.LogWarning("[Note] particleSystemController non assegnato, impossibile applicare il gradient.");
+            }
+
+            // Aggiorna il colore delle luci se presente
+            if (pointLights != null && pointLights.Length > 0)
+            {
+                foreach (Light pl in pointLights)
+                {
+                    if (pl != null)
+                    {
+                        pl.color = noteData.lightColor;
+                    }
+                }
             }
         }
     }

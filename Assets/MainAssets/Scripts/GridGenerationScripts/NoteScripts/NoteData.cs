@@ -27,6 +27,9 @@ public class NoteData : ScriptableObject
     [Tooltip("Materiale associato alla nota")]
     public Material noteMaterial;
 
+    [Tooltip("Colore utilizzato per le luci associate alla nota")]
+    public Color lightColor = Color.white;
+
     public string SelectedNoteType => noteTypes != null
         && selectedNoteTypeIndex >= 0
         && selectedNoteTypeIndex < noteTypes.Count

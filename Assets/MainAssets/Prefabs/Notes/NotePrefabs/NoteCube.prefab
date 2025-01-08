@@ -129,6 +129,8 @@ MonoBehaviour:
           m_BoolArgument: 0
         m_CallState: 2
   isPlaced: 0
+  pointLights:
+  - {fileID: 2293475620148714242}
 --- !u!82 &2958456752219626552
 AudioSource:
   m_ObjectHideFlags: 0

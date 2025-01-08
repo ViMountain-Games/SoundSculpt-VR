@@ -54,3 +54,4 @@ MonoBehaviour:
   - FX
   selectedNoteTypeIndex: 0
   noteMaterial: {fileID: 2100000, guid: acce950f5e6f2bc418c613d5d6a58c0c, type: 2}
+  lightColor: {r: 1, g: 0.6431373, b: 0.3529412, a: 1}

@@ -4984,6 +4984,7 @@ GameObject:
   - component: {fileID: -8505427964175343782}
   - component: {fileID: 2626865109144079514}
   - component: {fileID: 2050897611491001500}
+  - component: {fileID: 6418771068607071276}
   m_Layer: 12
   m_Name: NoteCube3
   m_TagString: Note
@@ -5081,16 +5082,16 @@ MonoBehaviour:
   onNotePlayed:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 387385676202670937}
-        m_TargetAssemblyTypeName: UnityEngine.Animator, UnityEngine
-        m_MethodName: Play
-        m_Mode: 3
+      - m_Target: {fileID: 6418771068607071276}
+        m_TargetAssemblyTypeName: PlayAnimationByEvents, Assembly-CSharp
+        m_MethodName: TriggerAnimation
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: 
+          m_StringArgument: Pulse4_4
           m_BoolArgument: 0
         m_CallState: 2
   isPlaced: 0
@@ -5615,6 +5616,20 @@ MonoBehaviour:
   animator: {fileID: 387385676202670937}
   note: {fileID: 1119063521772734887}
   floatingBoolName: IsFloating
+--- !u!114 &6418771068607071276
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3959593897940877384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c02dbea5efad0b44786248cbdeb08964, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 387385676202670937}
+  triggerName: Pulse
 --- !u!1 &8331112996152601335
 GameObject:
   m_ObjectHideFlags: 0

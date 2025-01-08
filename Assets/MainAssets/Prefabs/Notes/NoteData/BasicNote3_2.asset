@@ -53,5 +53,5 @@ MonoBehaviour:
   - Percussion
   - FX
   selectedNoteTypeIndex: 0
-  noteMaterial: {fileID: 2100000, guid: 720ea100b5a5ea741a0e79cfb3ab65c6, type: 2}
+  noteMaterial: {fileID: 2100000, guid: a60649858826a974d87f7a113224a58a, type: 2}
   lightColor: {r: 0.6724, g: 1, b: 0.29800004, a: 1}

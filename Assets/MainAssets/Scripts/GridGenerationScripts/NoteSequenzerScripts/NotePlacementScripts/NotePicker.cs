@@ -69,6 +69,8 @@ namespace GridGen
                     if (noteComponent != null)
                     {
                         noteComponent.SetGridPosition(x, y, z);
+                        // Attiviamo il bool di "piazzato"
+                        noteComponent.isPlaced = true;
                     }
 
                     // [NUOVA MODIFICA] Se l'oggetto ha un MusicScaleGenerator, assegniamogli lo stesso gridGenerator
@@ -106,6 +108,16 @@ namespace GridGen
                     z >= 0 && z < gridGenerator.gridSizeZ)
                 {
                     gridGenerator.UpdateGridMatrix(x, y, z, null);
+                }
+            }
+
+            // Se l'oggetto rimosso era una Note, disattiviamo il bool "isPlaced"
+            if (selectedObject != null)
+            {
+                Note noteComponent = selectedObject.GetComponent<Note>();
+                if (noteComponent != null)
+                {
+                    noteComponent.isPlaced = false;
                 }
             }
 

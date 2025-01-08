@@ -4983,6 +4983,7 @@ GameObject:
   - component: {fileID: 8217838015474467643}
   - component: {fileID: -8505427964175343782}
   - component: {fileID: 2626865109144079514}
+  - component: {fileID: 2050897611491001500}
   m_Layer: 12
   m_Name: NoteCube3
   m_TagString: Note
@@ -5092,6 +5093,7 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  isPlaced: 0
 --- !u!82 &195695186631700235
 AudioSource:
   m_ObjectHideFlags: 0
@@ -5594,6 +5596,21 @@ MonoBehaviour:
     m_ColorSpace: -1
     m_NumColorKeys: 2
     m_NumAlphaKeys: 2
+--- !u!114 &2050897611491001500
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3959593897940877384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eb365ad1eac9e084d88dee5f6d15972d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  animator: {fileID: 387385676202670937}
+  note: {fileID: 1119063521772734887}
+  floatingBoolName: IsFloating
 --- !u!1 &8331112996152601335
 GameObject:
   m_ObjectHideFlags: 0

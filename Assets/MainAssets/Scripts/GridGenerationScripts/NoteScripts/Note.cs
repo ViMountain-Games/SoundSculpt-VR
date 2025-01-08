@@ -20,12 +20,19 @@ namespace GridGen
         [Header("Eventi")]
         public UnityEvent onNotePlayed;
 
+        /// <summary>
+        /// Indica se la nota è piazzata (true) o no (false).
+        /// Viene gestito dal NotePicker quando questa nota viene assegnata come selectedObject.
+        /// </summary>
+        [Header("Stato della nota")]
+        public bool isPlaced;
+
         private MusicScaleGenerator musicScaleGenerator;
         private Renderer objectRenderer;
 
         private void Awake()
         {
-            // Recupera il MusicScaleGenerator gi� presente sul GameObject.
+            // Recupera il MusicScaleGenerator già presente sul GameObject.
             musicScaleGenerator = GetComponent<MusicScaleGenerator>();
 
             // Assicura che il target per il materiale sia impostato.
@@ -38,7 +45,7 @@ namespace GridGen
                     objectRenderer = materialTarget.AddComponent<Renderer>();
                 }
 
-                // Se c'� gi� un NoteData, lo applichiamo
+                // Se c'è già un NoteData, lo applichiamo
                 if (noteData != null)
                 {
                     ApplyNoteDataAndMaterial(noteData);
@@ -46,7 +53,7 @@ namespace GridGen
             }
             else
             {
-                Debug.LogWarning("[Note] MaterialTarget non � impostato. Il materiale non sar� assegnato.");
+                Debug.LogWarning("[Note] MaterialTarget non è impostato. Il materiale non sarà assegnato.");
             }
         }
 
@@ -78,7 +85,7 @@ namespace GridGen
 
             if (noteData == null)
             {
-                Debug.LogWarning("[Note] Il nuovo NoteData � null, impossibile applicare materiale o gradient.");
+                Debug.LogWarning("[Note] Il nuovo NoteData è null, impossibile applicare materiale o gradient.");
                 return;
             }
 
@@ -104,7 +111,6 @@ namespace GridGen
             // Applica il Gradient del NoteData al ParticleSystemController (se esiste)
             if (particleSystemController != null)
             {
-                //Debug.Log($"[Note] Applico il gradient '{noteData.colorGradient}' al ParticleSystemController.");
                 particleSystemController.ApplyStartColorGradient(noteData.colorGradient);
             }
             else

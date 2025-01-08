@@ -173,12 +173,12 @@ Material:
     - _VertexExtrusionSmoothNormals: 0
     - _ZWrite: 1
     m_Colors:
-    - _BaseColor: {r: 1, g: 0.008641863, b: 0, a: 1}
+    - _BaseColor: {r: 1, g: 0.2062745, b: 0.19999999, a: 1}
     - _Color: {r: 1, g: 0.27058828, b: 0.32003722, a: 1}
     - _ColorCelShadow: {r: 0.38581347, g: 0.38787434, b: 0.9622642, a: 1}
-    - _ColorDim: {r: 0.6509804, g: 0.14104576, b: 0, a: 1}
+    - _ColorDim: {r: 0.32599998, g: 0.1397143, b: 0.113102056, a: 1}
     - _ColorDimCurve: {r: 0.85, g: 0.85, b: 0.85, a: 0.85}
-    - _ColorDimExtra: {r: 0.30588236, g: 0.06627452, b: 0, a: 1}
+    - _ColorDimExtra: {r: 0.157, g: 0.073369645, b: 0.051181998, a: 1}
     - _ColorDimSteps: {r: 0.85, g: 0.85, b: 0.85, a: 0.85}
     - _ColorGradient: {r: 0.65, g: 0.65, b: 0.65, a: 1}
     - _ColorSecondary: {r: 1, g: 0.55879205, b: 0, a: 1}

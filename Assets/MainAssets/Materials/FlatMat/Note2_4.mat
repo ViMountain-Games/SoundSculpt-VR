@@ -32,7 +32,7 @@ Material:
   stringTagMap: {}
   disabledShaderPasses:
   - SRPDEFAULTUNLIT
-  m_LockedProperties: 
+  m_LockedProperties: _FlatSpecularColor
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:

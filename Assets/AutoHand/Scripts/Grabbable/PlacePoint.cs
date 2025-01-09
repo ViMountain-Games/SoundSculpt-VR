@@ -359,7 +359,7 @@ namespace Autohand
                     || notePicker.validTags.Contains(placeObj.gameObject.tag))
                 {
                     notePicker.selectedObject = placeObj.gameObject;
-                    Debug.Log($"[PlacePoint] '{placeObj.gameObject.name}' assegnato come selectedObject su NotePicker '{notePicker.name}'.");
+                    //Debug.Log($"[PlacePoint] '{placeObj.gameObject.name}' assegnato come selectedObject su NotePicker '{notePicker.name}'.");
                 }
             }
 
@@ -530,7 +530,7 @@ namespace Autohand
             if (notePicker != null && notePicker.selectedObject == placeObj.gameObject)
             {
                 notePicker.selectedObject = null;
-                Debug.Log($"[PlacePoint] Rimosso oggetto '{placeObj.gameObject.name}' da NotePicker '{notePicker.name}'.");
+                //Debug.Log($"[PlacePoint] Rimosso oggetto '{placeObj.gameObject.name}' da NotePicker '{notePicker.name}'.");
             }
 
             // Se c'è un Note e gridGenerator != null, rimuoviamo dalla griglia

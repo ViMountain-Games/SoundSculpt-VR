@@ -28,7 +28,7 @@ public class PlayAnimationByEvents : MonoBehaviour
         {
             // Imposta il trigger sull'Animator
             animator.SetTrigger(triggerName);
-            Debug.Log($"Trigger '{triggerName}' attivato con successo.");
+            //Debug.Log($"Trigger '{triggerName}' attivato con successo.");
         }
         catch (System.Exception ex)
         {

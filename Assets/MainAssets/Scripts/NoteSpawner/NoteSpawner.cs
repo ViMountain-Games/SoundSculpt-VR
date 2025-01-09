@@ -2,92 +2,85 @@ using UnityEngine;
 using System.Collections.Generic;
 using CustomInspector;
 
+[System.Serializable]
+public class NotePrefabMapping
+{
+    public NoteData noteData;  // Il NoteData corrispondente
+    public GameObject prefab; // Il Prefab associato
+}
+
 public class NoteSpawner : MonoBehaviour
 {
     [Header("Spawn Settings")]
     [Tooltip("Origin point for spawning prefabs.")]
-    public GameObject origin; // L'origine da cui verrà istanziato il prefab
+    public GameObject origin;
 
-    [Tooltip("List of prefabs to spawn.")]
-    public GameObject[] prefabs; // Lista di prefabs disponibili
+    [Tooltip("Mapping tra NoteData e Prefabs.")]
+    public List<NotePrefabMapping> noteMappings;
 
-    [Tooltip("Select the prefab index to spawn.")]
-    [Min(0)]
-    public int selectedPrefabIndex = 0; // Indice del prefab selezionato
+    [ReadOnly]
+    public int selectedPrefabIndex = 0;
 
     [Header("Direction and Force")]
     [Tooltip("Direction in which the prefab will be pushed.")]
-    public Vector3 spawnDirection = Vector3.forward; // Direzione in cui spingere il prefab
+    public Vector3 spawnDirection = Vector3.forward;
 
     [Tooltip("Amount of force applied to the prefab.")]
-    public float forceAmount = 10f; // La quantità di forza da applicare
+    public float forceAmount = 10f;
 
     [Header("Rotation Settings")]
-    public bool applyRotation = false; // Bool per decidere se applicare una rotazione
+    public bool applyRotation = false;
 
     [Tooltip("Torque vector to apply to the spawned prefab.")]
-    [ShowIf(nameof(applyRotation))]
-    public Vector3 rotationTorque; // Intensità della rotazione da applicare (in torque)
+    public Vector3 rotationTorque;
 
     [Tooltip("Intensity of the torque.")]
-    [ShowIf(nameof(applyRotation))]
-    public float torqueIntensity = 1f; // Fattore moltiplicativo per la forza del torque
+    public float torqueIntensity = 1f;
 
     [Header("Gizmo Settings")]
     [Tooltip("Color of the Gizmo direction arrow.")]
-    public Color gizmoColor = Color.green; // Colore del Gizmo
+    public Color gizmoColor = Color.green;
 
     [Tooltip("Length of the Gizmo direction arrow.")]
-    public float gizmoLength = 2f; // Lunghezza della freccia del Gizmo
+    public float gizmoLength = 2f;
 
-    [Header("Pooling Settings")]
-    [Tooltip("Initial size of the pool for each prefab.")]
-    public int initialPoolSize = 10;
+    [Header("Note Picker Reference")]
+    [Tooltip("Riferimento al NotePicker da cui recuperare la nota selezionata")]
+    public GridGen.NotePicker notePicker;
 
-    [Button(nameof(SpawnNote),
-                label = "Spawn Note")]
-
-    private List<Queue<GameObject>> objectPools; // Un pool (coda) per ciascun prefab
+    private List<Queue<GameObject>> objectPools;
 
     private void Awake()
     {
         InitializePools();
     }
 
-    /// <summary>
-    /// Crea i pool di oggetti per ogni prefab.
-    /// </summary>
     private void InitializePools()
     {
-        if (prefabs == null || prefabs.Length == 0)
+        if (noteMappings == null || noteMappings.Count == 0)
         {
-            Debug.LogWarning("Prefabs list is empty or not assigned!");
+            Debug.LogWarning("Note mappings are empty or not assigned!");
             return;
         }
 
-        objectPools = new List<Queue<GameObject>>(prefabs.Length);
+        objectPools = new List<Queue<GameObject>>(noteMappings.Count);
 
-        for (int i = 0; i < prefabs.Length; i++)
+        foreach (var mapping in noteMappings)
         {
             Queue<GameObject> pool = new Queue<GameObject>();
-
-            for (int j = 0; j < initialPoolSize; j++)
+            for (int j = 0; j < 10; j++) // Initial pool size
             {
-                GameObject obj = Instantiate(prefabs[i]);
+                GameObject obj = Instantiate(mapping.prefab);
                 obj.SetActive(false);
                 pool.Enqueue(obj);
             }
-
             objectPools.Add(pool);
         }
     }
 
-    /// <summary>
-    /// Ottiene un oggetto dal pool, se disponibile. Altrimenti ne istanzia uno nuovo.
-    /// </summary>
     private GameObject GetPooledObject(int prefabIndex)
     {
-        if (prefabIndex < 0 || prefabIndex >= prefabs.Length)
+        if (prefabIndex < 0 || prefabIndex >= objectPools.Count)
         {
             Debug.LogWarning("Selected prefab index is out of range!");
             return null;
@@ -102,73 +95,49 @@ public class NoteSpawner : MonoBehaviour
         }
         else
         {
-            // Se il pool è vuoto, crea un nuovo oggetto
-            pooledObj = Instantiate(prefabs[prefabIndex]);
+            pooledObj = Instantiate(noteMappings[prefabIndex].prefab);
         }
 
         pooledObj.SetActive(true);
         return pooledObj;
     }
 
-    /// <summary>
-    /// Restituisce un oggetto al pool. Da chiamare quando l'oggetto non serve più.
-    /// </summary>
-    public void ReturnToPool(int prefabIndex, GameObject obj)
-    {
-        if (prefabIndex < 0 || prefabIndex >= prefabs.Length)
-        {
-            Debug.LogWarning("Invalid prefab index when returning to pool.");
-            Destroy(obj);
-            return;
-        }
-
-        obj.SetActive(false);
-        objectPools[prefabIndex].Enqueue(obj);
-    }
-
-    /// <summary>
-    /// Cambia l'indice del prefab selezionato.
-    /// </summary>
-    /// <param name="index">Nuovo indice del prefab.</param>
-    public void SetSelectedPrefabIndex(int index)
-    {
-        if (index < 0 || index >= prefabs.Length)
-        {
-            Debug.LogWarning("Invalid prefab index provided!");
-            return;
-        }
-
-        selectedPrefabIndex = index;
-        //Debug.Log($"Selected prefab index set to: {index}");
-    }
-
     public void SpawnNote()
     {
-        // Validazione dei parametri
-        if (origin == null)
+        // ------------------------- INIZIO MODIFICA -------------------------
+        // Controlla se il NotePicker ha un oggetto selezionato
+        if (notePicker == null || notePicker.selectedObject == null)
         {
-            Debug.LogWarning("Origin is not assigned!");
+            Debug.LogWarning("SelectedObject is not assigned in NotePicker. Cannot spawn an object!");
             return;
         }
 
-        if (prefabs == null || prefabs.Length == 0)
+        // Recupera il NoteData del selectedObject
+        var selectedNote = notePicker.selectedObject.GetComponent<GridGen.Note>();
+        if (selectedNote == null || selectedNote.noteData == null)
         {
-            Debug.LogWarning("Prefabs list is empty or not assigned!");
+            Debug.LogWarning("SelectedObject does not have a valid Note or NoteData. Cannot spawn an object!");
             return;
         }
 
-        if (selectedPrefabIndex < 0 || selectedPrefabIndex >= prefabs.Length)
+        // Trova l'indice del NoteData nel mapping
+        bool foundMapping = false;
+        for (int i = 0; i < noteMappings.Count; i++)
         {
-            Debug.LogWarning("Selected prefab index is out of range!");
-            return;
+            if (noteMappings[i].noteData == selectedNote.noteData)
+            {
+                selectedPrefabIndex = i;
+                foundMapping = true;
+                break;
+            }
         }
 
-        GameObject prefabToSpawn = prefabs[selectedPrefabIndex];
-        if (prefabToSpawn == null)
+        if (!foundMapping)
         {
-            Debug.LogWarning("Selected prefab is null!");
+            Debug.LogWarning("No matching NoteData found in NoteMappings for the selected object!");
             return;
         }
+        // -------------------------- FINE MODIFICA --------------------------
 
         // Ottieni un oggetto dal pool
         GameObject spawnedObject = GetPooledObject(selectedPrefabIndex);
@@ -182,49 +151,19 @@ public class NoteSpawner : MonoBehaviour
         spawnedObject.transform.position = origin.transform.position;
         spawnedObject.transform.rotation = origin.transform.rotation;
 
-        // Ottieni il Rigidbody e applica la forza
         Rigidbody rb = spawnedObject.GetComponent<Rigidbody>();
         if (rb != null)
         {
-            // Calcola la direzione globale
             Vector3 globalDirection = origin.transform.TransformDirection(spawnDirection.normalized);
-
-            // Resetta velocità e rotazione
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
-
-            // Applica la forza al Rigidbody
             rb.AddForce(globalDirection * forceAmount, ForceMode.Impulse);
 
-            // Applica il torque se abilitato
             if (applyRotation)
             {
                 Vector3 torque = rotationTorque.normalized * torqueIntensity;
                 rb.AddTorque(torque, ForceMode.Impulse);
             }
         }
-        else
-        {
-            Debug.LogWarning("The spawned object does not have a Rigidbody component!");
-        }
-    }
-
-    private void OnDrawGizmos()
-    {
-        if (origin == null)
-            return;
-
-        // Imposta il colore del Gizmo
-        Gizmos.color = gizmoColor;
-
-        // Calcola la direzione del Gizmo rispetto all'origine
-        Vector3 startPosition = origin.transform.position;
-        Vector3 endPosition = startPosition + origin.transform.TransformDirection(spawnDirection.normalized) * gizmoLength;
-
-        // Disegna una linea per mostrare la direzione
-        Gizmos.DrawLine(startPosition, endPosition);
-
-        // Disegna una sfera per indicare la fine della freccia
-        Gizmos.DrawSphere(endPosition, 0.01f);
     }
 }

@@ -51,43 +51,53 @@ namespace GridGen
                 }
             }
 
-            if (selectedObject != null && gridGenerator != null)
+            // Se abbiamo trovato un child con tag valido
+            if (selectedObject != null)
             {
-                // Calcoliamo gli indici di cella
-                int x = Mathf.FloorToInt((transform.position.x - gridGenerator.transform.position.x) / gridGenerator.cellSize.value);
-                int y = Mathf.FloorToInt((transform.position.y - gridGenerator.transform.position.y) / gridGenerator.cellSize.value);
-                int z = Mathf.FloorToInt((transform.position.z - gridGenerator.transform.position.z) / gridGenerator.cellSize.value);
-
-                if (x >= 0 && x < gridGenerator.gridSizeX &&
-                    y >= 0 && y < gridGenerator.gridSizeY &&
-                    z >= 0 && z < gridGenerator.gridSizeZ)
+                // Se gridGenerator NON esiste, non facciamo i check di griglia e NON diamo errori.
+                if (gridGenerator == null)
                 {
-                    gridGenerator.UpdateGridMatrix(x, y, z, selectedObject);
-
-                    // Se l'oggetto selezionato è una Nota
-                    Note noteComponent = selectedObject.GetComponent<Note>();
-                    if (noteComponent != null)
-                    {
-                        noteComponent.SetGridPosition(x, y, z);
-                        // Attiviamo il bool di "piazzato"
-                        noteComponent.isPlaced = true;
-                    }
-
-                    // [NUOVA MODIFICA] Se l'oggetto ha un MusicScaleGenerator, assegniamogli lo stesso gridGenerator
-                    MusicScaleGenerator ms = selectedObject.GetComponent<MusicScaleGenerator>();
-                    if (ms != null)
-                    {
-                        ms.gridGenerator = gridGenerator;
-                    }
+                    Debug.LogWarning($"[NotePicker on {name}] selectedObject='{selectedObject.name}', ma gridGenerator non è assegnato: salto i controlli di griglia.");
                 }
                 else
                 {
-                    Debug.LogError($"Indices out of bounds: ({x}, {y}, {z}). [NotePicker on {name}]");
+                    // Se gridGenerator esiste, facciamo il posizionamento in griglia
+                    int x = Mathf.FloorToInt((transform.position.x - gridGenerator.transform.position.x) / gridGenerator.cellSize.value);
+                    int y = Mathf.FloorToInt((transform.position.y - gridGenerator.transform.position.y) / gridGenerator.cellSize.value);
+                    int z = Mathf.FloorToInt((transform.position.z - gridGenerator.transform.position.z) / gridGenerator.cellSize.value);
+
+                    if (x >= 0 && x < gridGenerator.gridSizeX &&
+                        y >= 0 && y < gridGenerator.gridSizeY &&
+                        z >= 0 && z < gridGenerator.gridSizeZ)
+                    {
+                        gridGenerator.UpdateGridMatrix(x, y, z, selectedObject);
+
+                        // Se l'oggetto selezionato è una Nota
+                        Note noteComponent = selectedObject.GetComponent<Note>();
+                        if (noteComponent != null)
+                        {
+                            noteComponent.SetGridPosition(x, y, z);
+                            noteComponent.isPlaced = true;
+                        }
+
+                        // Se l'oggetto ha un MusicScaleGenerator, assegniamo lo stesso gridGenerator
+                        MusicScaleGenerator ms = selectedObject.GetComponent<MusicScaleGenerator>();
+                        if (ms != null)
+                        {
+                            ms.gridGenerator = gridGenerator;
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogError($"Indices out of bounds: ({x}, {y}, {z}). [NotePicker on {name}]");
+                    }
                 }
             }
             else
             {
-                Debug.LogError($"[NotePicker on {name}] No valid child or missing gridGenerator.");
+                // Non diamo più errore fatale,
+                // ma un avviso che non abbiamo trovato child con tag valido (o non c'è gridGenerator).
+                Debug.LogWarning($"[NotePicker on {name}] Nessun child valido trovato o gridGenerator assente.");
             }
 
 #if UNITY_EDITOR

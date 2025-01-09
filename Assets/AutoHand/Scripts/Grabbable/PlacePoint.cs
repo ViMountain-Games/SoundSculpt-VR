@@ -37,7 +37,9 @@ namespace Autohand
         [AutoHeader("Place Point")]
         public bool ignoreMe;
 
-        private NotePicker notePicker;
+        // Ora è pubblico, così da poterlo assegnare in Inspector:
+        // Se presente, useremo la reference in Place(...) per impostare selectedObject.
+        public NotePicker notePicker;
 
         [Header("Grid Generator (assegnare da Inspector o codice)")]
         public Grid3DGenerator gridGenerator;
@@ -121,14 +123,15 @@ namespace Autohand
 
         protected virtual void Awake()
         {
-            // Non assegniamo qui, perché Awake() di PlacePoint potrebbe avvenire
-            // prima che NotePicker abbia il .gridGenerator assegnato.
-            // Perciò, spostiamo la logica in Start().
+            // Non lo assegniamo qui perché potremmo volerlo fare in Start o da Inspector.
         }
 
         protected virtual void Start()
         {
-            notePicker = GetComponent<NotePicker>();
+            // Se esiste un NotePicker su questo stesso oggetto e non è già assegnato, lo prendiamo
+            if (!notePicker)
+                notePicker = GetComponent<NotePicker>();
+
             if (!gridGenerator && notePicker != null && notePicker.gridGenerator != null)
             {
                 gridGenerator = notePicker.gridGenerator;
@@ -222,9 +225,16 @@ namespace Autohand
 
         public Grabbable GetPlacedObject() => placedObject;
 
+        /// <summary>
+        /// Se gridGenerator è null, salta i check di griglia (ritorna true se tutto il resto va bene).
+        /// </summary>
         public virtual bool CanPlace(Grabbable placeObj, bool checkRoot = true)
         {
-            if (!gridGenerator) return false;
+            // Non blocchiamo più il piazzamento se gridGenerator è assente:
+            if (!gridGenerator)
+            {
+                Debug.LogWarning($"[PlacePoint on {name}] Nessun Grid3DGenerator assegnato: salto i controlli su note/griglia.");
+            }
 
             if (checkRoot && CanPlace(placeObj.rootGrabbable, false))
                 return true;
@@ -257,8 +267,9 @@ namespace Autohand
                 if (!allowedByName) return false;
             }
 
+            // Se c'è un Note e gridGenerator != null, controlliamo la griglia
             Note noteComponent = placeObj.GetComponent<Note>();
-            if (noteComponent != null)
+            if (noteComponent != null && gridGenerator != null)
             {
                 var dur = noteComponent.noteData.duration;
                 int x = Mathf.FloorToInt((placedOffset.position.x - gridGenerator.transform.position.x) / gridGenerator.cellSize.value);
@@ -279,7 +290,6 @@ namespace Autohand
             if (CanPlace(placeObj))
                 Place(placeObj);
         }
-
         public virtual void Place(Grabbable placeObj)
         {
             if (placedObject != null) return;
@@ -341,6 +351,18 @@ namespace Autohand
             OnPlace?.Invoke(this, placeObj);
             lastPlacedTime = Time.time;
 
+            // [NUOVA RIGA] Se notePicker è assegnato, aggiorna selectedObject
+            if (notePicker != null)
+            {
+                if (notePicker.validTags == null
+                    || notePicker.validTags.Count == 0
+                    || notePicker.validTags.Contains(placeObj.gameObject.tag))
+                {
+                    notePicker.selectedObject = placeObj.gameObject;
+                    Debug.Log($"[PlacePoint] '{placeObj.gameObject.name}' assegnato come selectedObject su NotePicker '{notePicker.name}'.");
+                }
+            }
+
             if (destroyObjectOnPlace)
             {
                 Destroy(placeObj.gameObject);
@@ -361,7 +383,6 @@ namespace Autohand
             if (disableGrabOnPlace || disablePlacePointOnPlace)
                 placeObj.isGrabbable = false;
 
-            // resizeOnPlace e grabbablePlacePoint
             if (resizeOnPlace)
             {
                 placeObj.OnBeforeGrabEvent += ResizeBeforeGrab;
@@ -380,6 +401,7 @@ namespace Autohand
 
                 float scaleVal = Mathf.Abs(transform.lossyScale.x < transform.lossyScale.y ? transform.lossyScale.x : transform.lossyScale.y);
                 scaleVal = Mathf.Abs(scaleVal < transform.lossyScale.z ? scaleVal : transform.lossyScale.z);
+
                 if (shapeType == PlacePointShape.Sphere)
                     FitAndCenterToBounds(placeObj.rootTransform.gameObject, placeRadius * scaleVal + resizeOffset * scaleVal);
                 else if (shapeType == PlacePointShape.Box)
@@ -407,7 +429,7 @@ namespace Autohand
                     parentGrabbable.AddGrabbableColliders(placeObj);
             }
 
-            // Se c'è un Note, aggiorniamo la Grid
+            // Se c'è un Note, aggiorniamo la Grid (solo se gridGenerator != null).
             if (gridGenerator != null)
             {
                 Note noteComponent = placeObj.GetComponent<Note>();
@@ -425,7 +447,6 @@ namespace Autohand
                 }
             }
         }
-
         public virtual void Remove(Grabbable placeObj)
         {
             placeObj = placeObj.rootGrabbable;
@@ -499,11 +520,20 @@ namespace Autohand
             placedObject.OnPlacePointRemoveEvent?.Invoke(this, highlightingObj);
             foreach (var grabChild in placedObject.grabbableChildren)
                 grabChild.OnPlacePointRemoveEvent?.Invoke(this, grabChild);
+
             OnRemoveEvent?.Invoke(this, placeObj);
             OnRemove?.Invoke(this, placeObj);
 
             lastPlacedObject = placedObject;
 
+            // [NUOVA RIGA] Se notePicker.selectedObject era l'oggetto rimosso, resettiamo.
+            if (notePicker != null && notePicker.selectedObject == placeObj.gameObject)
+            {
+                notePicker.selectedObject = null;
+                Debug.Log($"[PlacePoint] Rimosso oggetto '{placeObj.gameObject.name}' da NotePicker '{notePicker.name}'.");
+            }
+
+            // Se c'è un Note e gridGenerator != null, rimuoviamo dalla griglia
             if (gridGenerator != null && placedObject != null)
             {
                 Note noteComponent = placedObject.GetComponent<Note>();
@@ -516,7 +546,6 @@ namespace Autohand
 
             placedObject = null;
         }
-
         [ContextMenu("Remove Placed")]
         public void Remove()
         {

@@ -34,6 +34,21 @@ public class LevelManagerActions : MonoBehaviour
     }
 
     /// <summary>
+    /// Ricarica la scena attuale.
+    /// </summary>
+    public void ReloadCurrentScene()
+    {
+        if (LevelManager.Instance != null)
+        {
+            LevelManager.Instance.ReloadCurrentScene();
+        }
+        else
+        {
+            Debug.LogWarning("LevelManager non trovato! Assicurati che sia attivo nella scena iniziale.");
+        }
+    }
+
+    /// <summary>
     /// Legge la progressione di caricamento dal LevelManager.
     /// </summary>
     /// <returns>La percentuale di caricamento (0..1).</returns>

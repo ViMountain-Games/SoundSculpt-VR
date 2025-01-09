@@ -6,10 +6,9 @@ using System.Collections.Generic;
 using Gley.AllPlatformsSave; // Namespace dell'asset
 using CustomInspector;
 
-
 /// <summary>
 /// Struttura dei dati da salvare e caricare.
-/// Puoi aggiungere al suo interno altri campi se vuoi salvare pi˘ informazioni.
+/// Puoi aggiungere al suo interno altri campi se vuoi salvare pi√π informazioni.
 /// </summary>
 [System.Serializable]
 public class SaveData
@@ -34,7 +33,7 @@ public class LevelManager : MonoBehaviour
     private List<string> sceneNames;
 
     [HorizontalLine("File di salvataggio", 2)]
-    [Tooltip("Nome del file dove salvare i dati. Verr‡ salvato in Application.persistentDataPath.")]
+    [Tooltip("Nome del file dove salvare i dati. Verr√† salvato in Application.persistentDataPath.")]
     [SerializeField]
     private string fileName = "SaveData";
 
@@ -67,7 +66,7 @@ public class LevelManager : MonoBehaviour
     private float sceneLoadDelay = 2f;
 
     [HorizontalLine("Scene escluse dal salvataggio", 2)]
-    [MessageBox("In queste scene, il salvataggio automatico Ë disattivato.", MessageBoxType.Info)]
+    [MessageBox("In queste scene, il salvataggio automatico √® disattivato.", MessageBoxType.Info)]
     [SerializeField]
     private List<string> excludedAutoSaveScenes;
 
@@ -148,7 +147,7 @@ public class LevelManager : MonoBehaviour
             currentLevelIndex = 0;
         }
 
-        // Proviamo a salvare (se la scena non Ë nella lista excludedAutoSaveScenes)
+        // Proviamo a salvare (se la scena non √® nella lista excludedAutoSaveScenes)
         SaveProgress();
 
         // Avvia una coroutine che attende un delay e poi carica la scena
@@ -169,10 +168,24 @@ public class LevelManager : MonoBehaviour
 
         currentLevelIndex = index;
 
-        // Proviamo a salvare (se la scena non Ë nella lista excludedAutoSaveScenes)
+        // Proviamo a salvare (se la scena non √® nella lista excludedAutoSaveScenes)
         SaveProgress();
 
         // Avvia una coroutine che attende un delay e poi carica la scena
+        StartCoroutine(LoadSceneWithDelay(sceneNames[currentLevelIndex]));
+    }
+
+    /// <summary>
+    /// Ricarica la scena corrente, utilizzando la stessa logica di caricamento asincrono.
+    /// </summary>
+    public void ReloadCurrentScene()
+    {
+        Debug.Log("ReloadCurrentScene");
+
+        // Facoltativo: possiamo salvare di nuovo lo stato, se vogliamo
+        SaveProgress();
+
+        // Avviamo una coroutine con il solito delay per ricaricare la scena attuale
         StartCoroutine(LoadSceneWithDelay(sceneNames[currentLevelIndex]));
     }
 
@@ -211,7 +224,7 @@ public class LevelManager : MonoBehaviour
             // Evento: segnala il progresso
             OnSceneLoadingProgress?.Invoke(progress);
 
-            // Se il caricamento Ë completo (>= 90%), attiva la scena
+            // Se il caricamento √® completo (>= 90%), attiva la scena
             if (asyncOp.progress >= 0.9f)
             {
                 asyncOp.allowSceneActivation = true;
@@ -230,22 +243,22 @@ public class LevelManager : MonoBehaviour
 
     /// <summary>
     /// Salva i dati correnti (ad esempio, l'indice del livello) su disco
-    /// SOLO se la scena attuale non Ë esclusa e il currentLevelIndex Ë maggiore di quello gi‡ salvato.
+    /// SOLO se la scena attuale non √® esclusa e il currentLevelIndex √® maggiore di quello gi√† salvato.
     /// </summary>
     public void SaveProgress()
     {
-        // Se la scena corrente Ë nella lista delle escluse, esci subito
+        // Se la scena corrente √® nella lista delle escluse, esci subito
         string activeSceneName = SceneManager.GetActiveScene().name;
         if (excludedAutoSaveScenes.Contains(activeSceneName))
         {
-            Debug.Log($"[SaveProgress] Scena '{activeSceneName}' Ë esclusa dal salvataggio automatico, non salvo.");
+            Debug.Log($"[SaveProgress] Scena '{activeSceneName}' √® esclusa dal salvataggio automatico, non salvo.");
             return;
         }
 
         if (currentSaveData == null)
             currentSaveData = new SaveData();
 
-        // Se stiamo andando a un livello pi˘ avanzato rispetto a quello salvato, aggiorniamo il file
+        // Se stiamo andando a un livello pi√π avanzato rispetto a quello salvato, aggiorniamo il file
         if (currentLevelIndex > currentSaveData.currentLevelIndex)
         {
             Debug.Log($"[SaveProgress] Nuovo livello (index {currentLevelIndex}) > salvato (index {currentSaveData.currentLevelIndex}), salvo su disco.");
@@ -280,7 +293,7 @@ public class LevelManager : MonoBehaviour
     /// </summary>
     public void LoadProgress()
     {
-        Debug.Log("LoadProgress - (opzionale, non Ë chiamato di default)");
+        Debug.Log("LoadProgress - (opzionale, non √® chiamato di default)");
         API.Load<SaveData>(FullPath, DataWasLoaded, encrypt);
     }
 

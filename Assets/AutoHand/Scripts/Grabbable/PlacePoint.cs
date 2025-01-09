@@ -233,7 +233,7 @@ namespace Autohand
             // Non blocchiamo più il piazzamento se gridGenerator è assente:
             if (!gridGenerator)
             {
-                Debug.LogWarning($"[PlacePoint on {name}] Nessun Grid3DGenerator assegnato: salto i controlli su note/griglia.");
+                //Debug.LogWarning($"[PlacePoint on {name}] Nessun Grid3DGenerator assegnato: salto i controlli su note/griglia.");
             }
 
             if (checkRoot && CanPlace(placeObj.rootGrabbable, false))

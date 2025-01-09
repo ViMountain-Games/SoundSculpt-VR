@@ -28,7 +28,7 @@ namespace GridGen
         {
             if (!gridGenerator)
             {
-                Debug.LogWarning($"[NotePicker on {name}] gridGenerator non assegnato in Inspector/istanziazione.");
+                //Debug.LogWarning($"[NotePicker on {name}] gridGenerator non assegnato in Inspector/istanziazione.");
             }
         }
 

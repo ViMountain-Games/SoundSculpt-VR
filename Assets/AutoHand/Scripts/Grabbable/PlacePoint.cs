@@ -139,7 +139,7 @@ namespace Autohand
 
             if (!gridGenerator)
             {
-                Debug.LogWarning($"[PlacePoint on {name}] Nessun gridGenerator assegnato né trovato via NotePicker!");
+                //Debug.LogWarning($"[PlacePoint on {name}] Nessun gridGenerator assegnato né trovato via NotePicker!");
             }
 
             if (checkRoutine == null)

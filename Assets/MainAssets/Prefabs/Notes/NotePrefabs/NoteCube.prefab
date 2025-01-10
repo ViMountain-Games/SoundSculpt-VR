@@ -22,6 +22,7 @@ GameObject:
   - component: {fileID: 2019240282247395027}
   - component: {fileID: 51580780705679018}
   - component: {fileID: -4378436508665628919}
+  - component: {fileID: 8362995688430340727}
   m_Layer: 12
   m_Name: NoteCube
   m_TagString: Note
@@ -664,6 +665,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animator: {fileID: 7018139820015585466}
   triggerName: Pulse
+--- !u!114 &8362995688430340727
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1335621963648836805}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae3b37e3b3af3674f99b66c9b6cee569, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  torqueAxis: {x: 1, y: 1, z: 1}
+  torqueIntensity: 0.005
+  torqueDuration: 0.25
 --- !u!1 &2523698762934756655
 GameObject:
   m_ObjectHideFlags: 0

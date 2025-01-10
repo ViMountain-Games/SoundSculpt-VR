@@ -5788,6 +5788,7 @@ MonoBehaviour:
   onSoundPlayed:
     m_PersistentCalls:
       m_Calls: []
+  noteReference: {fileID: 2258988621010448073}
 --- !u!114 &8517325404724405506
 MonoBehaviour:
   m_ObjectHideFlags: 0

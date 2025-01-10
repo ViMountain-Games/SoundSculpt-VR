@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 6214134711003489400}
   - component: {fileID: 8265349016820950633}
   - component: {fileID: 2480101018324405485}
+  - component: {fileID: 1849314498489486343}
   m_Layer: 12
   m_Name: PastCar
   m_TagString: PastOBJ
@@ -47,7 +48,7 @@ Rigidbody:
   serializedVersion: 4
   m_Mass: 1
   m_Drag: 0
-  m_AngularDrag: 0.05
+  m_AngularDrag: 0
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -240,6 +241,7 @@ MonoBehaviour:
   onSoundPlayed:
     m_PersistentCalls:
       m_Calls: []
+  noteReference: {fileID: 0}
 --- !u!114 &2480101018324405485
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -390,6 +392,21 @@ MonoBehaviour:
     - {x: -0.12157388, y: -0.49154654, z: -0.8623235}
     - {x: -0.44734856, y: -0.44734898, z: -0.7744405}
     - {x: -0.77444035, y: -0.44734886, z: -0.447349}
+--- !u!114 &1849314498489486343
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2233395981145422454}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ae3b37e3b3af3674f99b66c9b6cee569, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  torqueAxis: {x: 1, y: 1, z: 0}
+  torqueIntensity: 0.01
+  torqueDuration: 0.5
 --- !u!1001 &1473813236549236399
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -517,11 +534,11 @@ AudioSource:
   m_GameObject: {fileID: 1780435354621578238}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: -3165942800488051908, guid: 7e984f512e89b60468e829489e8883e3, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.8
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -529,10 +546,10 @@ AudioSource:
   SpatializePostEffects: 0
   Priority: 128
   DopplerLevel: 1
-  MinDistance: 1
-  MaxDistance: 500
+  MinDistance: 0
+  MaxDistance: 50
   Pan2D: 0
-  rolloffMode: 0
+  rolloffMode: 1
   BypassEffects: 0
   BypassListenerEffects: 0
   BypassReverbZones: 0
@@ -565,7 +582,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0

@@ -118,8 +118,9 @@ public class Outline : MonoBehaviour
         // Recupera o genera le normali smooth
         LoadSmoothNormals();
 
-        // Applica immediatamente le proprietà del materiale
-        needsUpdate = true;
+        // Applica immediatamente le proprietà (opzionale, se vuoi evitare frame indesiderati già in Awake)
+        // needsUpdate = true;
+        // UpdateMaterialProperties();
     }
 
     void OnEnable()
@@ -132,6 +133,10 @@ public class Outline : MonoBehaviour
             materials.Add(outlineFillMaterial);
             renderer.materials = materials.ToArray();
         }
+
+        // **Modifica principale**: forziamo subito l'aggiornamento delle proprietà
+        needsUpdate = true;
+        UpdateMaterialProperties();
     }
 
     void OnValidate()
@@ -354,6 +359,7 @@ public class Outline : MonoBehaviour
             case Mode.SilhouetteOnly:
                 outlineMaskMaterial.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.LessEqual);
                 outlineFillMaterial.SetFloat("_ZTest", (float)UnityEngine.Rendering.CompareFunction.Greater);
+                // In SilhouetteOnly l'outline classico è a 0
                 outlineFillMaterial.SetFloat("_OutlineWidth", 0f);
                 break;
         }

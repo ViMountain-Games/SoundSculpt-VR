@@ -154459,6 +154459,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: OBJSwapVFX
       objectReference: {fileID: 0}
+    - target: {fileID: 4041679731687402045, guid: d74cd4eb4ea2cf14eb2fd70ac9a3fb2a, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7401325079709785811, guid: d74cd4eb4ea2cf14eb2fd70ac9a3fb2a, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.706

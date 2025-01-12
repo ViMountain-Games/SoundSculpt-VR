@@ -11,6 +11,9 @@ public class NoteData : ScriptableObject
     [Tooltip("Gradient usato per il Particle System")]
     public Gradient colorGradient;
 
+    [Tooltip("Gradient usato per la Trail Renderer")]
+    public Gradient trailGradient;
+
     [Tooltip("Durata della nota (es: 1/4, 2/4, 4/4)")]
     public NoteDuration duration;
 

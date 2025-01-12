@@ -1,12 +1,14 @@
 using UnityEngine;
+using UnityEngine.Events;
+using System.Collections;
 using System.Collections.Generic;
 using CustomInspector;
 
 [System.Serializable]
 public class NotePrefabMapping
 {
-    public NoteData noteData;  // Il NoteData corrispondente
-    public GameObject prefab; // Il Prefab associato
+    public NoteData noteData;   // Il NoteData corrispondente
+    public GameObject prefab;   // Il Prefab associato
 }
 
 public class NoteSpawner : MonoBehaviour
@@ -19,6 +21,7 @@ public class NoteSpawner : MonoBehaviour
     public List<NotePrefabMapping> noteMappings;
 
     [ReadOnly]
+    [Tooltip("Indice corrente del prefab selezionato (solo per debug).")]
     public int selectedPrefabIndex = 0;
 
     [Header("Direction and Force")]
@@ -47,6 +50,26 @@ public class NoteSpawner : MonoBehaviour
     [Header("Note Picker Reference")]
     [Tooltip("Riferimento al NotePicker da cui recuperare la nota selezionata")]
     public GridGen.NotePicker notePicker;
+
+    // ------------------------- NUOVE PROPRIETÀ -------------------------
+
+    [Header("Spawn Limit")]
+    [Tooltip("Numero massimo di volte in cui è possibile fare lo spawn.")]
+    public int spawnLimit = 5;
+    private int currentSpawnCount = 0;
+
+    [Header("Spawn Delay")]
+    [Tooltip("Ritardo (in secondi) tra la chiamata del metodo e lo spawn effettivo.")]
+    public float spawnDelay = 1f;
+
+    [Header("Spawn Events")]
+    [Tooltip("Evento chiamato all'avvio del metodo SpawnNote.")]
+    public UnityEvent onSpawnNoteCalled;
+
+    [Tooltip("Evento chiamato dopo il ritardo, prima di effettivamente istanziare l'oggetto.")]
+    public UnityEvent onSpawnNoteDelayed;
+
+    // ---------------------------------------------------------------
 
     private List<Queue<GameObject>> objectPools;
 
@@ -102,9 +125,49 @@ public class NoteSpawner : MonoBehaviour
         return pooledObj;
     }
 
+    // Questo è il metodo pubblico che viene chiamato per spawnare una nota.
+    // Appena entra in questo metodo, richiama l'evento onSpawnNoteCalled, poi avvia la coroutine che eseguirà lo spawn effettivo dopo un delay.
     public void SpawnNote()
     {
-        // ------------------------- INIZIO MODIFICA -------------------------
+        // Controlla se si è raggiunto il limite massimo di spawn
+        if (currentSpawnCount >= spawnLimit)
+        {
+            Debug.LogWarning("Hai raggiunto il limite massimo di spawn!");
+            return;
+        }
+
+        // Invoca l'evento al momento della chiamata del metodo
+        if (onSpawnNoteCalled != null)
+        {
+            onSpawnNoteCalled.Invoke();
+        }
+
+        // Avvia la coroutine che effettua lo spawn dopo il ritardo
+        StartCoroutine(SpawnNoteCoroutine());
+    }
+
+    // Questa coroutine viene avviata da SpawnNote e si occupa di attendere il ritardo prima di effettuare lo spawn.
+    private IEnumerator SpawnNoteCoroutine()
+    {
+        // Attendere il ritardo definito
+        yield return new WaitForSeconds(spawnDelay);
+
+        // Invoca l'evento dopo il ritardo, prima dello spawn effettivo
+        if (onSpawnNoteDelayed != null)
+        {
+            onSpawnNoteDelayed.Invoke();
+        }
+
+        // Esegue lo spawn vero e proprio
+        PerformSpawn();
+
+        // Incrementa il contatore di spawn effettuati
+        currentSpawnCount++;
+    }
+
+    // Qui mettiamo la logica che era inizialmente in SpawnNote per il picking della nota e lo spawn effettivo dell'oggetto.
+    private void PerformSpawn()
+    {
         // Controlla se il NotePicker ha un oggetto selezionato
         if (notePicker == null || notePicker.selectedObject == null)
         {
@@ -137,7 +200,6 @@ public class NoteSpawner : MonoBehaviour
             Debug.LogWarning("No matching NoteData found in NoteMappings for the selected object!");
             return;
         }
-        // -------------------------- FINE MODIFICA --------------------------
 
         // Ottieni un oggetto dal pool
         GameObject spawnedObject = GetPooledObject(selectedPrefabIndex);
@@ -151,19 +213,36 @@ public class NoteSpawner : MonoBehaviour
         spawnedObject.transform.position = origin.transform.position;
         spawnedObject.transform.rotation = origin.transform.rotation;
 
+        // Gestione fisica
         Rigidbody rb = spawnedObject.GetComponent<Rigidbody>();
         if (rb != null)
         {
+            // Calcola la direzione in coordinate globali
             Vector3 globalDirection = origin.transform.TransformDirection(spawnDirection.normalized);
+
+            // Resetta eventuali velocità residue
             rb.linearVelocity = Vector3.zero;
             rb.angularVelocity = Vector3.zero;
+
+            // Applica la forza
             rb.AddForce(globalDirection * forceAmount, ForceMode.Impulse);
 
+            // Applica la rotazione se richiesto
             if (applyRotation)
             {
                 Vector3 torque = rotationTorque.normalized * torqueIntensity;
                 rb.AddTorque(torque, ForceMode.Impulse);
             }
         }
+    }
+
+    // Disegna la freccia del gizmo in scena, utile per il debugging
+    private void OnDrawGizmos()
+    {
+        if (origin == null) return;
+
+        Gizmos.color = gizmoColor;
+        Vector3 direction = origin.transform.TransformDirection(spawnDirection.normalized) * gizmoLength;
+        Gizmos.DrawRay(origin.transform.position, direction);
     }
 }

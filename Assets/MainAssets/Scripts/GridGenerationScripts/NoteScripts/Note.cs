@@ -17,6 +17,10 @@ namespace GridGen
         [Tooltip("Controller del Particle System associato a questa nota")]
         public ParticleSystemController particleSystemController;
 
+        [Header("Controller Trail Renderer")]
+        [Tooltip("Controller del Trail Renderer associato a questa nota")]
+        public TrailColorController trailColorController;
+
         [Header("Eventi")]
         public UnityEvent onNotePlayed;
 
@@ -81,7 +85,7 @@ namespace GridGen
         /// <summary>
         /// Aggiorna il NoteData dell'oggetto e ri-applica il materiale associato,
         /// inclusa l'applicazione del gradient al ParticleSystemController (se assegnato),
-        /// oltre ad aggiornare il colore delle luci.
+        /// l'aggiornamento della Trail, oltre ad aggiornare il colore delle luci.
         /// </summary>
         public void ApplyNoteDataAndMaterial(NoteData newNoteData)
         {
@@ -121,6 +125,16 @@ namespace GridGen
             else
             {
                 Debug.LogWarning("[Note] particleSystemController non assegnato, impossibile applicare il gradient.");
+            }
+
+            // Applica il Gradient del NoteData alla Trail (se esiste)
+            if (trailColorController != null)
+            {
+                trailColorController.ApplyTrailColorGradient(noteData.trailGradient);
+            }
+            else
+            {
+                Debug.LogWarning("[Note] trailColorController non assegnato, impossibile applicare il gradient alla trail.");
             }
 
             // Aggiorna il colore delle luci se presente
